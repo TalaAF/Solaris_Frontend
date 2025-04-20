@@ -1,0 +1,5 @@
+[
+    { "query": "What is pharmacology?", "response": "Pharmacology is the study of drugs and their effects on the body." },
+    { "query": "Help with VR lab", "response": "Click the VR lab button in Course Content to access simulations." },
+    { "query": "What are my enrolled courses?", "response": "You are enrolled in Pharmacology and Human Anatomy I." }
+  ]

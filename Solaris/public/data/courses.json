@@ -1,0 +1,26 @@
+[
+    {
+      "id": 1,
+      "name": "Biochemistry",
+      "status": "completed",
+      "prerequisites": [],
+      "progress": 100,
+      "instructor": "Dr. Emily Carter"
+    },
+    {
+      "id": 2,
+      "name": "Human Anatomy I",
+      "status": "locked",
+      "prerequisites": [1],
+      "progress": 0,
+      "instructor": "Dr. Sarah Johnson"
+    },
+    {
+      "id": 3,
+      "name": "Pharmacology",
+      "status": "enrolled",
+      "prerequisites": [1],
+      "progress": 60,
+      "instructor": "Dr. Michael Lee"
+    }
+  ]
