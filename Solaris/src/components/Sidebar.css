@@ -1,12 +1,15 @@
 .sidebar {
   width: 220px;
   background-color: #fff;
-  height: 100vh;
+  min-height: 100vh; /* Minimum height of viewport */
+  height: 100%; /* Will expand with content */
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
   z-index: 10;
   font-family: 'Inter', sans-serif;
+  position: sticky;
+  top: 0;
 }
 
 .nav-menu {
