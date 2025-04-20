@@ -9,23 +9,19 @@ import ClinicalSkills from './components/ClinicalSkills';
 import Progress from './components/Progress';
 import Community from './components/Community';
 
-import './App.css';
-
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/assessments" element={<Assessments />} />
-          <Route path="/collaboration" element={<Collaboration />} />
-          <Route path="/clinical-skills" element={<ClinicalSkills />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/community" element={<Community />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/assessments" element={<Assessments />} />
+        <Route path="/collaboration" element={<Collaboration />} />
+        <Route path="/clinical-skills" element={<ClinicalSkills />} />
+        <Route path="/progress" element={<Progress />} />
+        <Route path="/community" element={<Community />} />
+      </Routes>
     </Router>
   );
 }
