@@ -15,7 +15,7 @@
 .logo-icon {
   width: 32px;
   height: 32px;
-  background-color: #B5C0D0;
+  background-color: #f97316;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -31,7 +31,7 @@
 .logo-text {
   font-weight: 600;
   font-size: 16px;
-  color: #4a5568;
+  color: #1e293b;
 }
 
 .header-icons {
@@ -68,11 +68,11 @@
 }
 
 .orange-dot {
-  background-color: #F5E8DD;
+  background-color: #f97316;
 }
 
 .blue-dot {
-  background-color: #B5C0D0;
+  background-color: #3b82f6;
 }
 
 .user-button {
@@ -83,7 +83,7 @@
 .user-avatar {
   width: 32px;
   height: 32px;
-  background-color: #EED3D9;
+  background-color: #fdba74;
   border-radius: 50%;
   display: flex;
   align-items: center;

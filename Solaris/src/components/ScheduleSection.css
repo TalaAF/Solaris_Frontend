@@ -16,12 +16,12 @@
   .schedule-title {
     font-size: 18px;
     font-weight: 600;
-    color: #4a5568;
+    color: #1e293b;
     margin: 0;
   }
   
   .schedule-date {
-    color: #718096;
+    color: #64748b;
     font-size: 14px;
   }
   
@@ -40,23 +40,23 @@
   }
   
   .schedule-item-orange {
-    background-color: #FFF7F3;
-    border-left: 4px solid #F5E8DD;
+    background-color: #fff7ed;
+    border-left: 4px solid #f97316;
   }
   
   .schedule-item-blue {
-    background-color: #F0F3F8;
-    border-left: 4px solid #B5C0D0;
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
   }
   
   .schedule-item-green {
-    background-color: #F1F3F1;
-    border-left: 4px solid #CCD3CA;
+    background-color: #f0fdf4;
+    border-left: 4px solid #22c55e;
   }
   
   .schedule-item-pink {
-    background-color: #FBF0F3;
-    border-left: 4px solid #EED3D9;
+    background-color: #fdf2f8;
+    border-left: 4px solid #ec4899;
   }
   
   .schedule-content {
@@ -68,13 +68,13 @@
   .schedule-item-title {
     font-size: 16px;
     font-weight: 500;
-    color: #4a5568;
+    color: #1e293b;
     margin: 0;
   }
   
   .schedule-item-location {
     font-size: 14px;
-    color: #718096;
+    color: #64748b;
     margin: 0;
   }
   
@@ -82,7 +82,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    color: #718096;
+    color: #64748b;
     font-size: 14px;
   }
   
