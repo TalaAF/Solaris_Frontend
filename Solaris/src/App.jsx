@@ -6,7 +6,7 @@ import Calendar from './components/Calendar';
 import Assessments from './components/Assessments';
 import Collaboration from './components/Collaboration';
 import ClinicalSkills from './components/ClinicalSkills';
-import Progress from './components/Progress';
+import Progress from './components/ProgressSection';
 import Community from './components/Community';
 
 function App() {

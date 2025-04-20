@@ -85,6 +85,18 @@
   margin-right: 12px;
 }
 
+.deadline-dot-blue {
+  background-color: #3b82f6;
+}
+
+.deadline-dot-orange {
+  background-color: #f97316;
+}
+
+.deadline-dot-green {
+  background-color: #22c55e;
+}
+
 .deadline-dot-line {
   position: absolute;
   left: 5px;

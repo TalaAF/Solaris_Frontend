@@ -1,50 +1,88 @@
-/* Header Styles */
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .search-bar {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    border-radius: 5px;
-    padding: 8px 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    width: 300px;
-  }
-  
-  .search-icon {
-    margin-right: 8px;
-  }
-  
-  .search-bar input {
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 14px;
-  }
-  
-  .user-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .action-icon {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-  }
-  
-  .action-icon:hover {
-    background-color: #f5f5f5;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.search-container {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  color: #94a3b8;
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  width: 100%;
+  color: #1e293b;
+}
+
+.search-bar input::placeholder {
+  color: #94a3b8;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-icon {
+  width: 36px;
+  height: 36px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-icon:hover {
+  background-color: #f8fafc;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.orange-dot {
+  background-color: #f97316;
+}
+
+.blue-dot {
+  background-color: #3b82f6;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #f1f5f9;
+  margin-left: 4px;
+}

@@ -6,20 +6,24 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/', label: 'Dashboard', icon: '🏠' },
     { path: '/courses', label: 'Courses', icon: '📚' },
     { path: '/calendar', label: 'Calendar', icon: '📅' },
     { path: '/assessments', label: 'Assessments', icon: '📝' },
-    { path: '/collaboration', label: 'Collaboration', icon: '👥' },
+    { path: '/collaboration', label: 'Collaboration', icon: '💬' },
     { path: '/clinical-skills', label: 'Clinical Skills', icon: '💉' },
     { path: '/progress', label: 'Progress', icon: '📈' },
-    { path: '/community', label: 'Community', icon: '🌐' },
+    { path: '/community', label: 'Community', icon: '👥' },
   ];
 
   return (
     <div className="sidebar">
       <div className="logo">
-        <span className="logo-text">Solaris Medical LMS</span>
+        <div className="logo-icon">S</div>
+        <div className="logo-text">
+          <span className="logo-title">Solaris</span>
+          <span className="logo-subtitle">Medical LMS</span>
+        </div>
       </div>
       
       <nav className="nav-menu">
