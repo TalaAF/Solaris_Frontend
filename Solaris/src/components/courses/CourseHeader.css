@@ -1,0 +1,42 @@
+/* CourseHeader.css */
+/* Styles specific to the CourseHeader component */
+
+.course-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .course-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .course-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e6b400; /* solaris-yellow */
+    margin: 0;
+  }
+  
+  .course-code {
+    font-weight: normal;
+    font-size: 0.75rem;
+  }
+  
+  .course-description {
+    font-size: 0.875rem;
+    color: #64748b; /* slate-500 */
+    margin: 0;
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 768px) {
+    .course-title {
+      font-size: 1.875rem; /* text-3xl */
+    }
+    
+    .course-header {
+      margin-bottom: 2rem;
+    }
+  }

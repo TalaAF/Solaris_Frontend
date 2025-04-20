@@ -1,0 +1,87 @@
+/* CourseResources.css */
+/* Styles specific to the CourseResources component */
+
+.resources-card {
+    height: 100%;
+  }
+  
+  .resources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .resource-item {
+    display: block;
+    padding: 1rem;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .resource-item:hover {
+    background-color: #f8fafc; /* slate-50 */
+    border-color: #cbd5e1; /* slate-300 */
+  }
+  
+  .resource-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .resource-type-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .resource-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #64748b; /* slate-500 */
+  }
+  
+  .resource-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .resource-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+    color: #0f172a; /* slate-900 */
+  }
+  
+  .resource-meta {
+    font-size: 0.75rem;
+    color: #64748b; /* slate-500 */
+  }
+  
+  .resource-type {
+    text-transform: capitalize;
+  }
+  
+  /* Resource type-specific styling */
+  .resource-item[href*="book"] .resource-icon,
+  .resource-item .resource-icon path[d*="book"] {
+    color: #e6b400; /* solaris-yellow */
+  }
+  
+  .resource-item[href*="interactive"] .resource-icon,
+  .resource-item .resource-icon path[d*="interactive"] {
+    color: #3b82f6; /* blue-500 */
+  }
+  
+  .resource-item[href*="document"] .resource-icon,
+  .resource-item .resource-icon path[d*="document"] {
+    color: #10b981; /* emerald-500 */
+  }
+  
+  .resource-item[href*="download"] .resource-icon,
+  .resource-item .resource-icon path[d*="download"] {
+    color: #8b5cf6; /* violet-500 */
+  }

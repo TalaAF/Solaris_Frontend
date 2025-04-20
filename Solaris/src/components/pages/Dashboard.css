@@ -1,0 +1,110 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/* App Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main Container (sidebar + content) */
+.main-container {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 60px); /* Adjust based on header height */
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Content Grid (Two-column layout) */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 24px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+/* Add spacing between components in the same column */
+.content-column > * {
+  margin-bottom: 24px;
+}
+
+.content-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Specific spacer for larger gaps between components */
+.component-spacer {
+  height: 24px;
+}
+
+/* Responsive adjustment for smaller screens */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Dashboard specific styling */
+.dashboard-content {
+  width: 100%;
+  padding: 20px;
+}
+
+/* Custom scrollbar - only applied to dashboard content */
+.dashboard-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

@@ -1,0 +1,57 @@
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.layout-main {
+  flex: 1;
+  margin-left: 20x;
+  transition: margin-left 0.3s ease-in-out;
+  padding: 10px;
+}
+
+.layout-main.sidebar-collapsed {
+  margin-left: -220px;
+}
+
+/* Ensure smooth transitions */
+* {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Ensure header spans full width */
+header {
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Add these styles to your existing Layout.css */
+.sidebar-toggle-button {
+  position: fixed;
+  left: 220px; /* Position at the edge of expanded sidebar */
+  top: 100px; /* Position below header */
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 901;
+  transition: left 0.3s ease-in-out; /* Make it move smoothly */
+}
+
+/* Move the toggle button when sidebar is collapsed */
+.sidebar-collapsed + .sidebar-toggle-button {
+  left: 60px; /* Should match collapsed sidebar width */
+}
