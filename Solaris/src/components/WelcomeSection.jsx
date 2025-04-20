@@ -3,17 +3,32 @@ import './WelcomeSection.css';
 
 const WelcomeSection = () => {
   return (
-    <div className="welcome-section">
-      <h1>Good evening, Dr. Johnson</h1>
-      <p className="date">Friday, April 18, 2025</p>
+    <div className="welcome-container">
+      <div className="welcome-header">
+        <h1>Good evening, Dr. Johnson</h1>
+        <p className="date">Friday, April 18, 2025</p>
+      </div>
       
-      <div className="day-glance">
-        <div className="notification-icon">
-          <i className="bell-icon"></i>
+      <div className="glance-card">
+        <div className="bell-icon-container">
+          <svg 
+            className="bell-icon" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
         </div>
         <div className="glance-content">
-          <div className="glance-title">Your day at a glance</div>
-          <div className="glance-details">You have 3 upcoming classes and 2 assignments due today.</div>
+          <p className="glance-title">Your day at a glance</p>
+          <p className="glance-details">You have 3 upcoming classes and 2 assignments due today.</p>
         </div>
       </div>
     </div>
