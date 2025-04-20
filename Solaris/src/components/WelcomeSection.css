@@ -1,0 +1,64 @@
+.welcome-section {
+    background-color: #f8d7b0;
+    border-radius: 0;
+    padding: 32px;
+    margin-bottom: 24px;
+    color: black;
+    box-shadow: none;
+  }
+  
+  .welcome-section h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+  }
+  
+  .date {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.7);
+    margin-top: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .day-glance {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 30px;
+    padding: 10px 16px;
+    margin-top: 16px;
+    max-width: fit-content;
+  }
+  
+  .notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+  }
+  
+  .bell-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/%3E%3Cpath d='M13.73 21a2 2 0 0 1-3.46 0'/%3E%3C/svg%3E");
+    background-size: contain;
+  }
+  
+  .glance-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .glance-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.9);
+  }
+  
+  .glance-details {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+  }

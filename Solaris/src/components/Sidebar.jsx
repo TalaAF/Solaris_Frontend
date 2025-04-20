@@ -6,26 +6,18 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { path: '/', label: 'Dashboard', icon: '🏠' },
-    { path: '/courses', label: 'Courses', icon: '📚' },
-    { path: '/calendar', label: 'Calendar', icon: '📅' },
-    { path: '/assessments', label: 'Assessments', icon: '📝' },
-    { path: '/collaboration', label: 'Collaboration', icon: '💬' },
-    { path: '/clinical-skills', label: 'Clinical Skills', icon: '💉' },
-    { path: '/progress', label: 'Progress', icon: '📈' },
-    { path: '/community', label: 'Community', icon: '👥' },
+    { path: '/', label: 'Dashboard', icon: 'home' },
+    { path: '/courses', label: 'Courses', icon: 'book' },
+    { path: '/calendar', label: 'Calendar', icon: 'calendar' },
+    { path: '/assessments', label: 'Assessments', icon: 'file' },
+    { path: '/collaboration', label: 'Collaboration', icon: 'message-square' },
+    { path: '/clinical-skills', label: 'Clinical Skills', icon: 'stethoscope' },
+    { path: '/progress', label: 'Progress', icon: 'bar-chart-2' },
+    { path: '/community', label: 'Community', icon: 'users' },
   ];
 
   return (
-    <div className="sidebar">
-      <div className="logo">
-        <div className="logo-icon">S</div>
-        <div className="logo-text">
-          <span className="logo-title">Solaris</span>
-          <span className="logo-subtitle">Medical LMS</span>
-        </div>
-      </div>
-      
+    <div className="sidebar">      
       <nav className="nav-menu">
         {menuItems.map(item => (
           <Link 
@@ -33,7 +25,7 @@ const Sidebar = () => {
             to={item.path} 
             className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
           >
-            <span className="nav-icon">{item.icon}</span>
+            <span className={`nav-icon icon-${item.icon}`}></span>
             <span className="nav-label">{item.label}</span>
           </Link>
         ))}

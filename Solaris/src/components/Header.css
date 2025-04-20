@@ -2,74 +2,69 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  padding: 10px 16px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.search-container {
-  flex: 1;
-  max-width: 400px;
-}
-
-.search-bar {
+.logo-container {
   display: flex;
   align-items: center;
-  background-color: white;
-  border-radius: 8px;
-  padding: 8px 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.search-icon {
-  color: #94a3b8;
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-.search-bar input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  width: 100%;
-  color: #1e293b;
-}
-
-.search-bar input::placeholder {
-  color: #94a3b8;
-}
-
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-icon {
-  width: 36px;
-  height: 36px;
-  background-color: white;
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #f97316;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  color: white;
+  margin-right: 8px;
 }
 
-.action-icon:hover {
-  background-color: #f8fafc;
+.logo-icon svg {
+  stroke: white;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #94a3b8;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-button:hover {
+  color: #64748b;
 }
 
 .notification-dot {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -2px;
+  right: -2px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 2px solid white;
 }
 
 .orange-dot {
@@ -80,9 +75,20 @@
   background-color: #3b82f6;
 }
 
+.user-button {
+  width: auto;
+  height: auto;
+}
+
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #f1f5f9;
-  margin-left: 4px;
+  width: 32px;
+  height: 32px;
+  background-color: #fdba74;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
 }
