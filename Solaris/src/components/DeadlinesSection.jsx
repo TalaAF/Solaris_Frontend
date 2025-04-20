@@ -1,5 +1,5 @@
 import React from 'react';
-import './Dashboard.css';
+import './DeadlinesSection.css';
 
 const DeadlinesSection = ({ deadlines }) => {
   return (
@@ -10,14 +10,16 @@ const DeadlinesSection = ({ deadlines }) => {
       <div className="deadlines-list">
         {deadlines.map((item, index) => (
           <div key={index} className="deadline-item">
-            <div className={`deadline-dot deadline-dot-${item.color}`}></div>
+            <div className="deadline-dot-container">
+              <div className={`deadline-dot ${item.color === 'blue' ? 'blue-dot' : 'orange-dot'}`}></div>
+            </div>
             <div className="deadline-content">
-              <h4>{item.title}</h4>
-              <p>{item.course}</p>
+              <h4 className="deadline-title">{item.title}</h4>
+              <p className="deadline-course">{item.course}</p>
             </div>
             <div className="deadline-date">
-              <span className="date-icon">📅</span>
-              <span>{item.due}</span>
+              <span className="date-icon">⏱</span>
+              <span className="date-text">{item.due}</span>
             </div>
           </div>
         ))}
