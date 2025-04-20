@@ -8,6 +8,7 @@ import Collaboration from './components/Collaboration';
 import ClinicalSkills from './components/ClinicalSkills';
 import Progress from './components/ProgressSection';
 import Community from './components/Community';
+import './App.css';
 
 function App() {
   return (

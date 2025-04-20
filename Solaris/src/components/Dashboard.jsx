@@ -114,34 +114,40 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar Component */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="main-content">
-        <Header />
+    <div className="app-container">
+      {/* Header Component */}
+      <Header />
+      
+      <div className="main-container">
+        {/* Sidebar Component */}
+        <Sidebar />
         
-        {/* Welcome Section */}
-        <WelcomeSection />
-        
-        <div className="content-grid">
-          {/* Left column */}
-          <div className="content-column">
-            {/* Quick Access */}
-            <QuickAccessSection quickAccessItems={quickAccessItems} />
-            
-            {/* Today's Schedule */}
-            <ScheduleSection scheduleItems={scheduleItems} />
-          </div>
+        {/* Main Content */}
+        <div className="main-content">
+          {/* Welcome Section */}
+          <WelcomeSection />
           
-          {/* Right column */}
-          <div className="content-column">
-            {/* Course Progress */}
-            <ProgressSection progressData={progressData} />
+          <div className="content-grid">
+            {/* Left column */}
+            <div className="content-column">
+              {/* Quick Access */}
+              <QuickAccessSection quickAccessItems={quickAccessItems} />
+              
+              {/* Today's Schedule */}
+              <ScheduleSection scheduleItems={scheduleItems} />
+            </div>
             
-            {/* Upcoming Deadlines */}
-            <DeadlinesSection deadlines={deadlines} />
+            {/* Right column */}
+            <div className="content-column">
+              {/* Course Progress */}
+              <ProgressSection progressData={progressData} />
+              
+              {/* Spacing div */}
+              <div className="component-spacer"></div>
+              
+              {/* Upcoming Deadlines */}
+              <DeadlinesSection deadlines={deadlines} />
+            </div>
           </div>
         </div>
       </div>
