@@ -9,40 +9,40 @@
 
 /* Progress bar colors */
 .progress-green {
-  background-color: #22c55e;
+  background-color: #CCD3CA;
 }
 
 .progress-blue {
-  background-color: #3b82f6;
+  background-color: #B5C0D0;
 }
 
 .progress-yellow {
-  background-color: #eab308;
+  background-color: #F5E8DD;
 }
 
 .progress-red {
-  background-color: #ef4444;
+  background-color: #EED3D9;
 }
 
 /* Schedule items */
 .schedule-item-orange {
-  background-color: #fff7ed;
-  border-left: 4px solid #f97316;
+  background-color: #F5E8DD;
+  border-left: 4px solid #eabeaa;
 }
 
 .schedule-item-blue {
-  background-color: #eff6ff;
-  border-left: 4px solid #3b82f6;
+  background-color: #e9edf4;
+  border-left: 4px solid #B5C0D0;
 }
 
 .schedule-item-green {
-  background-color: #f0fdf4;
-  border-left: 4px solid #22c55e;
+  background-color: #f1f4f1;
+  border-left: 4px solid #CCD3CA;
 }
 
 .schedule-item-pink {
-  background-color: #fdf2f8;
-  border-left: 4px solid #ec4899;
+  background-color: #fbeff3;
+  border-left: 4px solid #EED3D9;
 }
 
 /* Custom scrollbar */
@@ -56,12 +56,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #B5C0D0;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #9aa5b8;
 }
 
 /* Quick access icons */
@@ -86,15 +86,15 @@
 }
 
 .deadline-dot-blue {
-  background-color: #3b82f6;
+  background-color: #B5C0D0;
 }
 
 .deadline-dot-orange {
-  background-color: #f97316;
+  background-color: #F5E8DD;
 }
 
 .deadline-dot-green {
-  background-color: #22c55e;
+  background-color: #CCD3CA;
 }
 
 .deadline-dot-line {
@@ -108,7 +108,7 @@
 
 /* Welcome section */
 .welcome-section {
-  background-color: #ffedd5;
+  background-color: #F5E8DD;
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;

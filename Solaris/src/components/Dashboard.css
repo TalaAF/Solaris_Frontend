@@ -7,8 +7,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #F5E8DD;
+  color: #4a5568;
   line-height: 1.5;
 }
 
@@ -64,15 +64,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #EED3D9;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #B5C0D0;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #9aa5b8;
 }

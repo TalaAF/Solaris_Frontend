@@ -1,8 +1,8 @@
 .sidebar {
   width: 220px;
   background-color: #fff;
-  min-height: 100vh; /* Minimum height of viewport */
-  height: 100%; /* Will expand with content */
+  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
@@ -36,9 +36,9 @@
 }
 
 .nav-item.active {
-  background-color: #ffefd7;
-  color: #f97316;
-  border-left: 3px solid #f97316;
+  background-color: #F5E8DD;
+  color: #B5C0D0;
+  border-left: 3px solid #B5C0D0;
   font-weight: 500;
 }
 
@@ -62,7 +62,7 @@
 
 /* Icon styles */
 .icon-home {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpolyline points='9 22 9 12 15 12 15 22'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23B5C0D0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpolyline points='9 22 9 12 15 12 15 22'/%3E%3C/svg%3E");
 }
 
 .icon-book {
@@ -100,7 +100,7 @@
 .help-section {
   margin: 15px;
   padding: 15px;
-  background-color: #f8f4f1;
+  background-color: #EED3D9;
   border-radius: 8px;
 }
 
@@ -108,18 +108,18 @@
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #4d341e;
+  color: #4a5568;
 }
 
 .help-section p {
   font-size: 13px;
-  color: #994d1e;
+  color: #5a6a85;
   margin-bottom: 12px;
 }
 
 .support-button {
   background-color: transparent;
-  color: #994d1e;
+  color: #B5C0D0;
   border: none;
   padding: 8px 0;
   border-radius: 4px;
