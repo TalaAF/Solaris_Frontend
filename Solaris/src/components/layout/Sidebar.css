@@ -18,25 +18,27 @@
   transform: translateX(0); /* Don't move it off-screen, just make it narrower */
 }
 
-/* Remove or comment out this toggle button styles from Sidebar.css */
-/* 
-.toggle-button {
-  position: absolute;
-  right: -30px;
-  top: 10px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 901;
+:root {
+  /* Add these variables */
+  --sidebar-width: 220px; /* Default sidebar width */
+  --sidebar-collapsed-width: 60px; /* Default collapsed width */
 }
-*/
+
+/* Page-specific sidebar widths */
+.page-dashboard {
+  --sidebar-width: 230px;
+  --sidebar-collapsed-width: 70px; /* Wider collapsed state for dashboard */
+}
+
+.page-courses {
+  --sidebar-width: 230px; 
+  --sidebar-collapsed-width:60px;
+}
+
+.page-assessments {
+  --sidebar-width: 230px;
+  --sidebar-collapsed-width: 65px;
+}
 
 .sidebar {
   width: 220px;
@@ -211,14 +213,12 @@
   font-weight: 500;
 }
 
-/* In your Layout.css file */
-.layout-main {
-  margin-left: 220px; /* Should match sidebar width */
-  width: calc(100% - 220px);
-  transition: margin 0.3s ease-in-out, width 0.3s ease-in-out;
+
+
+.page-dashboard .sidebar {
+  --sidebar-width: 240px; /* Example of wider sidebar for dashboard */
 }
 
-.sidebar-collapsed {
-  margin-left: 60px !important; /* Match the closed sidebar width */
-  width: calc(100% - 60px) !important;
+.page-courses .sidebar {
+  --sidebar-width: 220px; /* Fix the typo from 7000px */
 }

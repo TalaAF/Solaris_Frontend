@@ -121,7 +121,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
                     >
                       <div className="course-image-overlay">
                         <span className="course-code">{course.code}</span>
-                        <h3 className="course-title">{course.title}</h3>
+                        <h5 className="course-title">{course.title}</h5>
                       </div>
                     </div>
                     <div className="course-content">

@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    width: 100%;
   }
   
   .course-view-breadcrumb {
@@ -22,6 +23,7 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    width: 100%;
   }
   
   .course-loading,
@@ -49,7 +51,8 @@
   .course-tabs {
     border: 1px solid #e2e8f0; /* slate-200 */
     border-radius: 0.5rem;
-    overflow: hidden;
+    overflow-y: auto;
+    width: 100%;
   }
   
   .tab-list {
@@ -76,6 +79,9 @@
   
   .tab-content {
     padding: 1.5rem;
+  height: auto; /* Let content determine natural height */
+  min-height: 400px; /* Ensure reasonable starting height */
+  overflow-y: auto;
   }
   
   .chevron-icon {

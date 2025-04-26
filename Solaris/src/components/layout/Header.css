@@ -12,10 +12,19 @@
   z-index: 1000;
 }
 
-/* Add this new class to adjust main content padding */
 .header-spacer {
-  height: 85px; /* Should match header height + padding */
+  height: var(--header-height); /* Uses the variable value */
 }
+
+.page-dashboard .header-spacer {
+  --header-height: 95px; /* Taller header for dashboard */
+}
+
+.page-courses .header-spacer {
+  --header-height: 75px; /* Standard height for courses */
+}
+/* Add this new class to adjust main content padding */
+
 
 .logo-container {
   display: flex;

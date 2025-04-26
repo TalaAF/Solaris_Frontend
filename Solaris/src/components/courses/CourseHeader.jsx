@@ -14,7 +14,7 @@ function CourseHeader({ courseData }) {
   return (
     <div className="course-header">
       <div className="course-header-title">
-        <h1 className="course-title">{courseData.title}</h1>
+        <h6 className="course-title">{courseData.title}</h6>
         <Badge 
           label={courseData.code}
           className="course-badge"

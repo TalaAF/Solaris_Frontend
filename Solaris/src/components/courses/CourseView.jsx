@@ -32,6 +32,7 @@ function CourseView() {
   const [error, setError] = useState(null);
   const [activeModule, setActiveModule] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview'); // Default tab
 
   // Fetch course data from API
   useEffect(() => {
@@ -61,6 +62,34 @@ function CourseView() {
 
     fetchCourseData();
   }, [courseId]);
+
+  // Handle tab switching
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    
+    // If switching to content tab and no item is selected, select first item of active module
+    if (tab === 'content' && !activeItem && activeModule) {
+      const currentModule = courseData.modules.find(module => module.id === activeModule);
+      if (currentModule?.items?.length > 0) {
+        setActiveItem(currentModule.items[0].id);
+      }
+    }
+  };
+
+  // Handle navigation between items
+  const handleNavigate = (direction) => {
+    const currentModule = courseData.modules.find(module => module.id === activeModule);
+    if (!currentModule) return;
+    
+    const items = currentModule.items;
+    const currentIndex = items.findIndex(item => item.id === activeItem);
+    
+    if (direction === 'prev' && currentIndex > 0) {
+      setActiveItem(items[currentIndex - 1].id);
+    } else if (direction === 'next' && currentIndex < items.length - 1) {
+      setActiveItem(items[currentIndex + 1].id);
+    }
+  };
 
   if (loading) {
     return <div className="course-loading">Loading course...</div>;
@@ -101,7 +130,13 @@ function CourseView() {
             activeModule={activeModule}
             setActiveModule={setActiveModule}
             activeItem={activeItem}
-            setActiveItem={setActiveItem}
+            setActiveItem={(itemId) => {
+              setActiveItem(itemId);
+              // When selecting an item, switch to content tab
+              if (itemId) {
+                setActiveTab('content');
+              }
+            }}
           />
           
           <InstructorCard instructor={courseData.instructor} />
@@ -109,39 +144,68 @@ function CourseView() {
         
         {/* Main content area */}
         <div className="course-view-content">
-          {activeItem ? (
-            <ContentViewer 
-              module={currentModule}
-              itemId={activeItem}
-              onNavigate={(direction) => {
-                // Handle navigation between items
-                const items = currentModule.items;
-                const currentIndex = items.findIndex(item => item.id === activeItem);
-                
-                if (direction === 'prev' && currentIndex > 0) {
-                  setActiveItem(items[currentIndex - 1].id);
-                } else if (direction === 'next' && currentIndex < items.length - 1) {
-                  setActiveItem(items[currentIndex + 1].id);
-                }
-              }}
-            />
-          ) : (
-            <div className="course-tabs">
-              <ul className="tab-list">
-                <li className="tab-item active">Overview</li>
-                <li className="tab-item">Syllabus</li>
-                <li className="tab-item">Assessments</li>
-                <li className="tab-item">Resources</li>
-              </ul>
+          <div className="course-tabs">
+            <ul className="tab-list">
+              <li 
+                className={`tab-item ${activeTab === 'overview' ? 'active' : ''}`} 
+                onClick={() => handleTabClick('overview')}
+              >
+                Overview
+              </li>
+              <li 
+                className={`tab-item ${activeTab === 'syllabus' ? 'active' : ''}`} 
+                onClick={() => handleTabClick('syllabus')}
+              >
+                Syllabus
+              </li>
+              <li 
+                className={`tab-item ${activeTab === 'content' ? 'active' : ''}`} 
+                onClick={() => handleTabClick('content')}
+              >
+                Course Content
+              </li>
+              <li 
+                className={`tab-item ${activeTab === 'assessments' ? 'active' : ''}`} 
+                onClick={() => handleTabClick('assessments')}
+              >
+                Assessments
+              </li>
+              <li 
+                className={`tab-item ${activeTab === 'resources' ? 'active' : ''}`} 
+                onClick={() => handleTabClick('resources')}
+              >
+                Resources
+              </li>
               
-              <div className="tab-content">
-                <CourseOverview 
-                  courseData={courseData} 
+            </ul>
+            
+            <div className="tab-content">
+              {activeTab === 'overview' && (
+                <CourseOverview courseData={courseData} />
+              )}
+              {activeTab === 'syllabus' && (
+                <CourseSyllabus courseData={courseData} />
+              )}
+              {activeTab === 'assessments' && (
+                <CourseAssessments courseData={courseData} />
+              )}
+              {activeTab === 'resources' && (
+                <CourseResources courseData={courseData} />
+              )}
+              {activeTab === 'content' && activeItem && currentModule && (
+                <ContentViewer 
+                  module={currentModule}
+                  itemId={activeItem}
+                  onNavigate={handleNavigate}
                 />
-                {/* Other tab content would be conditionally rendered based on active tab */}
-              </div>
+              )}
+              {activeTab === 'content' && (!activeItem || !currentModule) && (
+                <div className="content-select-prompt">
+                  <p>Please select a module item from the sidebar to view its content.</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
