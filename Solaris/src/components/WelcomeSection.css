@@ -1,95 +1,77 @@
 .welcome-container {
-    width: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-  
-  .welcome-header {
-    width: 100%;
-    height: 100px;
-    background-color: #e3b38a;
-    background-image: url('/api/placeholder/1200/400');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    padding: 24px 36px;
-    position: relative;
-  }
-  
-  .welcome-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(0deg, rgba(227, 179, 138, 0.85), rgba(227, 179, 138, 0.7));
-    z-index: 1;
-  }
-  
-  .welcome-header h1 {
-    position: relative;
-    z-index: 2;
-    font-family: 'Inter', sans-serif;
-    font-size: 28px;
-    font-weight: 500;
-    margin: 0;
-    color: white;
-    line-height: 1.2;
-  }
-  
-  .date {
-    position: relative;
-    z-index: 2;
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 4px;
-    margin-bottom: 0;
-    font-weight: normal;
-  }
-  
-  .glance-card {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    padding: 16px 24px;
-    border-radius: 0 0 8px 8px;
-  }
-  
-  .bell-icon-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: #fef2e6;
-    border-radius: 50%;
-    margin-right: 16px;
-    flex-shrink: 0;
-  }
-  
-  .bell-icon {
-    color: #e59d60;
-    font-size: 16px;
-  }
-  
-  .glance-content {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .glance-title {
-    font-weight: 500;
-    font-size: 14px;
-    color: #333;
-    margin: 0;
-  }
-  
-  .glance-details {
-    font-size: 14px;
-    color: #666;
-    margin: 0;
-    margin-top: 2px;
-  }
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-header {
+  width: 100%;
+  background-color: #e3b38a;
+  padding: 24px;
+  position: relative;
+  background-image: linear-gradient(to right, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.1)), url("/api/placeholder/1000/300");
+  background-size: cover;
+  background-position: center;
+}
+
+.welcome-header h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: white;
+  line-height: 1.2;
+}
+
+.date {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
+  margin-bottom: 0;
+  font-weight: normal;
+}
+
+.glance-card {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 16px 24px;
+  border-radius: 0 0 12px 12px;
+}
+
+.bell-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #fef2e6;
+  border-radius: 50%;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.bell-icon {
+  color: #f97316;
+}
+
+.glance-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.glance-title {
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+}
+
+.glance-details {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  margin-top: 2px;
+}

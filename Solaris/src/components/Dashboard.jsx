@@ -124,12 +124,12 @@ const Dashboard = () => {
         
         {/* Main Content */}
         <div className="main-content">
-          {/* Welcome Section */}
+          {/* Welcome Section - Full width */}
           <WelcomeSection />
           
           <div className="content-grid">
-            {/* Left column */}
-            <div className="content-column">
+            {/* Left column - Wider (65%) */}
+            <div className="content-column left-column">
               {/* Quick Access */}
               <QuickAccessSection quickAccessItems={quickAccessItems} />
               
@@ -137,13 +137,10 @@ const Dashboard = () => {
               <ScheduleSection scheduleItems={scheduleItems} />
             </div>
             
-            {/* Right column */}
-            <div className="content-column">
+            {/* Right column - Narrower (35%) */}
+            <div className="content-column right-column">
               {/* Course Progress */}
               <ProgressSection progressData={progressData} />
-              
-              {/* Spacing div */}
-              <div className="component-spacer"></div>
               
               {/* Upcoming Deadlines */}
               <DeadlinesSection deadlines={deadlines} />
