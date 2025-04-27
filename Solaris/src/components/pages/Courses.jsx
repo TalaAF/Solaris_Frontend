@@ -1,113 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Container } from '@mui/material';
+import { Typography, Box, Container, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Sidebar from '../layout/Sidebar';
-import Header from '../layout/Header'; // Assuming you have a Header component
-import CoursesList from '../courses/CourseList';
+import Header from '../layout/Header';
+import CourseList from '../courses/CourseList';
+import CourseService from '../services/CourseService';
 import './Courses.css';
 
 function Courses() {
-  const [courses, setCourses] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [semesterFilter, setSemesterFilter] = useState('all');
+  const [departments, setDepartments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch departments and course data
   useEffect(() => {
-    // Fetch courses data
-    const fetchCourses = async () => {
+    const fetchDepartments = async () => {
       try {
-        // If you don't have a real API yet, use mockCourses below
-        // const coursesData = await getCourses();
-        const coursesData = mockCourses;
-        setCourses(coursesData);
+        // In a real app, you would fetch departments from an API
+        // const departmentsResponse = await axios.get('/api/departments');
+        // setDepartments(departmentsResponse.data);
+        
+        // For now, using mockup departments
+        setDepartments([
+          { id: 1, name: 'Anatomy' },
+          { id: 2, name: 'Biochemistry' },
+          { id: 3, name: 'Pathology' },
+          { id: 4, name: 'Medical Humanities' },
+          { id: 5, name: 'Clinical Sciences' }
+        ]);
+        
+        // Set semesters (these would typically be derived from course data)
+        setSemesters([
+          'Fall 2024',
+          'Spring 2025',
+          'Fall 2025',
+          'Spring 2026'
+        ]);
+        
         setLoading(false);
       } catch (err) {
-        setError('Failed to load courses. Please try again later.');
+        console.error('Error fetching filter data:', err);
+        setError('Failed to load filter options. Please try again later.');
         setLoading(false);
       }
     };
 
-    fetchCourses();
+    fetchDepartments();
   }, []);
 
-  // Mock data for development
-  const mockCourses = [
-    {
-      id: 'med-101',
-      title: 'Introduction to Medical Sciences',
-      description: 'A foundational course covering the basics of medical sciences and healthcare.',
-      image: 'https://placehold.co/300x200?text=Medical+Sciences',
-      instructor: 'Dr. Jane Smith',
-      duration: '12 weeks',
-      level: 'Beginner',
-      enrollmentStatus: 'In Progress',
-      completed: 35,
-      modules: [
-        {
-          id: 'mod-1',
-          title: 'Medical Terminology',
-          description: 'Learn the basic terminology used in healthcare.',
-          items: [
-            { id: 'item-1', title: 'Introduction to Medical Terms', type: 'video', duration: '10 min' },
-            { id: 'item-2', title: 'Anatomy Terms', type: 'document', duration: '15 min' },
-            { id: 'item-3', title: 'Quiz: Medical Terminology', type: 'quiz', duration: '20 min' }
-          ]
-        },
-        {
-          id: 'mod-2',
-          title: 'Human Anatomy',
-          description: 'Explore the human body systems.',
-          items: [
-            { id: 'item-4', title: 'Cardiovascular System', type: 'video', duration: '15 min' },
-            { id: 'item-5', title: 'Respiratory System', type: 'document', duration: '12 min' },
-            { id: 'item-6', title: 'Interactive Body Explorer', type: 'interactive', duration: '25 min' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'surg-202',
-      title: 'Surgical Techniques',
-      description: 'Advanced course on modern surgical techniques and procedures.',
-      image: 'https://placehold.co/300x200?text=Surgical+Techniques',
-      instructor: 'Prof. Robert Chen',
-      duration: '16 weeks',
-      level: 'Advanced',
-      enrollmentStatus: 'Not Started',
-      completed: 0,
-      modules: [
-        {
-          id: 'mod-1',
-          title: 'Surgical Basics',
-          description: 'Fundamentals of surgical procedures.',
-          items: [
-            { id: 'item-1', title: 'Surgical Safety', type: 'video', duration: '20 min' },
-            { id: 'item-2', title: 'Sterilization Techniques', type: 'document', duration: '15 min' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'pharm-301',
-      title: 'Clinical Pharmacology',
-      description: 'Understanding the principles of drug action and clinical applications.',
-      image: 'https://placehold.co/300x200?text=Pharmacology',
-      instructor: 'Dr. Maria Garcia',
-      duration: '10 weeks',
-      level: 'Intermediate',
-      enrollmentStatus: 'Completed',
-      completed: 100,
-      modules: [
-        {
-          id: 'mod-1',
-          title: 'Pharmacokinetics',
-          description: 'How drugs move through the body.',
-          items: [
-            { id: 'item-1', title: 'Absorption and Distribution', type: 'video', duration: '18 min' },
-            { id: 'item-2', title: 'Metabolism and Excretion', type: 'quiz', duration: '15 min' }
-          ]
-        }
-      ]
-    }
-  ];
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Handle department filter change
+  const handleDepartmentChange = (event) => {
+    setDepartmentFilter(event.target.value);
+  };
+
+  // Handle semester filter change
+  const handleSemesterChange = (event) => {
+    setSemesterFilter(event.target.value);
+  };
 
   return (
     <div className="app-container">
@@ -120,9 +77,59 @@ function Courses() {
                 My Courses
               </Typography>
               
+              {/* Filters section */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap' }}>
+                <TextField
+                  label="Search courses"
+                  variant="outlined"
+                  size="small"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  sx={{ minWidth: '250px', flex: 1 }}
+                />
+                
+                <FormControl size="small" sx={{ minWidth: '200px' }}>
+                  <InputLabel id="department-filter-label">Department</InputLabel>
+                  <Select
+                    labelId="department-filter-label"
+                    id="department-filter"
+                    value={departmentFilter}
+                    label="Department"
+                    onChange={handleDepartmentChange}
+                  >
+                    <MenuItem value="all">All Departments</MenuItem>
+                    {departments.map(dept => (
+                      <MenuItem key={dept.id} value={dept.name}>{dept.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <FormControl size="small" sx={{ minWidth: '200px' }}>
+                  <InputLabel id="semester-filter-label">Semester</InputLabel>
+                  <Select
+                    labelId="semester-filter-label"
+                    id="semester-filter"
+                    value={semesterFilter}
+                    label="Semester"
+                    onChange={handleSemesterChange}
+                  >
+                    <MenuItem value="all">All Semesters</MenuItem>
+                    {semesters.map(semester => (
+                      <MenuItem key={semester} value={semester}>{semester}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              
               {loading && <Typography>Loading courses...</Typography>}
               {error && <Typography color="error">{error}</Typography>}
-              {!loading && !error && <CoursesList courses={courses} />}
+              {!loading && !error && (
+                <CourseList 
+                  searchTerm={searchTerm}
+                  departmentFilter={departmentFilter}
+                  semesterFilter={semesterFilter}
+                />
+              )}
             </Box>
           </Container>
         </div>

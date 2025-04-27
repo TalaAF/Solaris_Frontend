@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Calendar, Clock, Users, BadgeCheck } from 'lucide-react';
+import CourseService from '../services/CourseService';
 import './CourseList.css';
 
 /**
@@ -21,21 +22,45 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('active');
   
-  // Fetch courses from API or use mock data
+  // Get current user ID (in a real app, this would come from auth context)
+  const currentUserId = 1; // Example user ID
+
+  // Fetch courses from API
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        // In a real app, these would be actual API endpoints
-        // const activeResponse = await fetch('/api/courses/active');
-        // const archivedResponse = await fetch('/api/courses/archived');
+        // Get all courses
+        const response = await CourseService.getAllCourses();
         
-        // For demo purposes, using mock data
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setActiveCourses(mockActiveCourses);
-        setArchivedCourses(mockArchivedCourses);
+        // Process and categorize courses
+        if (response.data && response.data._embedded && response.data._embedded.entityModelList) {
+          const allCourses = response.data._embedded.entityModelList;
+          
+          // Transform backend data to match frontend structure
+          const transformedCourses = allCourses.map(course => ({
+            id: course.id,
+            title: course.title,
+            code: `CODE${course.id}`, // Generate a code if backend doesn't provide one
+            description: course.description,
+            department: course.departmentName || 'General',
+            semester: determineSemester(course), // Helper function to determine semester
+            credits: 3, // Default if not provided by backend
+            instructor: course.instructorEmail,
+            enrolled: course.currentEnrollment || 0,
+            progress: calculateProgress(course), // Calculate progress from backend data
+            imageUrl: getPlaceholderImage(course), // Helper to get image URL
+            status: determineStatus(course), // Helper to determine status
+            grade: course.averageRating ? `${convertToLetterGrade(course.averageRating)}` : null
+          }));
+          
+          // Separate active and archived courses
+          setActiveCourses(transformedCourses.filter(course => !course.isArchived));
+          setArchivedCourses(transformedCourses.filter(course => course.isArchived));
+        } else {
+          setActiveCourses([]);
+          setArchivedCourses([]);
+        }
       } catch (err) {
         console.error('Error fetching courses:', err);
         setError('Failed to load courses. Please try again later.');
@@ -46,6 +71,50 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
 
     fetchCourses();
   }, []);
+
+  // Helper function to determine semester based on dates
+  const determineSemester = (course) => {
+    if (!course.startDate) return 'Fall 2023';
+    
+    const startDate = new Date(course.startDate);
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth();
+    
+    if (month >= 0 && month <= 4) return `Spring ${year}`;
+    if (month >= 5 && month <= 7) return `Summer ${year}`;
+    return `Fall ${year}`;
+  };
+
+  // Helper function to calculate progress
+  const calculateProgress = (course) => {
+    // In a real implementation, this would use actual progress data
+    return Math.floor(Math.random() * 100); // Placeholder random progress
+  };
+
+  // Helper function to get placeholder image
+  const getPlaceholderImage = (course) => {
+    // In a real implementation, this would use actual course images
+    return `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title)}`;
+  };
+
+  // Helper function to determine course status
+  const determineStatus = (course) => {
+    // In a real implementation, this would use actual course status
+    if (course.isArchived) return 'completed';
+    
+    const progress = calculateProgress(course);
+    if (progress > 0) return 'in-progress';
+    return 'upcoming';
+  };
+
+  // Helper function to convert numerical grade to letter grade
+  const convertToLetterGrade = (grade) => {
+    if (grade >= 90) return 'A';
+    if (grade >= 80) return 'B';
+    if (grade >= 70) return 'C';
+    if (grade >= 60) return 'D';
+    return 'F';
+  };
 
   // Filter active courses based on search term and filters
   const filteredActiveCourses = activeCourses.filter(course => {
@@ -254,142 +323,5 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
     </div>
   );
 }
-
-// Mock data for demonstration purposes
-const mockActiveCourses = [
-  {
-    id: 1,
-    title: 'Human Anatomy & Physiology',
-    code: 'MED201',
-    department: 'Anatomy',
-    semester: 'Fall 2025',
-    credits: 4,
-    description: 'A comprehensive study of human anatomy and physiology covering body systems, tissues, and organs.',
-    instructor: 'Dr. Jane Smith',
-    enrolled: 68,
-    progress: 65,
-    imageUrl: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=1000&auto=format&fit=crop',
-    status: 'in-progress',
-  },
-  {
-    id: 2,
-    title: 'Biochemistry Fundamentals',
-    code: 'MED202',
-    department: 'Biochemistry',
-    semester: 'Fall 2025',
-    credits: 3,
-    description: 'Study of chemical processes within and related to living organisms, focusing on proteins, enzymes, and metabolism.',
-    instructor: 'Dr. Robert Johnson',
-    enrolled: 72,
-    progress: 80,
-    imageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=1000&auto=format&fit=crop',
-    status: 'in-progress',
-  },
-  {
-    id: 3,
-    title: 'Pathology',
-    code: 'MED301',
-    department: 'Pathology',
-    semester: 'Fall 2025',
-    credits: 4,
-    description: 'The study of disease processes and their effects on the human body, focusing on causes, mechanisms, and resulting changes.',
-    instructor: 'Dr. Maria Garcia',
-    enrolled: 65,
-    progress: 45,
-    imageUrl: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=1000&auto=format&fit=crop',
-    status: 'in-progress',
-  },
-  {
-    id: 4,
-    title: 'Pharmacology',
-    code: 'MED302',
-    department: 'Pharmacology',
-    semester: 'Fall 2025',
-    credits: 3,
-    description: 'Study of drug action and effects on biological systems, including mechanisms, applications, and therapeutic uses.',
-    instructor: 'Dr. David Chen',
-    enrolled: 70,
-    progress: 30,
-    imageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=1000&auto=format&fit=crop',
-    status: 'in-progress',
-  },
-  {
-    id: 5,
-    title: 'Medical Ethics',
-    code: 'MED203',
-    department: 'Medical Humanities',
-    semester: 'Spring 2026',
-    credits: 2,
-    description: 'Ethical principles and decision-making frameworks in healthcare, including patient autonomy, beneficence, and justice.',
-    instructor: 'Dr. Sarah Williams',
-    enrolled: 85,
-    progress: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000&auto=format&fit=crop',
-    status: 'upcoming',
-  },
-  {
-    id: 6,
-    title: 'Clinical Medicine Introduction',
-    code: 'MED401',
-    department: 'Clinical Sciences',
-    semester: 'Spring 2026',
-    credits: 5,
-    description: 'Introduction to clinical practice, including history-taking, physical examination, and clinical reasoning.',
-    instructor: 'Dr. Michael Brown',
-    enrolled: 60,
-    progress: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?q=80&w=1000&auto=format&fit=crop',
-    status: 'upcoming',
-  },
-];
-
-// Mock archived/completed courses
-const mockArchivedCourses = [
-  {
-    id: 7,
-    title: 'Medical Terminology',
-    code: 'MED101',
-    department: 'Medical Foundation',
-    semester: 'Spring 2025',
-    credits: 2,
-    description: 'Introduction to the language of medicine, including prefixes, suffixes, roots, and common medical abbreviations.',
-    instructor: 'Dr. Emily Taylor',
-    enrolled: 90,
-    progress: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop',
-    status: 'completed',
-    grade: 'A'
-  },
-  {
-    id: 8,
-    title: 'Cell Biology',
-    code: 'MED102',
-    department: 'Biology',
-    semester: 'Spring 2025',
-    credits: 3,
-    description: 'Study of cellular structure and function, including cell organelles, membrane transport, and cell division.',
-    instructor: 'Dr. Thomas White',
-    enrolled: 75,
-    progress: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?q=80&w=1000&auto=format&fit=crop',
-    status: 'completed',
-    grade: 'B+'
-  },
-  {
-    id: 9,
-    title: 'Histology',
-    code: 'MED103',
-    department: 'Anatomy',
-    semester: 'Fall 2024',
-    credits: 3,
-    description: 'Microscopic study of tissues and organs, focusing on cell organization, tissue types, and organ structure.',
-    instructor: 'Dr. Lisa Martinez',
-    enrolled: 70,
-    progress: 100,
-    imageUrl: 'https://images.unsplash.com/photo-1514998528874-95269bd9c38d?q=80&w=1000&auto=format&fit=crop',
-    status: 'completed',
-    grade: 'A-'
-  },
-];
 
 export default CourseList;
