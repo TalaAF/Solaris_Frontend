@@ -84,8 +84,35 @@
   overflow-y: auto;
   }
   
-  .chevron-icon {
-    height: 1rem;
-    width: 1rem;
-    margin-right: 0.25rem;
-  }
+  /* Back to courses button - clean, borderless style */
+.back-to-courses-button,
+button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary {
+  border: none !important;
+  background-color: transparent !important;
+  color: #475569 !important; /* slate-600 */
+  padding: 8px 0px 8px 19px !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 17px !important;
+  font-family: Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.back-to-courses-button:hover,
+button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary:hover {
+  background-color: transparent !important;
+  color: #e6b400 !important; /* solaris-yellow */
+}
+
+.chevron-icon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+.back-to-courses-button:hover .chevron-icon {
+  color: #e6b400; /* solaris-yellow */
+  transform: translateX(-2px);
+}

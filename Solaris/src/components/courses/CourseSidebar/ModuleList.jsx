@@ -1,12 +1,9 @@
 import React from 'react';
 import ModuleItem from './ModuleItem';
-import './ModuleList.css';
+import './ModuleList.css'; // Verify this import is working
 
 /**
  * ModuleList Component
- * 
- * Displays a list of course modules with their items.
- * Uses ModuleItem for individual module rendering.
  */
 function ModuleList({ 
   modules, 
@@ -25,6 +22,7 @@ function ModuleList({
 
   return (
     <div className="modules-list">
+      <h3 className="modules-heading">Course Content</h3>
       {modules.map((module) => (
         <ModuleItem
           key={module.id}

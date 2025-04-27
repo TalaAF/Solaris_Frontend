@@ -64,39 +64,78 @@ function CourseOverview({ courseData }) {
           </section>
           
           <section className="overview-section">
-            <Typography variant="h6">Course Progress</Typography>
-            <Typography variant="body2" color="text.secondary">Track your advancement through the course materials</Typography>
+            <Typography variant="h6" className="section-title">Course Progress</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Track your advancement through the course materials</Typography>
             <div className="modules-progress">
               {courseData.modules.map(module => (
                 <div key={module.id} className="module-progress">
                   <div className="progress-header">
                     <span className="module-name">{module.title}</span>
-                    <Badge className={`module-status ${getStatusColor(module.status)}`}>
-                      {module.status.replace(/-/g, ' ')
+                    <Badge 
+                      label={module.status.replace(/-/g, ' ')
                         .split(' ')
                         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                         .join(' ')}
-                    </Badge>
+                      className={`module-status ${getStatusColor(module.status)}`}
+                      sx={{ 
+                        height: 24,
+                        borderRadius: '12px'
+                      }}
+                    />
                   </div>
                   <LinearProgress 
                     variant="determinate"
                     value={calculateModuleProgress(module)}
-                    className="progress-bar"
+                    className={`module-progress-bar ${getStatusColor(module.status)}`}
+                    sx={{ 
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: '#f1f5f9',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: module.status === 'not-started' ? '#e2e8f0' : '#e6b400',
+                        borderRadius: 4
+                      }
+                    }}
                   />
                 </div>
               ))}
             </div>
-            <LinearProgress 
-              variant="determinate" 
-              value={courseData.progress || 0} 
-              sx={{ height: 10, borderRadius: 5 }}
-            />
-            <Badge 
-              label={courseData.status || "In Progress"} 
-              variant="outlined"
-              size="small"
-              className={`course-status status-${courseData.status?.toLowerCase() || "in-progress"}`}
-            />
+            
+            <div className="overall-progress" style={{ marginTop: '1.5rem' }}>
+              <div className="progress-header">
+                <Typography variant="subtitle2">Overall Progress</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {courseData.progress || 0}% Complete
+                </Typography>
+              </div>
+              <LinearProgress 
+                variant="determinate" 
+                value={courseData.progress || 0} 
+                sx={{ 
+                  height: 10, 
+                  borderRadius: 5,
+                  backgroundColor: '#f1f5f9',
+                  marginTop: '0.5rem',
+                  marginBottom: '1rem',
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: '#e6b400',
+                    borderRadius: 5
+                  }
+                }}
+              />
+              <Badge 
+                label={courseData.status || "In Progress"}
+                className="progress-badge"
+                sx={{ 
+                  backgroundColor: 'rgba(230, 180, 0, 0.15)',
+                  color: '#e6b400',
+                  border: '1px solid #e6b400',
+                  borderRadius: '16px',
+                  padding: '4px 12px',
+                  fontWeight: 500
+                }}
+              />
+            </div>
           </section>
         </div>
       </CardContent>

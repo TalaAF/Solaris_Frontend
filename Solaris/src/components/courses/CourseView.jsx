@@ -109,7 +109,20 @@ function CourseView() {
     <div className="course-view">
       <div className="course-view-breadcrumb">
         <Link to="/courses">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outlined" 
+            size="small"
+            className="back-to-courses-button"
+            sx={{
+              color: '#0f172a',
+              borderColor: '#e2e8f0',
+              '&:hover': {
+                backgroundColor: 'rgba(230, 180, 0, 0.08)',
+                borderColor: '#e6b400',
+                color: '#e6b400'
+              }
+            }}
+          >
             <ChevronLeftIcon className="chevron-icon" />
             Back to Courses
           </Button>
