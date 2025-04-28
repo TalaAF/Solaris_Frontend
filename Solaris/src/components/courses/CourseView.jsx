@@ -4,8 +4,10 @@ import { Button } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Link } from 'react-router-dom';
 
-// Import API service
+// Import API services
 import CourseService from '../services/CourseService';
+import ModuleService from '../services/ModuleService';
+import ContentService from '../services/ContentService';
 
 // Import our smaller components
 import CourseHeader from './CourseHeader';
@@ -25,17 +27,22 @@ import './CourseView.css'; // Component-specific CSS
  * 
  * This component is responsible for:
  * 1. Fetching course data from the API
- * 2. Managing the state of the active module and item
- * 3. Rendering the overall layout with sidebar and content area
+ * 2. Fetching module and content data from the API
+ * 3. Managing the state of the active module and item
+ * 4. Rendering the overall layout with sidebar and content area
  */
 function CourseView() {
   const { courseId } = useParams();
   const [courseData, setCourseData] = useState(null);
+  const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeModule, setActiveModule] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // Default tab
+
+  // Get current user ID (in a real app, this would come from auth context)
+  const currentUserId = 1; // Example user ID
 
   // Fetch course data from API
   useEffect(() => {
@@ -43,10 +50,28 @@ function CourseView() {
       setLoading(true);
       try {
         // Fetch course details from API
-        const response = await CourseService.getCourseById(courseId);
+        const courseResponse = await CourseService.getCourseById(courseId);
+        const course = courseResponse.data;
         
-        // Transform the backend data to match the frontend structure
-        const backendCourse = response.data;
+        // Fetch modules data - in a real app, you would fetch from your module API
+        // Since existing ModuleController returns a flat list, we need to fetch and then transform
+        try {
+          const modulesResponse = await ModuleService.getAllModules();
+          const allModules = modulesResponse.data || [];
+          
+          // Filter modules for this course and map to frontend structure
+          const courseModules = await processModulesData(allModules);
+          setModules(courseModules);
+          
+          // Set the first module as active by default if available
+          if (courseModules.length > 0) {
+            setActiveModule(courseModules[0].id);
+          }
+        } catch (moduleError) {
+          console.error('Error fetching modules:', moduleError);
+          // Fallback to empty modules array
+          setModules([]);
+        }
         
         // Get completion requirements for this course
         const completionResponse = await CourseService.getCompletionRequirements(courseId);
@@ -56,15 +81,22 @@ function CourseView() {
         const statsResponse = await CourseService.getCourseStatistics(courseId);
         const statistics = statsResponse.data;
         
-        // Map backend data to frontend structure
-        const courseData = transformCourseData(backendCourse, completionRequirements, statistics);
+        // Transform course data
+        const transformedCourse = {
+          id: course.id,
+          title: course.title,
+          code: `CODE${course.id}`, // Generate a code if backend doesn't provide one
+          description: course.description,
+          instructor: {
+            name: course.instructorEmail || 'Unknown Instructor',
+            avatar: null, // Backend doesn't provide this
+            title: 'Instructor' // Backend doesn't provide this
+          },
+          progress: statistics ? Math.round(statistics.averageCompletionPercentage) : 0,
+          completionRequirements: completionRequirements
+        };
         
-        setCourseData(courseData);
-        
-        // Set the first module as active by default
-        if (courseData.modules && courseData.modules.length > 0) {
-          setActiveModule(courseData.modules[0].id);
-        }
+        setCourseData(transformedCourse);
       } catch (err) {
         console.error('Error fetching course data:', err);
         setError('Failed to load course data. Please try again later.');
@@ -76,100 +108,113 @@ function CourseView() {
     fetchCourseData();
   }, [courseId]);
 
-  // Transform backend data to frontend structure
-  const transformCourseData = (backendCourse, completionRequirements, statistics) => {
-    // Map instructor data
-    const instructor = {
-      name: backendCourse.instructorEmail || 'Unknown Instructor',
-      avatar: null, // Backend doesn't provide this
-      title: 'Instructor' // Backend doesn't provide this
-    };
+  /**
+   * Process modules data from the backend
+   * Fetch content items for each module and map to frontend structure
+   */
+  const processModulesData = async (modules) => {
+    // Filter modules for this course
+    const courseModules = modules.filter(module => module.course && module.course.id == courseId);
     
-    // Currently, our backend doesn't provide modules directly
-    // In a real implementation, you would need additional API endpoints for this
-    // For now, we'll create mock modules based on the course data
-    
-    const mockModules = [
-      {
-        id: 1,
-        title: 'Introduction to ' + backendCourse.title,
-        status: 'completed',
-        items: [
-          { id: 1, title: 'Course Overview', type: 'document', status: 'completed', duration: '10 min' },
-          { id: 2, title: 'Key Concepts', type: 'video', status: 'completed', duration: '15 min' },
-          { id: 3, title: 'Quiz: Introduction', type: 'quiz', status: 'completed', duration: '10 min' }
-        ]
-      },
-      {
-        id: 2,
-        title: 'Core Content',
-        status: 'in-progress',
-        items: [
-          { id: 4, title: 'Main Topic 1', type: 'video', status: 'completed', duration: '20 min' },
-          { id: 5, title: 'Main Topic 2', type: 'document', status: 'in-progress', duration: '25 min' },
-          { id: 6, title: 'Assessment', type: 'quiz', status: 'not-started', duration: '15 min' }
-        ]
+    // For each module, fetch its content items
+    const modulePromises = courseModules.map(async module => {
+      try {
+        // Fetch content items for this module
+        const contentsResponse = await ModuleService.getContentsOrder(module.id);
+        const contents = contentsResponse.data || [];
+        
+        // Map content items to frontend structure
+        const items = contents.map(content => ({
+          id: content.id,
+          title: content.title,
+          type: mapContentTypeToItemType(content.type || content.fileType),
+          status: content.status || 'not-started',
+          duration: formatDuration(content.duration || estimateDuration(content))
+        }));
+        
+        // Calculate module status based on item statuses
+        const moduleStatus = calculateModuleStatus(items);
+        
+        // Return transformed module
+        return {
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          number: module.sequence,
+          status: moduleStatus,
+          items: items
+        };
+      } catch (error) {
+        console.error(`Error fetching contents for module ${module.id}:`, error);
+        return {
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          number: module.sequence,
+          status: 'not-started',
+          items: []
+        };
       }
-    ];
+    });
     
-    // Mock resources data
-    const resources = [
-      {
-        id: 1,
-        title: 'Course Textbook',
-        type: 'book',
-        url: '#'
-      },
-      {
-        id: 2,
-        title: 'Supplementary Materials',
-        type: 'document',
-        url: '#'
-      },
-      {
-        id: 3,
-        title: 'Interactive Diagrams',
-        type: 'interactive',
-        url: '#'
-      }
-    ];
+    // Wait for all module promises to resolve
+    return Promise.all(modulePromises);
+  };
+
+  /**
+   * Map content type from backend to frontend item type
+   */
+  const mapContentTypeToItemType = (contentType) => {
+    if (!contentType) return 'document';
     
-    // Mock assessments data
-    const assessments = [
-      {
-        id: 1,
-        title: 'Midterm Exam',
-        type: 'exam',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
-        status: 'upcoming'
-      },
-      {
-        id: 2,
-        title: 'Weekly Quiz',
-        type: 'quiz',
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
-        status: 'pending'
-      }
-    ];
+    const type = contentType.toLowerCase();
+    if (type.includes('video') || type.includes('mp4')) return 'video';
+    if (type.includes('quiz')) return 'quiz';
+    if (type.includes('interactive')) return 'interactive';
+    return 'document';
+  };
+
+  /**
+   * Estimate duration based on content type and size
+   */
+  const estimateDuration = (content) => {
+    // Default durations based on content type
+    if (!content) return 10;
     
-    // Calculate progress based on statistics if available
-    const progress = statistics && statistics.averageCompletionPercentage 
-      ? Math.round(statistics.averageCompletionPercentage) 
-      : (backendCourse.progress || 0);
+    const type = (content.type || content.fileType || '').toLowerCase();
+    if (type.includes('video')) return 15;
+    if (type.includes('quiz')) return 10;
+    if (type.includes('interactive')) return 20;
     
-    // Form the transformed course data
-    return {
-      id: backendCourse.id,
-      title: backendCourse.title,
-      code: `CODE${backendCourse.id}`, // Generate a code if backend doesn't provide one
-      description: backendCourse.description,
-      instructor: instructor,
-      progress: progress,
-      modules: mockModules, // In a real implementation, this would come from an API
-      resources: resources, // In a real implementation, this would come from an API
-      assessments: assessments, // In a real implementation, this would come from an API
-      completionRequirements: completionRequirements
-    };
+    // For documents, estimate based on file size if available
+    if (content.fileSize) {
+      // Rough estimate: 1 minute per 50KB for text documents
+      return Math.max(5, Math.round(content.fileSize / (50 * 1024)));
+    }
+    
+    return 10; // Default duration
+  };
+
+  /**
+   * Format duration in minutes
+   */
+  const formatDuration = (minutes) => {
+    if (!minutes) return '10 min';
+    return `${minutes} min`;
+  };
+
+  /**
+   * Calculate module status based on item statuses
+   */
+  const calculateModuleStatus = (items) => {
+    if (!items || items.length === 0) return 'not-started';
+    
+    const completedCount = items.filter(item => item.status === 'completed').length;
+    const inProgressCount = items.filter(item => item.status === 'in-progress').length;
+    
+    if (completedCount === items.length) return 'completed';
+    if (completedCount > 0 || inProgressCount > 0) return 'in-progress';
+    return 'not-started';
   };
 
   // Handle tab switching
@@ -178,7 +223,7 @@ function CourseView() {
     
     // If switching to content tab and no item is selected, select first item of active module
     if (tab === 'content' && !activeItem && activeModule) {
-      const currentModule = courseData.modules.find(module => module.id === activeModule);
+      const currentModule = modules.find(module => module.id === activeModule);
       if (currentModule?.items?.length > 0) {
         setActiveItem(currentModule.items[0].id);
       }
@@ -187,7 +232,7 @@ function CourseView() {
 
   // Handle navigation between items
   const handleNavigate = (direction) => {
-    const currentModule = courseData.modules.find(module => module.id === activeModule);
+    const currentModule = modules.find(module => module.id === activeModule);
     if (!currentModule) return;
     
     const items = currentModule.items;
@@ -212,7 +257,7 @@ function CourseView() {
     return <div className="course-not-found">Course not found</div>;
   }
 
-  const currentModule = courseData.modules.find(module => module.id === activeModule);
+  const currentModule = modules.find(module => module.id === activeModule);
 
   return (
     <div className="course-view">
@@ -248,7 +293,7 @@ function CourseView() {
         {/* Sidebar with modules and instructor info */}
         <div className="course-view-sidebar">
           <ModuleList 
-            modules={courseData.modules} 
+            modules={modules} 
             activeModule={activeModule}
             setActiveModule={setActiveModule}
             activeItem={activeItem}
@@ -298,15 +343,14 @@ function CourseView() {
               >
                 Resources
               </li>
-              
             </ul>
             
             <div className="tab-content">
               {activeTab === 'overview' && (
-                <CourseOverview courseData={courseData} />
+                <CourseOverview courseData={{...courseData, modules}} />
               )}
               {activeTab === 'syllabus' && (
-                <CourseSyllabus courseData={courseData} />
+                <CourseSyllabus courseData={{...courseData, modules}} />
               )}
               {activeTab === 'assessments' && (
                 <CourseAssessments courseData={courseData} />

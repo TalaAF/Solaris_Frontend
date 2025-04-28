@@ -7,6 +7,7 @@ import './CourseOverview.css';
  * 
  * Displays an overview of the course including description,
  * learning objectives, and progress tracking.
+ * Updated to work with API data.
  */
 function CourseOverview({ courseData }) {
   if (!courseData) return null;
@@ -34,6 +35,31 @@ function CourseOverview({ courseData }) {
     return 0;
   };
 
+  // Generate learning objectives from course description if not provided
+  const generateLearningObjectives = () => {
+    // If we don't have real learning objectives, let's generate some based on the description
+    const description = courseData.description || '';
+    
+    // Extract keywords from description
+    const keywords = description
+      .split(/\s+/)
+      .filter(word => word.length > 5)
+      .filter((word, i, arr) => arr.indexOf(word) === i)
+      .slice(0, 5);
+    
+    // Generate objectives based on keywords
+    return [
+      `Understand the fundamentals of ${courseData.title}`,
+      `Apply ${keywords[0] || 'key concepts'} in practical scenarios`,
+      `Analyze ${keywords[1] || 'important aspects'} of ${courseData.title}`,
+      `Evaluate ${keywords[2] || 'critical elements'} in various contexts`,
+      `Create ${keywords[3] || 'solutions'} using learned principles`
+    ];
+  };
+
+  const learningObjectives = generateLearningObjectives();
+  const modules = courseData.modules || [];
+
   return (
     <Card className="overview-card">
       <CardHeader
@@ -45,21 +71,16 @@ function CourseOverview({ courseData }) {
           <section className="overview-section">
             <Typography variant="h6" className="section-title">About This Course</Typography>
             <Typography variant="body1" className="section-text">
-              {courseData.description} This comprehensive course provides medical students 
-              with a detailed understanding of human anatomical structures and physiological functions. 
-              Through lectures, dissections, and interactive activities, students will gain 
-              knowledge essential for clinical practice.
+              {courseData.description || "No description available for this course."}
             </Typography>
           </section>
           
           <section className="overview-section">
             <Typography variant="h6" className="section-title">Learning Objectives</Typography>
             <ul className="objectives-list">
-              <li className="objective-item">Identify and describe major anatomical structures of the human body</li>
-              <li className="objective-item">Explain the physiological functions of different body systems</li>
-              <li className="objective-item">Understand the relationship between structure and function</li>
-              <li className="objective-item">Apply anatomical knowledge to basic clinical scenarios</li>
-              <li className="objective-item">Develop skills in laboratory techniques and dissection</li>
+              {learningObjectives.map((objective, index) => (
+                <li key={index} className="objective-item">{objective}</li>
+              ))}
             </ul>
           </section>
           
@@ -67,38 +88,44 @@ function CourseOverview({ courseData }) {
             <Typography variant="h6" className="section-title">Course Progress</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Track your advancement through the course materials</Typography>
             <div className="modules-progress">
-              {courseData.modules.map(module => (
-                <div key={module.id} className="module-progress">
-                  <div className="progress-header">
-                    <span className="module-name">{module.title}</span>
-                    <Badge 
-                      label={module.status.replace(/-/g, ' ')
-                        .split(' ')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ')}
-                      className={`module-status ${getStatusColor(module.status)}`}
+              {modules.length > 0 ? (
+                modules.map(module => (
+                  <div key={module.id} className="module-progress">
+                    <div className="progress-header">
+                      <span className="module-name">{module.title}</span>
+                      <Badge 
+                        label={module.status.replace(/-/g, ' ')
+                          .split(' ')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ')}
+                        className={`module-status ${getStatusColor(module.status)}`}
+                        sx={{ 
+                          height: 24,
+                          borderRadius: '12px'
+                        }}
+                      />
+                    </div>
+                    <LinearProgress 
+                      variant="determinate"
+                      value={calculateModuleProgress(module)}
+                      className={`module-progress-bar ${getStatusColor(module.status)}`}
                       sx={{ 
-                        height: 24,
-                        borderRadius: '12px'
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#f1f5f9',
+                        '& .MuiLinearProgress-bar': {
+                          backgroundColor: module.status === 'not-started' ? '#e2e8f0' : '#e6b400',
+                          borderRadius: 4
+                        }
                       }}
                     />
                   </div>
-                  <LinearProgress 
-                    variant="determinate"
-                    value={calculateModuleProgress(module)}
-                    className={`module-progress-bar ${getStatusColor(module.status)}`}
-                    sx={{ 
-                      height: 8,
-                      borderRadius: 4,
-                      backgroundColor: '#f1f5f9',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: module.status === 'not-started' ? '#e2e8f0' : '#e6b400',
-                        borderRadius: 4
-                      }
-                    }}
-                  />
-                </div>
-              ))}
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No modules available for this course.
+                </Typography>
+              )}
             </div>
             
             <div className="overall-progress" style={{ marginTop: '1.5rem' }}>
@@ -124,7 +151,7 @@ function CourseOverview({ courseData }) {
                 }}
               />
               <Badge 
-                label={courseData.status || "In Progress"}
+                label={courseData.progress > 0 ? "In Progress" : "Not Started"}
                 className="progress-badge"
                 sx={{ 
                   backgroundColor: 'rgba(230, 180, 0, 0.15)',

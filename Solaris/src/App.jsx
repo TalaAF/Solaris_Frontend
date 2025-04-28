@@ -12,10 +12,11 @@ import ClinicalSkills from './components/pages/ClinicalSkills';
 import Progress from './components/pages/ProgressSection';
 import Community from './components/pages/Community';
 import './App.css';
-
+import { AuthProvider } from './context/AuthContext';
 function App() {
   return (
-    <Router>
+    <AuthProvider>
+       <Router>
       <Routes>
         <Route element={<Layout />}>
           {/* Main pages */}
@@ -37,6 +38,8 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </AuthProvider>
+   
   );
 }
 
