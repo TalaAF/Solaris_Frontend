@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import './NotificationsPanel.css';
 import { useNotifications } from './NotificationContext';
+import NotificationDetail from './NotificationDetail';
 
 const NotificationsPanel = ({ isOpen, onClose }) => {
   const [activeFilter, setActiveFilter] = useState('all');
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   const filterNotifications = (type) => {
     setActiveFilter(type);
@@ -19,6 +21,15 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   };
   
   const filteredNotifications = getFilteredNotifications();
+
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.id);
+    setSelectedNotification(notification);
+  };
+
+  const closeNotificationDetail = () => {
+    setSelectedNotification(null);
+  };
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -47,71 +58,89 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
     }
   };
 
+  // If notification detail is open, close notification panel
+  const panelOpenClass = isOpen && !selectedNotification ? 'open' : '';
+
   return (
-    <div className={`notifications-panel ${isOpen ? 'open' : ''}`}>
-      <div className="notifications-header">
-        <h2>Notifications</h2>
-        <button className="close-button" onClick={onClose}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      
-      <div className="notifications-filter">
-        <button 
-          className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`}
-          onClick={() => filterNotifications('all')}
-        >
-          All
-        </button>
-        <button 
-          className={`filter-button ${activeFilter === 'academic' ? 'active' : ''}`}
-          onClick={() => filterNotifications('academic')}
-        >
-          Academic
-        </button>
-        <button 
-          className={`filter-button ${activeFilter === 'reminder' ? 'active' : ''}`}
-          onClick={() => filterNotifications('reminder')}
-        >
-          Reminders
-        </button>
-        <button 
-          className={`filter-button ${activeFilter === 'announcement' ? 'active' : ''}`}
-          onClick={() => filterNotifications('announcement')}
-        >
-          Announcements
-        </button>
-      </div>
-      
-      <div className="notifications-actions">
-        <button className="mark-all-read" onClick={markAllAsRead}>
-          Mark all as read
-        </button>
-      </div>
-      
-      <div className="notifications-list">
-        {filteredNotifications.map(notification => (
-          <div 
-            key={notification.id} 
-            className={`notification-item ${!notification.read ? 'unread' : ''}`}
-            onClick={() => markAsRead(notification.id)}
+    <>
+      <div className={`notifications-panel ${panelOpenClass}`}>
+        <div className="notifications-header">
+          <h2>Notifications</h2>
+          <button className="close-button" onClick={onClose}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div className="notifications-filter">
+          <button 
+            className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => filterNotifications('all')}
           >
-            <div className="notification-icon">
-              {getTypeIcon(notification.type)}
+            All
+          </button>
+          <button 
+            className={`filter-button ${activeFilter === 'academic' ? 'active' : ''}`}
+            onClick={() => filterNotifications('academic')}
+          >
+            Academic
+          </button>
+          <button 
+            className={`filter-button ${activeFilter === 'reminder' ? 'active' : ''}`}
+            onClick={() => filterNotifications('reminder')}
+          >
+            Reminders
+          </button>
+          <button 
+            className={`filter-button ${activeFilter === 'announcement' ? 'active' : ''}`}
+            onClick={() => filterNotifications('announcement')}
+          >
+            Announcements
+          </button>
+        </div>
+        
+        <div className="notifications-actions">
+          <button className="mark-all-read" onClick={markAllAsRead}>
+            Mark all as read
+          </button>
+        </div>
+        
+        <div className="notifications-list">
+          {filteredNotifications.map(notification => (
+            <div 
+              key={notification.id} 
+              className={`notification-item ${!notification.read ? 'unread' : ''}`}
+              onClick={() => handleNotificationClick(notification)}
+            >
+              <div className="notification-icon">
+                {getTypeIcon(notification.type)}
+              </div>
+              <div className="notification-content">
+                <h3 className="notification-title">{notification.title}</h3>
+                <p className="notification-message">{notification.message}</p>
+                <span className="notification-time">{notification.time}</span>
+              </div>
+              {!notification.read && <div className="unread-indicator"></div>}
             </div>
-            <div className="notification-content">
-              <h3 className="notification-title">{notification.title}</h3>
-              <p className="notification-message">{notification.message}</p>
-              <span className="notification-time">{notification.time}</span>
-            </div>
-            {!notification.read && <div className="unread-indicator"></div>}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* Backdrop for notification detail */}
+      {selectedNotification && (
+        <div className="notification-detail-backdrop" onClick={closeNotificationDetail}></div>
+      )}
+
+      {/* Render the notification detail if a notification is selected */}
+      {selectedNotification && (
+        <NotificationDetail 
+          notification={selectedNotification} 
+          onClose={closeNotificationDetail}
+        />
+      )}
+    </>
   );
 };
 
