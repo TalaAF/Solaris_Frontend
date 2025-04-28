@@ -8,22 +8,25 @@ import Collaboration from './components/Collaboration';
 import ClinicalSkills from './components/ClinicalSkills';
 import Progress from './components/ProgressSection';
 import Community from './components/Community';
+import { NotificationProvider } from './components/NotificationContext';
 import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/assessments" element={<Assessments />} />
-        <Route path="/collaboration" element={<Collaboration />} />
-        <Route path="/clinical-skills" element={<ClinicalSkills />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/community" element={<Community />} />
-      </Routes>
-    </Router>
+    <NotificationProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/assessments" element={<Assessments />} />
+          <Route path="/collaboration" element={<Collaboration />} />
+          <Route path="/clinical-skills" element={<ClinicalSkills />} />
+          <Route path="/progress" element={<Progress progressData={[]} />} />
+          <Route path="/community" element={<Community />} />
+        </Routes>
+      </Router>
+    </NotificationProvider>
   );
 }
 

@@ -7,6 +7,7 @@ import QuickAccessSection from './QuickAccessSection';
 import ScheduleSection from './ScheduleSection';
 import ProgressSection from './ProgressSection';
 import DeadlinesSection from './DeadlinesSection';
+// Remove DemoTrigger import
 
 const Dashboard = () => {
   // Today's schedule data
@@ -135,6 +136,8 @@ const Dashboard = () => {
               
               {/* Today's Schedule */}
               <ScheduleSection scheduleItems={scheduleItems} />
+              
+              {/* Removed DemoTrigger component */}
             </div>
             
             {/* Right column - Narrower (35%) */}
