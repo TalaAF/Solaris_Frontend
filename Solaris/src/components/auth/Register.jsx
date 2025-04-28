@@ -1,8 +1,8 @@
-// src/components/auth/Register.jsx
+// components/auth/Register.jsx
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { TextField, Button, Typography, Box, Alert, CircularProgress } from '@mui/material';
+import './Auth.css';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -16,119 +16,113 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Reset previous errors
+    setPasswordError('');
+    
     // Form validation
     if (password !== confirmPassword) {
       setPasswordError("Passwords don't match");
       return;
     }
     
-    setPasswordError('');
+    if (password.length < 8) {
+      setPasswordError("Password must be at least 8 characters long");
+      return;
+    }
     
     try {
       await register({ name, email, password });
-      navigate('/dashboard'); // Redirect after successful registration
+      navigate('/dashboard');
     } catch (err) {
-      // Error is already handled in AuthContext
-      console.error('Registration submission error:', err);
+      console.error('Registration failed:', err);
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        maxWidth: 400,
-        mx: 'auto',
-        p: 3,
-        boxShadow: 3,
-        borderRadius: 2,
-        bgcolor: 'background.paper',
-      }}
-    >
-      <Typography component="h1" variant="h5">
-        Create Account
-      </Typography>
-
-      {error && (
-        <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {passwordError && (
-        <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-          {passwordError}
-        </Alert>
-      )}
-
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="name"
-          label="Full Name"
-          name="name"
-          autoComplete="name"
-          autoFocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="confirmPassword"
-          label="Confirm Password"
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          disabled={isRegistering}
-        >
-          {isRegistering ? <CircularProgress size={24} /> : 'Sign Up'}
-        </Button>
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2">
-            Already have an account?{' '}
-            <Link to="/login" style={{ textDecoration: 'none' }}>
-              Sign In
-            </Link>
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-logo">
+          <div className="logo-circle"></div>
+          <h2>SOLARIS</h2>
+        </div>
+        
+        <h1 className="auth-title">Create your account</h1>
+        <p className="auth-subtitle">Join Solaris to access your medical education content</p>
+        
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              required
+            />
+            <div className="password-strength">
+              <div className={`strength-bar ${password.length > 0 ? (password.length >= 8 ? 'strong' : 'weak') : ''}`}></div>
+              <span className="strength-text">{password.length > 0 ? (password.length >= 8 ? 'Strong' : 'Weak') : ''}</span>
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              required
+            />
+          </div>
+          
+          {passwordError && <div className="auth-error">{passwordError}</div>}
+          {error && <div className="auth-error">{error}</div>}
+          
+          <button type="submit" className="auth-button" disabled={isRegistering}>
+            {isRegistering ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
+        
+        <div className="auth-footer">
+          <p>Already have an account? <Link to="/login">Sign in</Link></p>
+        </div>
+        
+        <div className="auth-terms">
+          By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </div>
+        
+        <div className="auth-copyright">
+          © 2025 Solaris Medical Education. All rights reserved.
+        </div>
+      </div>
+    </div>
   );
 };
 

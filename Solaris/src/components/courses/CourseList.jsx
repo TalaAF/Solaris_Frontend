@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Calendar, Clock, Users, BadgeCheck } from 'lucide-react';
-import CourseService from '../services/CourseService';
+import CourseService from '../../services/CourseService';
 import './CourseList.css';
 
 /**
@@ -32,32 +32,42 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
       try {
         // Get all courses
         const response = await CourseService.getAllCourses();
+        console.log("Courses response:", response);
         
         // Process and categorize courses
-        if (response.data && response.data._embedded && response.data._embedded.entityModelList) {
-          const allCourses = response.data._embedded.entityModelList;
+        if (response.data) {
+          // Handle both mock data and backend API formats
+          const allCourses = Array.isArray(response.data) 
+            ? response.data  // Direct array (from mock data)
+            : response.data._embedded?.entityModelList || []; // From Spring HATEOAS format
           
-          // Transform backend data to match frontend structure
+          console.log("All courses:", allCourses);
+          
+          // Transform backend data to match frontend structure if needed
           const transformedCourses = allCourses.map(course => ({
             id: course.id,
             title: course.title,
-            code: `CODE${course.id}`, // Generate a code if backend doesn't provide one
+            code: course.code || `CODE${course.id}`, // Use provided code or generate one
             description: course.description,
-            department: course.departmentName || 'General',
-            semester: determineSemester(course), // Helper function to determine semester
-            credits: 3, // Default if not provided by backend
-            instructor: course.instructorEmail,
-            enrolled: course.currentEnrollment || 0,
-            progress: calculateProgress(course), // Calculate progress from backend data
-            imageUrl: getPlaceholderImage(course), // Helper to get image URL
-            status: determineStatus(course), // Helper to determine status
-            grade: course.averageRating ? `${convertToLetterGrade(course.averageRating)}` : null
+            department: course.department || course.departmentName || 'General',
+            semester: course.semester || determineSemester(course),
+            credits: course.credits || 3, // Default if not provided
+            instructor: course.instructor?.name || course.instructorEmail || 'Unknown Instructor',
+            enrolled: course.enrolled || course.currentEnrollment || 0,
+            progress: course.progress || calculateProgress(course),
+            imageUrl: course.imageUrl || getPlaceholderImage(course),
+            status: course.status || determineStatus(course),
+            grade: course.grade || (course.averageRating ? convertToLetterGrade(course.averageRating) : null),
+            isArchived: course.isArchived || course.status === 'completed'
           }));
+          
+          console.log("Transformed courses:", transformedCourses);
           
           // Separate active and archived courses
           setActiveCourses(transformedCourses.filter(course => !course.isArchived));
           setArchivedCourses(transformedCourses.filter(course => course.isArchived));
         } else {
+          console.warn("No data found in response");
           setActiveCourses([]);
           setArchivedCourses([]);
         }
@@ -74,7 +84,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
 
   // Helper function to determine semester based on dates
   const determineSemester = (course) => {
-    if (!course.startDate) return 'Fall 2023';
+    if (!course.startDate) return 'Spring 2025';
     
     const startDate = new Date(course.startDate);
     const year = startDate.getFullYear();
@@ -94,7 +104,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
   // Helper function to get placeholder image
   const getPlaceholderImage = (course) => {
     // In a real implementation, this would use actual course images
-    return `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title)}`;
+    return `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title || 'education')}`;
   };
 
   // Helper function to determine course status
@@ -102,7 +112,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
     // In a real implementation, this would use actual course status
     if (course.isArchived) return 'completed';
     
-    const progress = calculateProgress(course);
+    const progress = course.progress || calculateProgress(course);
     if (progress > 0) return 'in-progress';
     return 'upcoming';
   };
@@ -118,12 +128,13 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
 
   // Filter active courses based on search term and filters
   const filteredActiveCourses = activeCourses.filter(course => {
+    const titleMatch = course.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const codeMatch = course.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const instructorMatch = typeof course.instructor === 'string' ? 
+      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    
     return (
-      (searchTerm === '' || 
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor.toLowerCase().includes(searchTerm.toLowerCase())
-      ) &&
+      (searchTerm === '' || titleMatch || codeMatch || instructorMatch) &&
       (departmentFilter === 'all' || course.department === departmentFilter) &&
       (semesterFilter === 'all' || course.semester === semesterFilter)
     );
@@ -131,12 +142,13 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
   
   // Filter archived courses based on search term and filters
   const filteredArchivedCourses = archivedCourses.filter(course => {
+    const titleMatch = course.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const codeMatch = course.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const instructorMatch = typeof course.instructor === 'string' ? 
+      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    
     return (
-      (searchTerm === '' || 
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor.toLowerCase().includes(searchTerm.toLowerCase())
-      ) &&
+      (searchTerm === '' || titleMatch || codeMatch || instructorMatch) &&
       (departmentFilter === 'all' || course.department === departmentFilter) &&
       (semesterFilter === 'all' || course.semester === semesterFilter)
     );

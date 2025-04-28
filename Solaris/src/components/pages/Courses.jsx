@@ -3,7 +3,6 @@ import { Typography, Box, Container, TextField, FormControl, InputLabel, Select,
 import Sidebar from '../layout/Sidebar';
 import Header from '../layout/Header';
 import CourseList from '../courses/CourseList';
-import CourseService from '../services/CourseService';
 import './Courses.css';
 
 function Courses() {
