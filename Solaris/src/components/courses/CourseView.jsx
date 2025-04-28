@@ -5,9 +5,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Link } from 'react-router-dom';
 
 // Import API services
-import CourseService from '../services/CourseService';
-import ModuleService from '../services/ModuleService';
-import ContentService from '../services/ContentService';
+import CourseService from '../../services/CourseService';
+import ModuleService from '../../services/ModuleService';
+import ContentService from '../../services/ContentService';
 
 // Import our smaller components
 import CourseHeader from './CourseHeader';

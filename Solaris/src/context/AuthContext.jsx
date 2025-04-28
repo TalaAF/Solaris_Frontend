@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import AuthService from '../components/services/AuthService';
+import AuthService from '../services/AuthService';
 
 // Create auth context
 const AuthContext = createContext();
@@ -14,7 +14,10 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // Load user data on app start
   useEffect(() => {
     const loadUser = async () => {
@@ -37,6 +40,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
   
   const login = async (email, password) => {
+    setIsLoggingIn(true);
     try {
       const response = await AuthService.login(email, password);
       setCurrentUser(response.data.user);
@@ -50,10 +54,13 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
       throw err;
+    } finally {
+      setIsLoggingIn(false);
     }
   };
   
   const register = async (userData) => {
+    setIsRegistering(true);
     try {
       const response = await AuthService.register(userData);
       setCurrentUser(response.data.user);
@@ -67,10 +74,13 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
       throw err;
+    } finally {
+      setIsRegistering(false);
     }
   };
   
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
       await AuthService.logout();
       setCurrentUser(null);
@@ -80,6 +90,8 @@ export const AuthProvider = ({ children }) => {
       // Still remove user from context even if API fails
       setCurrentUser(null);
       localStorage.removeItem('auth_token');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -95,7 +107,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     hasRole,
-    isAuthenticated: !!currentUser
+    isAuthenticated: !!currentUser,
+    isLoggingIn,
+    isRegistering,
+    isLoggingOut
   };
   
   return (
