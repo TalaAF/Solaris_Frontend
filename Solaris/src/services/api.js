@@ -8,9 +8,10 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token in requests
+// Add this to your request interceptor
 api.interceptors.request.use(
   (config) => {
+    console.log('API Request:', config.method.toUpperCase(), config.baseURL + config.url);
     const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;

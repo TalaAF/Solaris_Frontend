@@ -4,7 +4,8 @@ class AuthService {
   // Login with email and password
   async login(email, password) {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      // Add /api prefix to the endpoint if your backend expects it
+      const response = await api.post('/api/auth/login', { email, password });
       
       if (response.data.token) {
         localStorage.setItem('auth_token', response.data.token);
@@ -12,6 +13,7 @@ class AuthService {
       
       return response;
     } catch (error) {
+      console.error("Login error details:", error);
       throw this.handleError(error);
     }
   }

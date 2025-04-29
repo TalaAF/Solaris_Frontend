@@ -29,11 +29,11 @@ const Login = () => {
   };
   
   const handleGoogleSignIn = () => {
-  // Direct approach - redirect to Spring's OAuth2 authorization endpoint
-  window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  // Use the base URL without /api
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
   
-  // This is the standard Spring Security OAuth2 endpoint
-  // It will initiate the OAuth flow with Google
+  console.log('Redirecting to OAuth endpoint:', `${backendUrl}/oauth2/authorization/google`);
+  window.location.href = `${backendUrl}/oauth2/authorization/google`;
 };
 
   return (
