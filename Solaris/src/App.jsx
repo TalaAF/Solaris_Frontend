@@ -13,6 +13,10 @@ import Progress from './components/pages/ProgressSection';
 import Community from './components/pages/Community';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+// Add these two imports
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
+import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import './App.css';
@@ -40,7 +44,13 @@ function App() {
           {/* Auth routes - outside the main layout */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/oauth2/success" element={
+     
+          <OAuthHandler />
+       
+      } />
           {/* Protected routes - with layout */}
           <Route element={
             <RequireAuth>

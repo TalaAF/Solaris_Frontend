@@ -1,36 +1,42 @@
 // components/auth/Login.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showDemo, setShowDemo] = useState(false);
   const { login, error, isLoggingIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // API URL for OAuth endpoints
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (err) {
-      // Error is already handled in AuthContext
       console.error('Login failed:', err);
     }
   };
-
-  const handleDemoLogin = async (demoEmail) => {
-    setEmail(demoEmail);
-    setPassword('password'); // Demo password
-    try {
-      await login(demoEmail, 'password');
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Demo login failed:', err);
-    }
+  
+  const handleGoogleSignIn = () => {
+    // Use the backend URL without the API prefix
+    const backendUrl = 'http://localhost:8080';
+    
+    // The correct URL for Google OAuth using Spring's default
+    window.location.href = `${backendUrl}/oauth2/authorization/google`;
+    
+    // Note: It's /oauth2/authorization/google (not /oauth2/authorize/google)
+    // This is Spring Security OAuth2's default endpoint
   };
 
   return (
@@ -40,107 +46,68 @@ const Login = () => {
           <div className="logo-circle"></div>
           <h2>SOLARIS</h2>
         </div>
-        
+
         <h1 className="auth-title">Welcome to Solaris</h1>
         
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-tabs">
-            <button 
-              type="button" 
-              className={`tab-button ${!showDemo ? 'active' : ''}`} 
-              onClick={() => setShowDemo(false)}
-            >
-              Credentials
-            </button>
-            <button 
-              type="button" 
-              className={`tab-button ${showDemo ? 'active' : ''}`} 
-              onClick={() => setShowDemo(true)}
-            >
-              Demo Accounts
-            </button>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
           </div>
           
-          {!showDemo ? (
-            <>
-              <div className="form-group">
-                <label htmlFor="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="password">
-                  Password
-                  <Link to="/forgot-password" className="forgot-password">
-                    Forgot password?
-                  </Link>
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
-                  required
-                />
-              </div>
-              
-              {error && <div className="auth-error">{error}</div>}
-              
-              <button type="submit" className="auth-button" disabled={isLoggingIn}>
-                {isLoggingIn ? 'Signing In...' : 'Sign In'}
-              </button>
-            </>
-          ) : (
-            <div className="demo-accounts">
-              <div className="demo-account" onClick={() => handleDemoLogin('student@example.com')}>
-                <div className="demo-avatar">
-                  <img src="https://i.pravatar.cc/150?img=1" alt="Student" />
-                </div>
-                <div className="demo-info">
-                  <h3>Student</h3>
-                  <p>student@example.com</p>
-                </div>
-              </div>
-              
-              <div className="demo-account" onClick={() => handleDemoLogin('instructor@example.com')}>
-                <div className="demo-avatar">
-                  <img src="https://i.pravatar.cc/150?img=2" alt="Instructor" />
-                </div>
-                <div className="demo-info">
-                  <h3>Instructor</h3>
-                  <p>instructor@example.com</p>
-                </div>
-              </div>
-              
-              <div className="demo-account" onClick={() => handleDemoLogin('admin@example.com')}>
-                <div className="demo-avatar">
-                  <img src="https://i.pravatar.cc/150?img=3" alt="Admin" />
-                </div>
-                <div className="demo-info">
-                  <h3>Administrator</h3>
-                  <p>admin@example.com</p>
-                </div>
-              </div>
-              
-              {error && <div className="auth-error">{error}</div>}
-            </div>
-          )}
+          <div className="form-group">
+            <label htmlFor="password">
+              Password
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot password?
+              </Link>
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          
+          {error && <div className="auth-error">{error}</div>}
+          
+          <button type="submit" className="auth-button" disabled={isLoggingIn}>
+            Sign In
+          </button>
         </form>
+        
+        <div className="oauth-divider">or</div>
+        
+        <button 
+          type="button" 
+          className="google-login-button"
+          onClick={handleGoogleSignIn}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+          </svg>
+          Continue with Google
+        </button>
         
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Sign up</Link></p>
         </div>
         
         <div className="auth-terms">
-          By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          By signing in, you agree to our <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>.
         </div>
         
         <div className="auth-copyright">

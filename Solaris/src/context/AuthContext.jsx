@@ -79,17 +79,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
+  // Add this method to your AuthProvider if it's missing
+  const setOAuthUser = (userData) => {
+    if (userData) {
+      setCurrentUser(userData);
+      setError(null);
+    }
+  };
+  
   const logout = async () => {
     setIsLoggingOut(true);
     try {
       await AuthService.logout();
       setCurrentUser(null);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
     } catch (err) {
       console.error("Logout error:", err);
       // Still remove user from context even if API fails
       setCurrentUser(null);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
     } finally {
       setIsLoggingOut(false);
     }
@@ -99,6 +109,7 @@ export const AuthProvider = ({ children }) => {
     return currentUser?.roles?.includes(role) || false;
   };
   
+  // Make sure it's included in your context value
   const value = {
     currentUser,
     loading,
@@ -106,6 +117,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    setOAuthUser, // Must include this
     hasRole,
     isAuthenticated: !!currentUser,
     isLoggingIn,

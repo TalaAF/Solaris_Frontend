@@ -4,7 +4,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api';
-const USE_MOCK = true; // Toggle this when your backend is ready
+const USE_MOCK = false; // Toggle this when your backend is ready
 
 // Mock data
 const mockCourses = [

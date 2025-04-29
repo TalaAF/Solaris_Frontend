@@ -1,27 +1,38 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import CoursesList from '../components/courses/CoursesList';
-import CourseView from '../components/courses/CourseView';
-import ContentViewer from '../components/courses/CourseContent/ContentViewer';
+
+// Auth components
+import Login from '../components/auth/Login';
+import Register from '../components/auth/Register';
+import ForgotPassword from '../components/auth/ForgotPassword';
+import ResetPassword from '../components/auth/ResetPassword';
+import OAuthHandler from '../components/auth/OAuthHandler';
+
+// Other components and route definitions...
 
 const routes = [
+  // Public routes
   {
-    path: '/courses',
-    element: <CoursesList />,
+    path: '/login',
+    element: <Login />,
   },
   {
-    path: '/courses/:courseId',
-    element: <CourseView />,
+    path: '/register',
+    element: <Register />,
   },
   {
-    path: '/courses/:courseId/content/:moduleId/:itemId',
-    element: <ContentViewer />,
+    path: '/forgot-password',
+    element: <ForgotPassword />,
   },
-  // Add redirect from /courses path to courses list
   {
-    path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    path: '/reset-password',
+    element: <ResetPassword />,
   },
+  {
+    path: '/oauth2/success',
+    element: <OAuthHandler />,
+  },
+  // Other routes...
 ];
 
 export default routes;
