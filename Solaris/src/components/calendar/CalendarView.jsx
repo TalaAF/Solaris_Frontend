@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
-import { ChevronLeft, ChevronRight, Clock, MapPin } from 'react-feather';
+import { ChevronLeft, ChevronRight, Clock, MapPin, Calendar as CalendarIcon } from 'react-feather';
 import './CalendarView.css';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -9,10 +9,28 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+// Time slots for day view
+const TIME_SLOTS = [
+  '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
+  '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', 
+  '6:00 PM', '7:00 PM', '8:00 PM'
+];
+
 function CalendarView({ events }) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState('week');
+  const [view, setView] = useState('month'); // Set default to month view
+  const [isLoading, setIsLoading] = useState(true);
   
+  useEffect(() => {
+    // Simulate loading state
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [currentDate, view]);
+
   // Navigation functions
   const goToToday = () => setCurrentDate(new Date());
   
@@ -68,7 +86,16 @@ function CalendarView({ events }) {
     return eventDate >= startOfWeek && eventDate <= endOfWeek;
   });
   
-  // Group events by day
+  // Filter events for specific day (for day view)
+  const dayEvents = events.filter(event => {
+    const eventDate = new Date(event.date);
+    return eventDate.toDateString() === currentDate.toDateString();
+  }).sort((a, b) => {
+    // Sort by start time
+    return a.startTime.localeCompare(b.startTime);
+  });
+  
+  // Group events by day for week view
   const eventsByDay = weekDays.map(day => {
     return {
       date: day,
@@ -78,6 +105,14 @@ function CalendarView({ events }) {
       }).sort((a, b) => a.startTime.localeCompare(b.startTime))
     };
   });
+  
+  // Function to convert 24h time to 12h time format
+  const formatTime = (time24) => {
+    const [hour, minute] = time24.split(':').map(Number);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+  };
   
   // Get event styling based on type
   const getEventClassName = (type) => {
@@ -106,6 +141,138 @@ function CalendarView({ events }) {
     return date.toDateString() === today.toDateString();
   };
   
+  // Generate month calendar grid - OPTIMIZED IMPLEMENTATION
+  const generateMonthCalendar = () => {
+    // Get the first day of the month
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Get the day of the week for the first day (0 = Sunday, 1 = Monday, etc.)
+    const startDay = firstDay.getDay();
+    
+    // Create array of days in the month
+    const days = [];
+    
+    // Add previous month's days
+    const prevMonthDays = startDay;
+    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+    const prevMonthLastDay = prevMonth.getDate();
+    
+    for (let i = prevMonthDays - 1; i >= 0; i--) {
+      const dayNumber = prevMonthLastDay - i;
+      const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, dayNumber);
+      days.push({
+        day: dayNumber,
+        isCurrentMonth: false,
+        date: dayDate,
+        events: getEventsForDate(dayDate)
+      });
+    }
+    
+    // Add current month's days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+      days.push({
+        day: i,
+        isCurrentMonth: true,
+        date: dayDate,
+        events: getEventsForDate(dayDate)
+      });
+    }
+    
+    // Add next month's days to complete the grid (maximum 6 rows of 7 days = 42 cells)
+    const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
+    const nextMonthDays = totalCells - days.length;
+    
+    for (let i = 1; i <= nextMonthDays; i++) {
+      const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i);
+      days.push({
+        day: i,
+        isCurrentMonth: false,
+        date: dayDate,
+        events: getEventsForDate(dayDate)
+      });
+    }
+    
+    // Split into weeks
+    const weeks = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+    
+    return weeks;
+  };
+  
+  // Get events for a specific date (used in month view)
+  const getEventsForDate = (date) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate.toDateString() === date.toDateString();
+    });
+  };
+  
+  // Get event dot color based on event type
+  const getEventDotColor = (type) => {
+    switch(type) {
+      case 'lecture': return '#ed8936';
+      case 'lab': return '#4299e1';
+      case 'seminar': return '#805ad5';
+      case 'meeting': return '#38b2ac';
+      case 'exam': return '#e53e3e';
+      case 'assignment': return '#dd6b20';
+      default: return '#718096';
+    }
+  };
+  
+  // Generate time blocks for day view
+  const generateDayTimeBlocks = () => {
+    return TIME_SLOTS.map((timeSlot, index) => {
+      return {
+        time: timeSlot,
+        events: dayEvents.filter(event => {
+          // Check if event falls within this time slot
+          const hour = parseInt(timeSlot.split(':')[0]);
+          const isPM = timeSlot.includes('PM');
+          let timeHour = isPM && hour !== 12 ? hour + 12 : hour;
+          if (!isPM && hour === 12) timeHour = 0;
+          
+          const eventStartHour = parseInt(event.startTime.split(':')[0]);
+          const eventEndHour = parseInt(event.endTime.split(':')[0]);
+          
+          return eventStartHour <= timeHour && eventEndHour >= timeHour;
+        })
+      };
+    });
+  };
+
+  // Add this function to check if an event is happening at a current time
+  const isCurrentTimeInSlot = (timeSlot) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const [slotHour, slotMinutes] = parseTimeSlot(timeSlot);
+    
+    return currentHour === slotHour;
+  };
+
+  // Add this function to parse time slots
+  const parseTimeSlot = (timeSlot) => {
+    const [hourStr, minuteStr] = timeSlot.split(':');
+    let hour = parseInt(hourStr);
+    const isPM = timeSlot.includes('PM');
+    const minutes = minuteStr ? parseInt(minuteStr) : 0;
+    
+    if (isPM && hour !== 12) hour += 12;
+    if (!isPM && hour === 12) hour = 0;
+    
+    return [hour, minutes];
+  };
+
+  // Add this function to format date for day view header
+  const formatDayViewDate = (date) => {
+    return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
+  
   return (
     <Card className="calendar-container">
       <div className="calendar-toolbar">
@@ -120,12 +287,14 @@ function CalendarView({ events }) {
             <button 
               className="calendar-nav-btn"
               onClick={goToPrevious}
+              aria-label="Previous"
             >
               <ChevronLeft size={16} />
             </button>
             <button 
               className="calendar-nav-btn"
               onClick={goToNext}
+              aria-label="Next"
             >
               <ChevronRight size={16} />
             </button>
@@ -164,12 +333,65 @@ function CalendarView({ events }) {
         </div>
       </div>
       
-      <div className="calendar-view-transition">
-        {view === 'week' && (
+      <div className={`calendar-view-transition ${isLoading ? 'calendar-loading' : ''}`}>
+        {/* Month View */}
+        {view === 'month' && !isLoading && (
+          <div className="calendar-month-view">
+            <div className="calendar-month-header">
+              {DAYS.map((day, index) => (
+                <div key={`month-header-${index}`} className="calendar-month-weekday">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="calendar-month-grid">
+              {generateMonthCalendar().map((week, weekIndex) => (
+                <div key={`week-${weekIndex}`} className="calendar-month-week">
+                  {week.map((day, dayIndex) => (
+                    <div 
+                      key={`day-${weekIndex}-${dayIndex}`} 
+                      className={`calendar-month-day ${!day.isCurrentMonth ? 'calendar-month-day-inactive' : ''} ${isToday(day.date) ? 'calendar-day-today' : ''}`}
+                      onClick={() => {
+                        setCurrentDate(day.date);
+                        setView('day');
+                      }}
+                    >
+                      <div className="calendar-month-day-number">{day.day}</div>
+                      <div className="calendar-month-day-events">
+                        {day.events.slice(0, 3).map((event, idx) => (
+                          <div 
+                            key={`month-event-${event.id}-${idx}`} 
+                            className="calendar-month-event" 
+                            style={{ borderLeftColor: getEventDotColor(event.type) }}
+                            title={event.title}
+                          >
+                            <div className="calendar-month-event-time">
+                              {formatTime(event.startTime)}
+                            </div>
+                            <div className="calendar-month-event-title">
+                              {event.title.length > 18 ? event.title.substring(0, 18) + '...' : event.title}
+                            </div>
+                          </div>
+                        ))}
+                        {day.events.length > 3 && (
+                          <div className="calendar-month-more-events">
+                            +{day.events.length - 3} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Week View */}
+        {view === 'week' && !isLoading && (
           <div className="calendar-grid">
-            {/* Day headers */}
             {eventsByDay.map((dayData, index) => (
-              <div key={`header-${index}`} className="calendar-day-column">
+              <div key={`day-column-${index}`} className="calendar-day-column">
                 <div className={`calendar-day-header ${isToday(dayData.date) ? 'calendar-day-today' : ''}`}>
                   <div className="calendar-day-name">{DAYS[dayData.date.getDay()]}</div>
                   <div className="calendar-day-number">{dayData.date.getDate()}</div>
@@ -180,13 +402,13 @@ function CalendarView({ events }) {
                     <div className="calendar-events-container">
                       {dayData.events.map(event => (
                         <div 
-                          key={event.id} 
+                          key={`week-event-${event.id}`} 
                           className={getEventClassName(event.type)}
                         >
                           <div className="calendar-event-title">{event.title}</div>
                           <div className="calendar-event-time">
                             <Clock size={12} className="calendar-event-icon" />
-                            <span>{event.startTime} - {event.endTime}</span>
+                            <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
                           </div>
                           {event.location && (
                             <div className="calendar-event-location">
@@ -206,14 +428,105 @@ function CalendarView({ events }) {
           </div>
         )}
         
-        {/* Month view placeholder - to be implemented */}
-        {view === 'month' && (
-          <div className="calendar-placeholder">Month view will be implemented soon</div>
+        {/* Day View */}
+        {view === 'day' && !isLoading && (
+          <div className="calendar-day-view">
+            <div className={`calendar-day-view-header ${isToday(currentDate) ? 'calendar-day-today' : ''}`}>
+              <div className="calendar-day-view-title">
+                <div className="calendar-day-view-weekday">{DAYS[currentDate.getDay()]}</div>
+                <div className="calendar-day-view-date">{formatDayViewDate(currentDate)}</div>
+              </div>
+            </div>
+            
+            {/* All-day events section */}
+            <div className="calendar-all-day-section">
+              <div className="calendar-all-day-label">All day</div>
+              <div className="calendar-all-day-events">
+                {dayEvents
+                  .filter(event => event.allDay)
+                  .map(event => (
+                    <div 
+                      key={`all-day-event-${event.id}`}
+                      className="calendar-all-day-event"
+                      style={{ borderLeftColor: getEventDotColor(event.type) }}
+                    >
+                      {event.title}
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            <div className="calendar-day-view-content">
+              {TIME_SLOTS.map((timeSlot, index) => {
+                const eventsInThisSlot = dayEvents.filter(event => {
+                  // Filter events that are not all-day events
+                  if (event.allDay) return false;
+                  
+                  // Check if event falls within this time slot
+                  const [slotHour] = parseTimeSlot(timeSlot);
+                  const [startHour] = parseTimeSlot(event.startTime);
+                  const [endHour] = parseTimeSlot(event.endTime);
+                  
+                  return startHour <= slotHour && endHour >= slotHour;
+                });
+                
+                const isCurrentTime = isCurrentTimeInSlot(timeSlot);
+                
+                return (
+                  <div key={`time-${index}`} className="calendar-time-block">
+                    <div className="calendar-time-block-label">
+                      {timeSlot}
+                    </div>
+                    <div className="calendar-time-block-content">
+                      {isCurrentTime && (
+                        <div className="calendar-current-time-indicator"></div>
+                      )}
+                      
+                      {eventsInThisSlot.length > 0 ? (
+                        eventsInThisSlot.map(event => (
+                          <div 
+                            key={`day-event-${event.id}`} 
+                            className={getEventClassName(event.type)}
+                            style={{ borderLeftColor: getEventDotColor(event.type) }}
+                          >
+                            <div className="calendar-event-title">{event.title}</div>
+                            <div className="calendar-event-time">
+                              <Clock size={12} className="calendar-event-icon" />
+                              <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
+                            </div>
+                            {event.location && (
+                              <div className="calendar-event-location">
+                                <MapPin size={12} className="calendar-event-icon" />
+                                <span>{event.location}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="calendar-time-block-empty"></div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {dayEvents.filter(event => !event.allDay).length === 0 && (
+                <div className="calendar-day-no-events">
+                  <div className="calendar-empty-state">
+                    <CalendarIcon size={48} className="calendar-empty-icon" />
+                    <p className="calendar-empty-text">No events scheduled for this day</p>
+                    <p className="calendar-empty-subtext">Click the "Add Event" button to create a new event</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
         
-        {/* Day view placeholder - to be implemented */}
-        {view === 'day' && (
-          <div className="calendar-placeholder">Day view will be implemented soon</div>
+        {isLoading && (
+          <div className="calendar-loading-indicator">
+            <div className="calendar-spinner"></div>
+          </div>
         )}
       </div>
     </Card>
