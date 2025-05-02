@@ -21,8 +21,12 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import './App.css';
 
-// Protected route component
+// Temporarily bypass authentication for development
 const RequireAuth = ({ children }) => {
+  // Simply return children without checking authentication
+  return children;
+  
+  /* Original code - comment it out for now
   const { currentUser, loading } = useAuth();
 
   if (loading) {
@@ -34,6 +38,7 @@ const RequireAuth = ({ children }) => {
   }
 
   return children;
+  */
 };
 
 function App() {

@@ -5,7 +5,7 @@ class AuthService {
   async login(email, password) {
     try {
       // Add /api prefix to the endpoint if your backend expects it
-      const response = await api.post('/api/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       
       if (response.data.token) {
         localStorage.setItem('auth_token', response.data.token);
@@ -55,13 +55,32 @@ class AuthService {
         return null;
       }
       
-      return await api.get('/auth/me');
+      // Ensure token is set in headers for this request
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      try {
+        const response = await api.get('/auth/me');
+        return response; // Return the full response
+      } catch (firstError) {
+        // Check if token expired
+        if (firstError.response && firstError.response.status === 401) {
+          // Try to refresh the token and retry
+          const refreshed = await this.refreshToken();
+          if (refreshed) {
+            // Retry with new token
+            const retryResponse = await api.get('/auth/me');
+            return retryResponse;
+          }
+        }
+        throw firstError; // Re-throw if it wasn't an auth error or refresh failed
+      }
     } catch (error) {
       console.error('Get current user error:', error);
       // If token is invalid, clear it
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403 || error.response.status === 500)) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_data');
+        delete api.defaults.headers.common['Authorization']; // Also remove from headers
       }
       return null;
     }
@@ -98,19 +117,37 @@ class AuthService {
       // Configure API header with the new token
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Get user info with the token
-      const response = await api.get('/auth/me');
-      
-      // Store user data
-      if (response.data) {
-        localStorage.setItem('user_data', JSON.stringify(response.data));
+      try {
+        // Get user info with the token
+        const response = await api.get('/auth/me');
+        
+        // Store user data
+        if (response.data) {
+          localStorage.setItem('user_data', JSON.stringify(response.data));
+        }
+        
+        return { data: { user: response.data, token } };
+      } catch (error) {
+        // Check if token expired immediately (server time mismatch)
+        if (error.response && error.response.status === 401) {
+          // Try to refresh the token
+          const refreshed = await this.refreshToken();
+          if (refreshed) {
+            // Retry with new token
+            const retryResponse = await api.get('/auth/me');
+            if (retryResponse.data) {
+              localStorage.setItem('user_data', JSON.stringify(retryResponse.data));
+            }
+            return { data: { user: retryResponse.data, token: localStorage.getItem('auth_token') } };
+          }
+        }
+        throw error;
       }
-      
-      return { data: { user: response.data, token } };
     } catch (error) {
       // If OAuth authentication fails, clean up
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
+      delete api.defaults.headers.common['Authorization']; // Clear header if authentication fails
       console.error("OAuth login error:", error);
       throw this.handleError(error);
     }
@@ -129,8 +166,47 @@ class AuthService {
   isAuthenticated() {
     return !!localStorage.getItem('auth_token');
   }
+
+  // Initialize auth state - call this when your app starts
+  initAuth() {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    return this.isAuthenticated();
+  }
   
-  // Error handler
+  // Add a refresh token method
+  async refreshToken() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw new Error('No token available to refresh');
+      }
+      
+      // Set the current token in the request
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Call refresh token endpoint
+      const response = await api.post('/auth/refresh-token');
+      
+      // Update token in localStorage and API headers
+      if (response.data.token) {
+        localStorage.setItem('auth_token', response.data.token);
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // If refresh fails, log user out
+      this.logout();
+      return false;
+    }
+  }
+
+  // Add a proper handleError method
   handleError(error) {
     let errorMessage = 'An unexpected error occurred';
     

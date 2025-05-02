@@ -1,0 +1,464 @@
+/* Calendar-specific styling */
+
+/* Make sure all styles are applied properly */
+.calendar-event-lecture {
+  border-left-color: #f97316 !important; /* orange-500 */
+  background-color: #fff7ed !important; /* orange-50 */
+}
+
+.calendar-event-lecture:hover {
+  background-color: #ffedd5 !important; /* orange-100 */
+}
+
+.calendar-event-lab {
+  border-left-color: #3b82f6 !important; /* blue-500 */
+  background-color: #eff6ff !important; /* blue-50 */
+}
+
+.calendar-event-lab:hover {
+  background-color: #dbeafe !important; /* blue-100 */
+}
+
+.calendar-event-seminar {
+  border-left-color: #8b5cf6 !important; /* purple-500 */
+  background-color: #f5f3ff !important; /* purple-50 */
+}
+
+.calendar-event-seminar:hover {
+  background-color: #ede9fe !important; /* purple-100 */
+}
+
+.calendar-event-meeting {
+  border-left-color: #22c55e !important; /* green-500 */
+  background-color: #f0fdf4 !important; /* green-50 */
+}
+
+.calendar-event-meeting:hover {
+  background-color: #dcfce7 !important; /* green-100 */
+}
+
+.calendar-event-exam {
+  border-left-color: #ef4444 !important; /* red-500 */
+  background-color: #fef2f2 !important; /* red-50 */
+}
+
+.calendar-event-exam:hover {
+  background-color: #fee2e2 !important; /* red-100 */
+}
+
+.calendar-event-assignment {
+  border-left-color: #f59e0b !important; /* amber-500 */
+  background-color: #fffbeb !important; /* amber-50 */
+}
+
+.calendar-event-assignment:hover {
+  background-color: #fef3c7 !important; /* amber-100 */
+}
+
+/* Add global styles for all calendar events */
+[class*="calendar-event-"] {
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+[class*="calendar-event-"]:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure the calendar container has proper spacing */
+.calendar-container {
+  min-height: 600px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Calendar time indicators */
+.calendar-time-indicator {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+/* Highlight today */
+.calendar-day-today {
+  background-color: #fff7ed;
+  font-weight: 500;
+}
+
+.calendar-day-today .calendar-day-number {
+  color: #f97316;
+  font-weight: 600;
+}
+
+/* Make calendar responsive */
+@media (max-width: 640px) {
+  .calendar-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .calendar-day-name {
+    font-size: 0.75rem !important;
+  }
+  
+  .calendar-day-number {
+    font-size: 1rem !important;
+  }
+}
+
+/* Add animation for view transitions */
+.calendar-view-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Calendar view component specific styles */
+
+/* Calendar container */
+.calendar-container {
+  min-height: 600px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Calendar toolbar */
+.calendar-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+@media (min-width: 640px) {
+  .calendar-toolbar {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Calendar navigation */
+.calendar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .calendar-navigation {
+    margin-bottom: 0;
+  }
+}
+
+.calendar-today-button {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-today-button:hover {
+  background-color: #f9fafb;
+}
+
+.calendar-nav-buttons {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.calendar-nav-btn {
+  background-color: transparent;
+  border: none;
+  color: #6b7280;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-nav-btn:hover {
+  background-color: #f9fafb;
+}
+
+.calendar-nav-btn:first-child {
+  border-right: 1px solid #e5e7eb;
+}
+
+.calendar-date-heading {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-left: 0.75rem;
+}
+
+/* Calendar view selector */
+.calendar-view-selector {
+  display: flex;
+  background-color: #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+.calendar-view-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  background-color: transparent;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.calendar-view-btn:hover {
+  background-color: #d1d5db;
+}
+
+.calendar-view-btn-active {
+  background-color: #f97316;
+  color: #ffffff;
+}
+
+.calendar-view-btn-active:hover {
+  background-color: #ea580c;
+}
+
+/* Week view grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #e5e7eb;
+  min-height: 500px;
+}
+
+.calendar-day-column {
+  border-right: 1px solid #e5e7eb;
+}
+
+.calendar-day-column:last-child {
+  border-right: none;
+}
+
+.calendar-day-header {
+  padding: 1rem 0;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+.calendar-day-name {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.calendar-day-number {
+  font-size: 1.25rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Events container */
+.calendar-day-events {
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.calendar-events-container {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Base event styles */
+.calendar-event-base {
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border-left-width: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-event-base:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Event colors for different types */
+.calendar-event-lecture {
+  border-left-color: #f97316; /* orange-500 */
+  background-color: #fff7ed; /* orange-50 */
+}
+
+.calendar-event-lecture:hover {
+  background-color: #ffedd5; /* orange-100 */
+}
+
+.calendar-event-lab {
+  border-left-color: #3b82f6; /* blue-500 */
+  background-color: #eff6ff; /* blue-50 */
+}
+
+.calendar-event-lab:hover {
+  background-color: #dbeafe; /* blue-100 */
+}
+
+.calendar-event-seminar {
+  border-left-color: #8b5cf6; /* purple-500 */
+  background-color: #f5f3ff; /* purple-50 */
+}
+
+.calendar-event-seminar:hover {
+  background-color: #ede9fe; /* purple-100 */
+}
+
+.calendar-event-meeting {
+  border-left-color: #22c55e; /* green-500 */
+  background-color: #f0fdf4; /* green-50 */
+}
+
+.calendar-event-meeting:hover {
+  background-color: #dcfce7; /* green-100 */
+}
+
+.calendar-event-exam {
+  border-left-color: #ef4444; /* red-500 */
+  background-color: #fef2f2; /* red-50 */
+}
+
+.calendar-event-exam:hover {
+  background-color: #fee2e2; /* red-100 */
+}
+
+.calendar-event-assignment {
+  border-left-color: #f59e0b; /* amber-500 */
+  background-color: #fffbeb; /* amber-50 */
+}
+
+.calendar-event-assignment:hover {
+  background-color: #fef3c7; /* amber-100 */
+}
+
+.calendar-event-default {
+  border-left-color: #9ca3af; /* gray-500 */
+  background-color: #f9fafb; /* gray-50 */
+}
+
+.calendar-event-default:hover {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+/* Event content styling */
+.calendar-event-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.calendar-event-time, 
+.calendar-event-location {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.calendar-event-icon {
+  margin-right: 0.25rem;
+}
+
+/* Empty state */
+.calendar-no-events {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 1.5rem 0;
+}
+
+/* Calendar time indicators */
+.calendar-time-indicator {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+/* Highlight today */
+.calendar-day-today {
+  background-color: #fff7ed;
+  font-weight: 500;
+}
+
+.calendar-day-today .calendar-day-number {
+  color: #f97316;
+  font-weight: 600;
+}
+
+/* Placeholder for unimplemented views */
+.calendar-placeholder {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  margin: 2rem;
+}
+
+/* Add animation for view transitions */
+.calendar-view-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Make calendar responsive */
+@media (max-width: 640px) {
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .calendar-day-name {
+    font-size: 0.75rem;
+  }
+  
+  .calendar-day-number {
+    font-size: 1rem;
+  }
+}
