@@ -8,7 +8,6 @@ const Header = ({ profile }) => {
 
   return (
     <header className="dashboard-header">
-      <h1>Solaris LMS</h1>
       <div className="header-info">
         <p className="greeting">{greeting}, {profile?.name || 'User'}</p>
         <p className="date">{date}</p>
