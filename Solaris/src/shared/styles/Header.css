@@ -1,0 +1,30 @@
+.dashboard-header {
+  background: linear-gradient(135deg, #F5F5DC, #ADD8E6);
+  color: #1F2A44;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.header-info {
+  margin-top: 12px;
+}
+
+.greeting {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.date {
+  font-size: 14px;
+  color: #4B5563;
+}

@@ -1,0 +1,26 @@
+.input-field-container {
+    width: 100%;
+  }
+  
+  .input-field-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    outline: none;
+  }
+  
+  .input-field-container input:focus {
+    border-color: #B5EAD7;
+    box-shadow: 0 0 0 2px rgba(181, 234, 215, 0.5);
+  }
+  
+  .input-field-container input.error {
+    border-color: #EF4444;
+  }
+  
+  .input-field-container .error-message {
+    color: #EF4444;
+    font-size: 14px;
+    margin-top: 4px;
+  }

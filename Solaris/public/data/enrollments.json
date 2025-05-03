@@ -1,3 +1,4 @@
 [
-    { "userId": 1, "courseId": 3, "enrolledAt": "2025-04-18" }
-  ]
+  { "userId": 1, "courseId": 3, "enrolledAt": "2025-04-18" },
+  { "userId": 1, "courseId": 2, "enrolledAt": "2025-04-18" }
+]

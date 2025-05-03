@@ -1,0 +1,65 @@
+.account-summary-card {
+  background-color: #FFFBEB; /* Pale yellow background */
+  border-left: 4px solid #FBBF24;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  padding: 28px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.account-summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.card-icon {
+  font-size: 24px;
+  color: #FBBF24;
+}
+
+.section-heading {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1F2A44;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0 0 20px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2A44;
+}

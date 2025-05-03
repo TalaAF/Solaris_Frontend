@@ -1,0 +1,43 @@
+.download-button-card {
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  padding: 32px;
+  border-left: 4px solid #2DD4BF;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.download-button-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.section-heading {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1F2A44;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  color: #4B5563;
+  margin-bottom: 24px;
+  font-size: 16px;
+}
+
+.download-button {
+  background-color: #2DD4BF;
+  color: #FFFFFF;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.download-button:hover {
+  background-color: #26B8A6;
+  transform: scale(1.05);
+}

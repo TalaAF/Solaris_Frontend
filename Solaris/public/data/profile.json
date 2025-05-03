@@ -1,12 +1,18 @@
 {
   "id": 1,
-  "name": "Jane Doe",
+  "name": "Maysam Hammad",
+  "firstName": "Maysam",
+  "lastName": "Hammad",
   "role": "Medical Student",
-  "email": "student@school.edu",
+  "email": "Maysam@university.edu",
+  "phone": "",
+  "country": "",
+  "timezone": "",
   "studentId": "MSC21400001",
   "semester": "Spring 2025",
   "status": "Active",
   "activeCourses": 2,
   "enrolledCourses": 4,
-  "progress": 70
-}
+  "progress": 70,
+  "profileImage": null,
+  "password": "defaultPass123"}
