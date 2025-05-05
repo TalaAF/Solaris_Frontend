@@ -10,6 +10,7 @@ import {
   Stethoscope,
   BarChart2,
   Users,
+  GraduationCap, // Added for enrollment icon
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -27,6 +28,12 @@ const Sidebar = ({ isOpen }) => {
       path: "/courses",
       icon: <Book size={20} />,
       iconClass: "icon-book",
+    },
+    {
+      name: "Enrollment", // New Enrollment item
+      path: "/enrollment",
+      icon: <GraduationCap size={20} />,
+      iconClass: "icon-graduation-cap",
     },
     {
       name: "Calendar",

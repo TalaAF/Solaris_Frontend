@@ -18,6 +18,7 @@ import ResetPassword from './components/auth/ResetPassword';
 import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
+import Enrollment from './components/pages/Enrollment';
 import './App.css';
 
 // Temporarily bypass authentication for development
@@ -75,6 +76,7 @@ function App() {
               <Route path="/clinical-skills" element={<ClinicalSkills />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/enrollment" element={<Enrollment />} />
             </Route>
             
             {/* Catch-all redirect */}

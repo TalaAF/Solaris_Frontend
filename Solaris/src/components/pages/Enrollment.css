@@ -1,0 +1,62 @@
+/* src/components/pages/Enrollment.css */
+.enrollment-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+  }
+  
+  .course-view-breadcrumb {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .back-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+  }
+  
+  .back-link:hover {
+    color: #fb923c; /* Theme color */
+  }
+  
+  .chevron-icon {
+    margin-right: 6px;
+    transition: transform 0.2s ease;
+  }
+  
+  .back-link:hover .chevron-icon {
+    transform: translateX(-3px);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .enrollment-page-container {
+      padding: 15px;
+    }
+  
+    .page-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .enrollment-page-container {
+      padding: 10px;
+    }
+  
+    .page-title {
+      font-size: 1.25rem;
+    }
+  }
