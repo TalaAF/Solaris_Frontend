@@ -1,35 +1,91 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import Dashboard from './components/pages/Dashboard';
+import Courses from './components/pages/Courses';
+import CourseView from './components/courses/CourseView';
+import ContentViewer from './components/courses/CourseContent/ContentViewer';
+import Calendar from './components/pages/Calendar';
+import Assessments from './components/pages/Assessments';
+import Collaboration from './components/pages/Collaboration';
+import ClinicalSkills from './components/pages/ClinicalSkills';
+import Progress from './components/pages/ProgressSection';
+import Community from './components/pages/Community';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+// Add these two imports
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
+import OAuthHandler from './components/auth/OAuthHandler';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import './App.css';
+
+// Temporarily bypass authentication for development
+const RequireAuth = ({ children }) => {
+  // Simply return children without checking authentication
+  return children;
+  
+  /* Original code - comment it out for now
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
+  */
+};
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Auth routes - outside the main layout */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/oauth2/success" element={
+     
+          <OAuthHandler />
+       
+      } />
+          {/* Protected routes - with layout */}
+          <Route element={
+            <RequireAuth>
+              <Layout />
+            </RequireAuth>
+          }>
+            {/* Main pages */}
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Courses section with nested routes */}
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:courseId" element={<CourseView />} />
+            <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
+            
+            {/* Other pages */}
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/assessments" element={<Assessments />} />
+            <Route path="/collaboration" element={<Collaboration />} />
+            <Route path="/clinical-skills" element={<ClinicalSkills />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/community" element={<Community />} />
+          </Route>
+          
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

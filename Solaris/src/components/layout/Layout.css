@@ -1,0 +1,65 @@
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.layout-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.layout-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+  padding: 20px;
+  overflow-y: auto !important; /* This is the ONLY element that should scroll */
+  height: calc(100vh - var(--header-height)); /* Height minus header */
+}
+
+.layout-main.sidebar-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+  width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+/* Ensure smooth transitions */
+* {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Ensure header spans full width */
+header {
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Add these styles to your existing Layout.css */
+.sidebar-toggle-button {
+  position: fixed;
+  left: 220px;
+  top: 100px; /* Position below header */
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 901;
+  transition: left 0.3s ease-in-out; /* Make it move smoothly */
+}
+
+/* Update the collapsed toggle button position */
+.sidebar-toggle-button.collapsed {
+  left: 65px; /* Adjust this value to match the collapsed sidebar width */
+}
+.sidebar-toggle-button:hover {
+  background-color: #f3f4f6; /* Light gray on hover */
+}

@@ -1,42 +1,129 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.App {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Progress bar colors */
+.progress-green {
+  background-color: #22c55e;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.progress-blue {
+  background-color: #3b82f6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.progress-yellow {
+  background-color: #eab308;
 }
 
-.card {
-  padding: 2em;
+.progress-red {
+  background-color: #ef4444;
 }
 
-.read-the-docs {
-  color: #888;
+/* Schedule items */
+.schedule-item-orange {
+  background-color: #fff7ed;
+  border-left: 4px solid #f97316;
+}
+
+.schedule-item-blue {
+  background-color: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.schedule-item-green {
+  background-color: #f0fdf4;
+  border-left: 4px solid #22c55e;
+}
+
+.schedule-item-pink {
+  background-color: #fdf2f8;
+  border-left: 4px solid #ec4899;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Quick access icons */
+.quick-access-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+/* Deadline dots */
+.deadline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.deadline-dot-blue {
+  background-color: #3b82f6;
+}
+
+.deadline-dot-orange {
+  background-color: #f97316;
+}
+
+.deadline-dot-green {
+  background-color: #22c55e;
+}
+
+.deadline-dot-line {
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  width: 1px;
+  height: calc(100% - 10px);
+  background-color: #e5e7eb;
+}
+
+/* Welcome section */
+.welcome-section {
+  background-color: #ffedd5;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.day-glance-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.day-glance-badge span {
+  margin-right: 8px;
 }

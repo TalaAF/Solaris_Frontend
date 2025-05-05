@@ -1,0 +1,130 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 16px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.header-spacer {
+  height: var(--header-height); /* Uses the variable value */
+}
+
+.page-dashboard .header-spacer {
+  --header-height: 95px; /* Taller header for dashboard */
+}
+
+.page-courses .header-spacer {
+  --header-height: 75px; /* Standard height for courses */
+}
+/* Add this new class to adjust main content padding */
+
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background-color: #f6d110;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  
+  margin-right: 14px;
+  box-shadow: 
+    0 0 0 4px rgba(246, 209, 16, 0.3),
+    0 0 0 8px rgba(246, 209, 16, 0.2),
+    0 0 0 12px rgba(246, 209, 16, 0.1),
+    0 0 20px rgba(246, 209, 16, 0.3),
+    0 0 40px rgba(246, 209, 16, 0.2),
+    0 0 60px rgba(246, 209, 16, 0.1);
+
+}
+
+.logo-icon svg {
+  stroke: white;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+
+  width: 23px;
+  height: 23px;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 29px;
+  color: #1e293b;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 21px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #94a3b8;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-button:hover {
+  color: #64748b;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.orange-dot {
+  background-color: #f97316;
+}
+
+.blue-dot {
+  background-color: #3b82f6;
+}
+
+.user-button {
+  width: auto;
+  height: auto;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  background-color: #f6d220;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 544;
+  font-size: 20px;
+  
+}
