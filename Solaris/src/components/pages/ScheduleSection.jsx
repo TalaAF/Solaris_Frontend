@@ -10,10 +10,7 @@ const ScheduleSection = ({ scheduleItems }) => {
       </div>
       <div className="schedule-list">
         {scheduleItems.map((item, index) => (
-          <div
-            key={index}
-            className={`schedule-item schedule-item-${item.color}`}
-          >
+          <div key={index} className={`schedule-item schedule-item-${item.color}`}>
             <div className="schedule-content">
               <h4 className="schedule-item-title">{item.title}</h4>
               <p className="schedule-item-location">{item.location}</p>

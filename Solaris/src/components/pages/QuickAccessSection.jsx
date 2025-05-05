@@ -6,17 +6,17 @@ const QuickAccessSection = ({ quickAccessItems }) => {
   // Map the icons to the correct ones as shown in the image
   const getIcon = (title) => {
     switch (title) {
-      case "Courses":
+      case 'Courses':
         return <div className="quick-access-icon courses-icon"></div>;
-      case "Assessments":
+      case 'Assessments':
         return <div className="quick-access-icon assessments-icon"></div>;
-      case "Calendar":
+      case 'Calendar':
         return <div className="quick-access-icon calendar-icon"></div>;
-      case "Discussions":
+      case 'Discussions':
         return <div className="quick-access-icon discussions-icon"></div>;
-      case "Clinical Skills":
+      case 'Clinical Skills':
         return <div className="quick-access-icon clinical-icon"></div>;
-      case "Study Groups":
+      case 'Study Groups':
         return <div className="quick-access-icon study-groups-icon"></div>;
       default:
         return <div className="quick-access-icon"></div>;
@@ -25,7 +25,7 @@ const QuickAccessSection = ({ quickAccessItems }) => {
 
   // Create path from the title (lowercase with hyphens)
   const getPath = (title) => {
-    return "/" + title.toLowerCase().replace(/\s+/g, "-");
+    return '/' + title.toLowerCase().replace(/\s+/g, '-');
   };
 
   return (
@@ -33,8 +33,8 @@ const QuickAccessSection = ({ quickAccessItems }) => {
       <h3 className="quick-access-title">Quick Access</h3>
       <div className="quick-access-grid">
         {quickAccessItems.map((item, index) => (
-          <Link
-            key={index}
+          <Link 
+            key={index} 
             to={getPath(item.title)}
             className="quick-access-item"
           >
