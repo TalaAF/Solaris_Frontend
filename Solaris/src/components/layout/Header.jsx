@@ -4,10 +4,7 @@ import NotificationsPanel from "../NotificationsPanel";
 import Backdrop from "../Backdrop";
 import NotificationBadge from "../NotificationBadge";
 import { useNotifications } from "../NotificationContext";
-import NotificationsPanel from "../NotificationsPanel";
-import Backdrop from "../Backdrop";
-import NotificationBadge from "../NotificationBadge";
-import { useNotifications } from "../NotificationContext";
+
 
 const Header = () => {
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
