@@ -58,9 +58,11 @@ function CourseView() {
           const modulesResponse = await ModuleService.getAllModules();
           const allModules = modulesResponse.data || [];
 
+
           // Filter modules for this course and map to frontend structure
           const courseModules = await processModulesData(allModules);
           setModules(courseModules);
+
 
           // Set the first module as active by default if available
           if (courseModules.length > 0) {
