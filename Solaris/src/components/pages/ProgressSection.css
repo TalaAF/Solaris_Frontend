@@ -1,107 +1,108 @@
 .progress-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    font-family: 'Inter', sans-serif;
-  }
-  
-  .progress-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 20px;
-  }
-  
-  .overall-progress-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .overall-progress-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #475569;
-  }
-  
-  .overall-progress-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .overall-progress-bar {
-    height: 8px;
-    background-color: #e2e8f0;
-    border-radius: 4px;
-    margin-bottom: 24px;
-    overflow: hidden;
-  }
-  
-  .overall-progress-fill {
-    height: 100%;
-    background: linear-gradient(to right, #f97316 50%, #3b82f6 50%);
-    border-radius: 4px;
-  }
-  
-  .progress-items-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .progress-item {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-  }
-  
-  .progress-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
-  .progress-item-label {
-    font-size: 14px;
-    color: #475569;
-    font-weight: 500;
-  }
-  
-  .progress-item-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .progress-item-bar-container {
-    height: 8px;
-    background-color: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .progress-item-bar {
-    height: 100%;
-    border-radius: 4px;
-  }
-  
-  /* Progress bar colors - exact matches from the image */
-  .progress-orange {
-    background-color: #f97316;
-  }
-  
-  .progress-blue {
-    background-color: #3b82f6;
-  }
-  
-  .progress-purple {
-    background-color: #9333ea;
-  }
-  
-  .progress-red {
-    background-color: #e11d48;
-  }
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+}
+
+.progress-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+}
+
+.overall-progress-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.overall-progress-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.overall-progress-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.overall-progress-bar {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.overall-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #f97316 50%, #3b82f6 50%);
+  border-radius: 4px;
+}
+
+.progress-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.progress-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-item-label {
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.progress-item-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.progress-item-bar-container {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-item-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* Progress bar colors - exact matches from the image */
+.progress-orange {
+  background-color: #f97316;
+}
+
+.progress-blue {
+  background-color: #3b82f6;
+}
+
+.progress-purple {
+  background-color: #9333ea;
+}
+
+.progress-red {
+  background-color: #e11d48;
+}

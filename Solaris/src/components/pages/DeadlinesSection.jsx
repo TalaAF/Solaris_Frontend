@@ -11,9 +11,7 @@ const DeadlinesSection = ({ deadlines }) => {
         {deadlines.map((item, index) => (
           <div key={index} className="deadline-item">
             <div className="deadline-dot-container">
-              <div
-                className={`deadline-dot ${item.color === "blue" ? "blue-dot" : "orange-dot"}`}
-              ></div>
+              <div className={`deadline-dot ${item.color === 'blue' ? 'blue-dot' : 'orange-dot'}`}></div>
             </div>
             <div className="deadline-content">
               <h4 className="deadline-title">{item.title}</h4>

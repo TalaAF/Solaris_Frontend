@@ -5,7 +5,7 @@ import Header from "./Header";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./Layout.css";
 
-const Layout = ({ children, currentPage }) => {
+const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [pageType, setPageType] = useState("default");
