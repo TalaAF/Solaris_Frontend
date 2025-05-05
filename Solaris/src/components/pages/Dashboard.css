@@ -17,20 +17,23 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  
 }
 
 /* Main Container (sidebar + content) */
 .main-container {
   display: flex;
   flex: 1;
-  min-height: calc(100vh - 60px); /* Adjust based on header height */
+  
+  /* Adjust based on header height */
 }
 
 /* Main Content */
-.main-content {
+.dashbored-main-content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  margin-top: 64px;
 }
 
 /* Content Grid (Asymmetric two-column layout - 65% / 35%) */

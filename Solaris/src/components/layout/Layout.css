@@ -19,6 +19,9 @@
   padding: 20px;
   overflow-y: auto !important; /* This is the ONLY element that should scroll */
   height: calc(100vh - var(--header-height)); /* Height minus header */
+  margin-top: var(--header-height); /* Add this line to push content below header */
+  position: relative; /* Create stacking context */
+  z-index: 1; /* Lower than header but enough to be visible */
 }
 
 .layout-main.sidebar-collapsed {
@@ -32,9 +35,21 @@
 }
 
 /* Ensure header spans full width */
-header {
+.header-spacer {
   width: 100%;
+  height: var(--header-height); /* Should match your header height */
   z-index: 1000;
+}
+
+/* Make the header fixed at the top */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 91px; /* Your header height */
+  z-index: 1100; /* High z-index to stay on top */
+  background: white;
 }
 
 /* Add these styles to your existing Layout.css */

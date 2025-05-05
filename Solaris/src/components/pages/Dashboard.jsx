@@ -112,7 +112,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="main-content">
+    <div className="dashbored-main-content">
       {/* Welcome Section - Full width */}
       <WelcomeSection />
       
