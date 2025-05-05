@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@mui/material";
@@ -26,35 +25,6 @@ import "./CourseView.css"; // Component-specific CSS
 /**
  * CourseView Component (Container Component)
  *
-=======
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Button } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { Link } from 'react-router-dom';
-
-// Import API services
-import CourseService from '../../services/CourseService';
-import ModuleService from '../../services/ModuleService';
-import ContentService from '../../services/ContentService';
-
-// Import our smaller components
-import CourseHeader from './CourseHeader';
-import { ModuleList, InstructorCard } from './CourseSidebar';
-import ContentViewer from './CourseContent/ContentViewer';
-import { 
-  CourseOverview, 
-  CourseSyllabus, 
-  CourseAssessments, 
-  CourseResources 
-} from './CourseTabs';
-
-import './CourseView.css'; // Component-specific CSS
-
-/**
- * CourseView Component (Container Component)
- * 
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
  * This component is responsible for:
  * 1. Fetching course data from the API
  * 2. Fetching module and content data from the API
@@ -69,11 +39,7 @@ function CourseView() {
   const [error, setError] = useState(null);
   const [activeModule, setActiveModule] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
-<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState("overview"); // Default tab
-=======
-  const [activeTab, setActiveTab] = useState('overview'); // Default tab
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 
   // Get current user ID (in a real app, this would come from auth context)
   const currentUserId = 1; // Example user ID
@@ -86,51 +52,22 @@ function CourseView() {
         // Fetch course details from API
         const courseResponse = await CourseService.getCourseById(courseId);
         const course = courseResponse.data;
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         // Fetch modules data - in a real app, you would fetch from your module API
         // Since existing ModuleController returns a flat list, we need to fetch and then transform
         try {
           const modulesResponse = await ModuleService.getAllModules();
           const allModules = modulesResponse.data || [];
-<<<<<<< HEAD
 
           // Filter modules for this course and map to frontend structure
           const courseModules = await processModulesData(allModules);
           setModules(courseModules);
 
-=======
-          
-          // Filter modules for this course and map to frontend structure
-          const courseModules = await processModulesData(allModules);
-          setModules(courseModules);
-          
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
           // Set the first module as active by default if available
           if (courseModules.length > 0) {
             setActiveModule(courseModules[0].id);
           }
         } catch (moduleError) {
-<<<<<<< HEAD
           console.error("Error fetching modules:", moduleError);
-          // Fallback to empty modules array
-          setModules([]);
-        }
-
-        // Get completion requirements for this course
-        const completionResponse =
-          await CourseService.getCompletionRequirements(courseId);
-        const completionRequirements = completionResponse.data || [];
-
-        // Get course statistics (for progress data)
-        const statsResponse = await CourseService.getCourseStatistics(courseId);
-        const statistics = statsResponse.data;
-
-=======
-          console.error('Error fetching modules:', moduleError);
           // Fallback to empty modules array
           setModules([]);
         }
@@ -143,7 +80,6 @@ function CourseView() {
         const statsResponse = await CourseService.getCourseStatistics(courseId);
         const statistics = statsResponse.data;
         
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         // Transform course data
         const transformedCourse = {
           id: course.id,
@@ -151,25 +87,9 @@ function CourseView() {
           code: `CODE${course.id}`, // Generate a code if backend doesn't provide one
           description: course.description,
           instructor: {
-<<<<<<< HEAD
             name: course.instructorEmail || "Unknown Instructor",
             avatar: null, // Backend doesn't provide this
             title: "Instructor", // Backend doesn't provide this
-          },
-          progress: statistics
-            ? Math.round(statistics.averageCompletionPercentage)
-            : 0,
-          completionRequirements: completionRequirements,
-        };
-
-        setCourseData(transformedCourse);
-      } catch (err) {
-        console.error("Error fetching course data:", err);
-        setError("Failed to load course data. Please try again later.");
-=======
-            name: course.instructorEmail || 'Unknown Instructor',
-            avatar: null, // Backend doesn't provide this
-            title: 'Instructor' // Backend doesn't provide this
           },
           progress: statistics ? Math.round(statistics.averageCompletionPercentage) : 0,
           completionRequirements: completionRequirements
@@ -177,9 +97,8 @@ function CourseView() {
         
         setCourseData(transformedCourse);
       } catch (err) {
-        console.error('Error fetching course data:', err);
-        setError('Failed to load course data. Please try again later.');
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
+        console.error("Error fetching course data:", err);
+        setError("Failed to load course data. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -194,35 +113,6 @@ function CourseView() {
    */
   const processModulesData = async (modules) => {
     // Filter modules for this course
-<<<<<<< HEAD
-    const courseModules = modules.filter(
-      (module) => module.course && module.course.id == courseId,
-    );
-
-    // For each module, fetch its content items
-    const modulePromises = courseModules.map(async (module) => {
-      try {
-        // Fetch content items for this module
-        const contentsResponse = await ModuleService.getContentsOrder(
-          module.id,
-        );
-        const contents = contentsResponse.data || [];
-
-        // Map content items to frontend structure
-        const items = contents.map((content) => ({
-          id: content.id,
-          title: content.title,
-          type: mapContentTypeToItemType(content.type || content.fileType),
-          status: content.status || "not-started",
-          duration: formatDuration(
-            content.duration || estimateDuration(content),
-          ),
-        }));
-
-        // Calculate module status based on item statuses
-        const moduleStatus = calculateModuleStatus(items);
-
-=======
     const courseModules = modules.filter(module => module.course && module.course.id == courseId);
     
     // For each module, fetch its content items
@@ -237,14 +127,13 @@ function CourseView() {
           id: content.id,
           title: content.title,
           type: mapContentTypeToItemType(content.type || content.fileType),
-          status: content.status || 'not-started',
+          status: content.status || "not-started",
           duration: formatDuration(content.duration || estimateDuration(content))
         }));
         
         // Calculate module status based on item statuses
         const moduleStatus = calculateModuleStatus(items);
         
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         // Return transformed module
         return {
           id: module.id,
@@ -252,40 +141,21 @@ function CourseView() {
           description: module.description,
           number: module.sequence,
           status: moduleStatus,
-<<<<<<< HEAD
-          items: items,
-        };
-      } catch (error) {
-        console.error(
-          `Error fetching contents for module ${module.id}:`,
-          error,
-        );
-=======
           items: items
         };
       } catch (error) {
         console.error(`Error fetching contents for module ${module.id}:`, error);
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         return {
           id: module.id,
           title: module.title,
           description: module.description,
           number: module.sequence,
-<<<<<<< HEAD
           status: "not-started",
-          items: [],
-        };
-      }
-    });
-
-=======
-          status: 'not-started',
           items: []
         };
       }
     });
     
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     // Wait for all module promises to resolve
     return Promise.all(modulePromises);
   };
@@ -294,23 +164,13 @@ function CourseView() {
    * Map content type from backend to frontend item type
    */
   const mapContentTypeToItemType = (contentType) => {
-<<<<<<< HEAD
     if (!contentType) return "document";
-
+    
     const type = contentType.toLowerCase();
     if (type.includes("video") || type.includes("mp4")) return "video";
     if (type.includes("quiz")) return "quiz";
     if (type.includes("interactive")) return "interactive";
     return "document";
-=======
-    if (!contentType) return 'document';
-    
-    const type = contentType.toLowerCase();
-    if (type.includes('video') || type.includes('mp4')) return 'video';
-    if (type.includes('quiz')) return 'quiz';
-    if (type.includes('interactive')) return 'interactive';
-    return 'document';
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
   };
 
   /**
@@ -319,31 +179,18 @@ function CourseView() {
   const estimateDuration = (content) => {
     // Default durations based on content type
     if (!content) return 10;
-<<<<<<< HEAD
-
+    
     const type = (content.type || content.fileType || "").toLowerCase();
     if (type.includes("video")) return 15;
     if (type.includes("quiz")) return 10;
     if (type.includes("interactive")) return 20;
-
-=======
     
-    const type = (content.type || content.fileType || '').toLowerCase();
-    if (type.includes('video')) return 15;
-    if (type.includes('quiz')) return 10;
-    if (type.includes('interactive')) return 20;
-    
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     // For documents, estimate based on file size if available
     if (content.fileSize) {
       // Rough estimate: 1 minute per 50KB for text documents
       return Math.max(5, Math.round(content.fileSize / (50 * 1024)));
     }
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     return 10; // Default duration
   };
 
@@ -351,11 +198,7 @@ function CourseView() {
    * Format duration in minutes
    */
   const formatDuration = (minutes) => {
-<<<<<<< HEAD
     if (!minutes) return "10 min";
-=======
-    if (!minutes) return '10 min';
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     return `${minutes} min`;
   };
 
@@ -363,47 +206,23 @@ function CourseView() {
    * Calculate module status based on item statuses
    */
   const calculateModuleStatus = (items) => {
-<<<<<<< HEAD
     if (!items || items.length === 0) return "not-started";
-
-    const completedCount = items.filter(
-      (item) => item.status === "completed",
-    ).length;
-    const inProgressCount = items.filter(
-      (item) => item.status === "in-progress",
-    ).length;
-
+    
+    const completedCount = items.filter(item => item.status === "completed").length;
+    const inProgressCount = items.filter(item => item.status === "in-progress").length;
+    
     if (completedCount === items.length) return "completed";
     if (completedCount > 0 || inProgressCount > 0) return "in-progress";
     return "not-started";
-=======
-    if (!items || items.length === 0) return 'not-started';
-    
-    const completedCount = items.filter(item => item.status === 'completed').length;
-    const inProgressCount = items.filter(item => item.status === 'in-progress').length;
-    
-    if (completedCount === items.length) return 'completed';
-    if (completedCount > 0 || inProgressCount > 0) return 'in-progress';
-    return 'not-started';
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
   };
 
   // Handle tab switching
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-<<<<<<< HEAD
-
-    // If switching to content tab and no item is selected, select first item of active module
-    if (tab === "content" && !activeItem && activeModule) {
-      const currentModule = modules.find(
-        (module) => module.id === activeModule,
-      );
-=======
     
     // If switching to content tab and no item is selected, select first item of active module
-    if (tab === 'content' && !activeItem && activeModule) {
+    if (tab === "content" && !activeItem && activeModule) {
       const currentModule = modules.find(module => module.id === activeModule);
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
       if (currentModule?.items?.length > 0) {
         setActiveItem(currentModule.items[0].id);
       }
@@ -412,27 +231,15 @@ function CourseView() {
 
   // Handle navigation between items
   const handleNavigate = (direction) => {
-<<<<<<< HEAD
-    const currentModule = modules.find((module) => module.id === activeModule);
-    if (!currentModule) return;
-
-    const items = currentModule.items;
-    const currentIndex = items.findIndex((item) => item.id === activeItem);
-
-    if (direction === "prev" && currentIndex > 0) {
-      setActiveItem(items[currentIndex - 1].id);
-    } else if (direction === "next" && currentIndex < items.length - 1) {
-=======
     const currentModule = modules.find(module => module.id === activeModule);
     if (!currentModule) return;
     
     const items = currentModule.items;
     const currentIndex = items.findIndex(item => item.id === activeItem);
     
-    if (direction === 'prev' && currentIndex > 0) {
+    if (direction === "prev" && currentIndex > 0) {
       setActiveItem(items[currentIndex - 1].id);
-    } else if (direction === 'next' && currentIndex < items.length - 1) {
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
+    } else if (direction === "next" && currentIndex < items.length - 1) {
       setActiveItem(items[currentIndex + 1].id);
     }
   };
@@ -449,19 +256,14 @@ function CourseView() {
     return <div className="course-not-found">Course not found</div>;
   }
 
-<<<<<<< HEAD
-  const currentModule = modules.find((module) => module.id === activeModule);
-=======
   const currentModule = modules.find(module => module.id === activeModule);
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 
   return (
     <div className="course-view">
       <div className="course-view-breadcrumb">
         <Link to="/courses">
-<<<<<<< HEAD
-          <Button
-            variant="outlined"
+          <Button 
+            variant="outlined" 
             size="small"
             className="back-to-courses-button"
             sx={{
@@ -470,22 +272,8 @@ function CourseView() {
               "&:hover": {
                 backgroundColor: "rgba(230, 180, 0, 0.08)",
                 borderColor: "#e6b400",
-                color: "#e6b400",
-              },
-=======
-          <Button 
-            variant="outlined" 
-            size="small"
-            className="back-to-courses-button"
-            sx={{
-              color: '#0f172a',
-              borderColor: '#e2e8f0',
-              '&:hover': {
-                backgroundColor: 'rgba(230, 180, 0, 0.08)',
-                borderColor: '#e6b400',
-                color: '#e6b400'
+                color: "#e6b400"
               }
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
             }}
           >
             <ChevronLeftIcon className="chevron-icon" />
@@ -493,21 +281,7 @@ function CourseView() {
           </Button>
         </Link>
         <div className="breadcrumb-path">
-<<<<<<< HEAD
           / {courseData.code} / {currentModule?.title || "Overview"}
-        </div>
-      </div>
-
-      {/* Course Header with title and description */}
-      <CourseHeader courseData={courseData} />
-
-      <div className="course-view-container">
-        {/* Sidebar with modules and instructor info */}
-        <div className="course-view-sidebar">
-          <ModuleList
-            modules={modules}
-=======
-          / {courseData.code} / {currentModule?.title || 'Overview'}
         </div>
       </div>
       
@@ -519,7 +293,6 @@ function CourseView() {
         <div className="course-view-sidebar">
           <ModuleList 
             modules={modules} 
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
             activeModule={activeModule}
             setActiveModule={setActiveModule}
             activeItem={activeItem}
@@ -527,17 +300,7 @@ function CourseView() {
               setActiveItem(itemId);
               // When selecting an item, switch to content tab
               if (itemId) {
-<<<<<<< HEAD
                 setActiveTab("content");
-              }
-            }}
-          />
-
-          <InstructorCard instructor={courseData.instructor} />
-        </div>
-
-=======
-                setActiveTab('content');
               }
             }}
           />
@@ -545,80 +308,48 @@ function CourseView() {
           <InstructorCard instructor={courseData.instructor} />
         </div>
         
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         {/* Main content area */}
         <div className="course-view-content">
           <div className="course-tabs">
             <ul className="tab-list">
-<<<<<<< HEAD
-              <li
-                className={`tab-item ${activeTab === "overview" ? "active" : ""}`}
+              <li 
+                className={`tab-item ${activeTab === "overview" ? "active" : ""}`} 
                 onClick={() => handleTabClick("overview")}
               >
                 Overview
               </li>
-              <li
-                className={`tab-item ${activeTab === "syllabus" ? "active" : ""}`}
+              <li 
+                className={`tab-item ${activeTab === "syllabus" ? "active" : ""}`} 
                 onClick={() => handleTabClick("syllabus")}
               >
                 Syllabus
               </li>
-              <li
-                className={`tab-item ${activeTab === "content" ? "active" : ""}`}
+              <li 
+                className={`tab-item ${activeTab === "content" ? "active" : ""}`} 
                 onClick={() => handleTabClick("content")}
               >
                 Course Content
               </li>
-              <li
-                className={`tab-item ${activeTab === "assessments" ? "active" : ""}`}
+              <li 
+                className={`tab-item ${activeTab === "assessments" ? "active" : ""}`} 
                 onClick={() => handleTabClick("assessments")}
               >
                 Assessments
               </li>
-              <li
-                className={`tab-item ${activeTab === "resources" ? "active" : ""}`}
+              <li 
+                className={`tab-item ${activeTab === "resources" ? "active" : ""}`} 
                 onClick={() => handleTabClick("resources")}
-=======
-              <li 
-                className={`tab-item ${activeTab === 'overview' ? 'active' : ''}`} 
-                onClick={() => handleTabClick('overview')}
-              >
-                Overview
-              </li>
-              <li 
-                className={`tab-item ${activeTab === 'syllabus' ? 'active' : ''}`} 
-                onClick={() => handleTabClick('syllabus')}
-              >
-                Syllabus
-              </li>
-              <li 
-                className={`tab-item ${activeTab === 'content' ? 'active' : ''}`} 
-                onClick={() => handleTabClick('content')}
-              >
-                Course Content
-              </li>
-              <li 
-                className={`tab-item ${activeTab === 'assessments' ? 'active' : ''}`} 
-                onClick={() => handleTabClick('assessments')}
-              >
-                Assessments
-              </li>
-              <li 
-                className={`tab-item ${activeTab === 'resources' ? 'active' : ''}`} 
-                onClick={() => handleTabClick('resources')}
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
               >
                 Resources
               </li>
             </ul>
-<<<<<<< HEAD
-
+            
             <div className="tab-content">
               {activeTab === "overview" && (
-                <CourseOverview courseData={{ ...courseData, modules }} />
+                <CourseOverview courseData={{...courseData, modules}} />
               )}
               {activeTab === "syllabus" && (
-                <CourseSyllabus courseData={{ ...courseData, modules }} />
+                <CourseSyllabus courseData={{...courseData, modules}} />
               )}
               {activeTab === "assessments" && (
                 <CourseAssessments courseData={courseData} />
@@ -627,42 +358,15 @@ function CourseView() {
                 <CourseResources courseData={courseData} />
               )}
               {activeTab === "content" && activeItem && currentModule && (
-                <ContentViewer
-=======
-            
-            <div className="tab-content">
-              {activeTab === 'overview' && (
-                <CourseOverview courseData={{...courseData, modules}} />
-              )}
-              {activeTab === 'syllabus' && (
-                <CourseSyllabus courseData={{...courseData, modules}} />
-              )}
-              {activeTab === 'assessments' && (
-                <CourseAssessments courseData={courseData} />
-              )}
-              {activeTab === 'resources' && (
-                <CourseResources courseData={courseData} />
-              )}
-              {activeTab === 'content' && activeItem && currentModule && (
                 <ContentViewer 
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
                   module={currentModule}
                   itemId={activeItem}
                   onNavigate={handleNavigate}
                 />
               )}
-<<<<<<< HEAD
               {activeTab === "content" && (!activeItem || !currentModule) && (
                 <div className="content-select-prompt">
-                  <p>
-                    Please select a module item from the sidebar to view its
-                    content.
-                  </p>
-=======
-              {activeTab === 'content' && (!activeItem || !currentModule) && (
-                <div className="content-select-prompt">
                   <p>Please select a module item from the sidebar to view its content.</p>
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
                 </div>
               )}
             </div>
@@ -673,8 +377,4 @@ function CourseView() {
   );
 }
 
-<<<<<<< HEAD
 export default CourseView;
-=======
-export default CourseView;
->>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
