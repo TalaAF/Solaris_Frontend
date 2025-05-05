@@ -1,0 +1,118 @@
+/* CourseView.css */
+/* Styles specific to the main CourseView component */
+
+.course-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  
+  .course-view-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .breadcrumb-path {
+    font-size: 0.875rem;
+    color: #64748b; /* slate-500 */
+  }
+  
+  .course-view-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  
+  .course-loading,
+  .course-error,
+  .course-not-found {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 16rem;
+    text-align: center;
+  }
+  
+  .course-error {
+    color: #ef4444; /* red-500 */
+  }
+  
+  /* Responsive layout */
+  @media (min-width: 768px) {
+    .course-view-container {
+      grid-template-columns: 1fr 3fr;
+    }
+  }
+  
+  /* Tab styles */
+  .course-tabs {
+    border: 1px solid #e2e8f0; /* slate-200 */
+    border-radius: 0.5rem;
+    overflow-y: auto;
+    width: 100%;
+  }
+  
+  .tab-list {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #f8fafc; /* slate-50 */
+    border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  }
+  
+  .tab-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  
+  .tab-item.active {
+    background-color: white;
+    font-weight: 500;
+    border-bottom: 2px solid #e6b400; /* solaris-yellow */
+    color: #e6b400; /* solaris-yellow */
+  }
+  
+  .tab-content {
+    padding: 1.5rem;
+  height: auto; /* Let content determine natural height */
+  min-height: 400px; /* Ensure reasonable starting height */
+  overflow-y: auto;
+  }
+  
+  /* Back to courses button - clean, borderless style */
+.back-to-courses-button,
+button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary {
+  border: none !important;
+  background-color: transparent !important;
+  color: #475569 !important; /* slate-600 */
+  padding: 8px 0px 8px 19px !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 17px !important;
+  font-family: Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.back-to-courses-button:hover,
+button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary:hover {
+  background-color: transparent !important;
+  color: #e6b400 !important; /* solaris-yellow */
+}
+
+.chevron-icon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+.back-to-courses-button:hover .chevron-icon {
+  color: #e6b400; /* solaris-yellow */
+  transform: translateX(-2px);
+}

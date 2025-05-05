@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import './Header.css';
-import NotificationsPanel from './NotificationsPanel';
-import Backdrop from './Backdrop';
-import NotificationBadge from './NotificationBadge';
-import { useNotifications } from './NotificationContext';
+import React, { useState } from "react";
+import "./Header.css";
+import NotificationsPanel from "./NotificationsPanel";
+import Backdrop from "./Backdrop";
+import NotificationBadge from "./NotificationBadge";
+import { useNotifications } from "./NotificationContext";
 
 const Header = () => {
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
@@ -22,7 +22,17 @@ const Header = () => {
       <div className="header">
         <div className="logo-container">
           <div className="logo-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
               <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -38,18 +48,28 @@ const Header = () => {
         </div>
 
         <div className="header-icons">
-          <button 
+          <button
             className="icon-button notification-button"
             onClick={toggleNotificationsPanel}
             aria-label="Open notifications"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
             <NotificationBadge count={unreadCount} />
           </button>
-          
+
           <button className="icon-button user-button">
             <div className="user-avatar">
               <span>S</span>
@@ -59,14 +79,14 @@ const Header = () => {
       </div>
 
       {/* Notifications Panel */}
-      <NotificationsPanel 
-        isOpen={notificationsPanelOpen} 
+      <NotificationsPanel
+        isOpen={notificationsPanelOpen}
         onClose={closeNotificationsPanel}
       />
-      
+
       {/* Backdrop */}
-      <Backdrop 
-        isVisible={notificationsPanelOpen} 
+      <Backdrop
+        isVisible={notificationsPanelOpen}
         onClick={closeNotificationsPanel}
       />
     </>

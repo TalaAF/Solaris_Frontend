@@ -1,0 +1,100 @@
+/* ContentViewer.css */
+/* Styles specific to the ContentViewer component */
+
+.content-viewer {
+    height: 100%;
+    
+  }
+  
+  .content-header {
+    border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  }
+  
+  .content-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+  }
+  
+  .content-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .navigation-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .nav-button {
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-icon {
+    height: 1rem;
+    width: 1rem;
+  }
+  
+  .nav-text {
+    display: none;
+  }
+  
+  .content-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem; /* text-sm */
+    color: #64748b; /* slate-500 */
+    margin-top: 0.25rem;
+  }
+  
+  .module-name {
+    font-weight: 500;
+  }
+  
+  .meta-separator {
+    margin: 0 0.5rem;
+  }
+  
+  .content-type {
+    font-size: 0.75rem; /* text-xs */
+    font-weight: normal;
+  }
+  
+  .content-duration {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .duration-icon {
+    height: 0.75rem;
+    width: 0.75rem;
+  }
+  
+  .content-body {
+    padding-top: 1rem;
+  }
+  
+  .content-not-found {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b; /* slate-500 */
+  }
+  
+  .unknown-content {
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8fafc; /* slate-50 */
+    border-radius: 0.5rem;
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 768px) {
+    .nav-text {
+      display: inline;
+      margin: 0 0.25rem;
+    }
+  }
