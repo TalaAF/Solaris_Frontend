@@ -18,6 +18,7 @@ import ResetPassword from './components/auth/ResetPassword';
 import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 // Temporarily bypass authentication for development
@@ -45,41 +46,43 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <Router>
-          <Routes>
-            {/* Auth routes - outside the main layout */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/oauth2/success" element={<OAuthHandler />} />
-            
-            {/* Protected routes - with layout */}
-            <Route element={
-              <RequireAuth>
-                <Layout />
-              </RequireAuth>
-            }>
-              {/* Main pages */}
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+          <ErrorBoundary>
+            <Routes>
+              {/* Auth routes - outside the main layout */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/oauth2/success" element={<OAuthHandler />} />
               
-              {/* Courses section with nested routes */}
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/courses/:courseId" element={<CourseView />} />
-              <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
+              {/* Protected routes - with layout */}
+              <Route element={
+                <RequireAuth>
+                  <Layout />
+                </RequireAuth>
+              }>
+                {/* Main pages */}
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                
+                {/* Courses section with nested routes */}
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:courseId" element={<CourseView />} />
+                <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
+                
+                {/* Other pages */}
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/assessments" element={<Assessments />} />
+                <Route path="/collaboration" element={<Collaboration />} />
+                <Route path="/clinical-skills" element={<ClinicalSkills />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/community" element={<Community />} />
+              </Route>
               
-              {/* Other pages */}
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/assessments" element={<Assessments />} />
-              <Route path="/collaboration" element={<Collaboration />} />
-              <Route path="/clinical-skills" element={<ClinicalSkills />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/community" element={<Community />} />
-            </Route>
-            
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+              {/* Catch-all redirect */}
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </ErrorBoundary>
         </Router>
       </NotificationProvider>
     </AuthProvider>

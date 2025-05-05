@@ -107,10 +107,10 @@ function CourseOverview({ courseData }) {
                     <div className="progress-header">
                       <span className="module-name">{module.title}</span>
                       <Badge 
-                        label={module.status.replace(/-/g, ' ')
+                        label={module.status ? module.status.replace(/-/g, ' ')
                           .split(' ')
                           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ')}
+                          .join(' ') : "Unknown"}
                         className={`module-status ${getStatusColor(module.status)}`}
                         sx={{ 
                           height: 24,
@@ -175,6 +175,22 @@ function CourseOverview({ courseData }) {
                   fontWeight: 500
                 }}
               />
+            </div>
+          </section>
+
+          <section className="overview-section">
+            <Typography variant="h6" className="section-title">Course Modules</Typography>
+            <div className="course-modules">
+              {courseData.modules?.map(module => (
+                <div key={module.id} className="overview-module">
+                  <h3>{module.title}</h3>
+                  <p>
+                    {module.description && module.description.length > 100
+                      ? module.description.substring(0, 100) + '...'
+                      : module.description}
+                  </p>
+                </div>
+              ))}
             </div>
           </section>
         </div>
