@@ -1,9 +1,15 @@
 // ModuleService.js
 // Service to handle API calls to the module backend with mock data support
 
+<<<<<<< HEAD
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+=======
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 const USE_MOCK = false; // Toggle this when your backend is ready
 
 // Mock data for development
@@ -14,7 +20,11 @@ const mockModules = [
     title: "Introduction to Anatomy",
     description: "Basic concepts and terminology in anatomy",
     sequence: 1,
+<<<<<<< HEAD
     status: "completed",
+=======
+    status: "completed"
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
   },
   {
     id: 2,
@@ -22,7 +32,11 @@ const mockModules = [
     title: "Cell Structure and Function",
     description: "Understanding the fundamental unit of life",
     sequence: 2,
+<<<<<<< HEAD
     status: "in-progress",
+=======
+    status: "in-progress"
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
   },
   {
     id: 3,
@@ -30,8 +44,13 @@ const mockModules = [
     title: "Tissues and Organs",
     description: "How cells organize into functional units",
     sequence: 3,
+<<<<<<< HEAD
     status: "not-started",
   },
+=======
+    status: "not-started"
+  }
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 ];
 
 const mockContentOrders = [
@@ -39,13 +58,21 @@ const mockContentOrders = [
   { id: 2, moduleId: 1, contentId: 2, sequence: 2 },
   { id: 3, moduleId: 1, contentId: 3, sequence: 3 },
   { id: 4, moduleId: 2, contentId: 4, sequence: 1 },
+<<<<<<< HEAD
   { id: 5, moduleId: 2, contentId: 5, sequence: 2 },
+=======
+  { id: 5, moduleId: 2, contentId: 5, sequence: 2 }
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 ];
 
 class ModuleService {
   // Helper for mock responses
   async mockDelay(ms = 300) {
+<<<<<<< HEAD
     return new Promise((resolve) => setTimeout(resolve, ms));
+=======
+    return new Promise(resolve => setTimeout(resolve, ms));
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
   }
 
   // Get all modules
@@ -54,7 +81,11 @@ class ModuleService {
       await this.mockDelay();
       return { data: mockModules };
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.get(`${API_URL}/modules`);
     } catch (error) {
@@ -68,17 +99,29 @@ class ModuleService {
   async getModuleById(id) {
     if (USE_MOCK) {
       await this.mockDelay();
+<<<<<<< HEAD
       const module = mockModules.find((m) => m.id == id);
       if (!module) throw new Error("Module not found");
       return { data: module };
     }
 
+=======
+      const module = mockModules.find(m => m.id == id);
+      if (!module) throw new Error("Module not found");
+      return { data: module };
+    }
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.get(`${API_URL}/modules/${id}`);
     } catch (error) {
       console.error(`Error fetching module ${id}:`, error);
       await this.mockDelay();
+<<<<<<< HEAD
       const module = mockModules.find((m) => m.id == id);
+=======
+      const module = mockModules.find(m => m.id == id);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
       if (!module) throw new Error("Module not found");
       return { data: module };
     }
@@ -88,16 +131,27 @@ class ModuleService {
   async getModulesByCourse(courseId) {
     if (USE_MOCK) {
       await this.mockDelay();
+<<<<<<< HEAD
       const modules = mockModules.filter((m) => m.courseId == courseId);
       return { data: modules };
     }
 
+=======
+      const modules = mockModules.filter(m => m.courseId == courseId);
+      return { data: modules };
+    }
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.get(`${API_URL}/modules/course/${courseId}`);
     } catch (error) {
       console.error(`Error fetching modules for course ${courseId}:`, error);
       await this.mockDelay();
+<<<<<<< HEAD
       const modules = mockModules.filter((m) => m.courseId == courseId);
+=======
+      const modules = mockModules.filter(m => m.courseId == courseId);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
       return { data: modules };
     }
   }
@@ -110,7 +164,11 @@ class ModuleService {
       mockModules.push(newModule);
       return { data: newModule };
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.post(`${API_URL}/modules`, moduleData);
     } catch (error) {
@@ -126,7 +184,11 @@ class ModuleService {
       // Mock implementation would reorder the modules here
       return { data: { success: true } };
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.post(`${API_URL}/modules/reorder`, moduleIds);
     } catch (error) {
@@ -142,6 +204,7 @@ class ModuleService {
       // Mock implementation would assign content to module here
       return { data: { success: true } };
     }
+<<<<<<< HEAD
 
     try {
       return await axios.post(
@@ -152,6 +215,13 @@ class ModuleService {
         `Error assigning content ${contentId} to module ${moduleId}:`,
         error,
       );
+=======
+    
+    try {
+      return await axios.post(`${API_URL}/modules/${contentId}/assign-to-module/${moduleId}`);
+    } catch (error) {
+      console.error(`Error assigning content ${contentId} to module ${moduleId}:`, error);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
       throw error;
     }
   }
@@ -163,12 +233,18 @@ class ModuleService {
       // Mock implementation would reorder the contents here
       return { data: { success: true } };
     }
+<<<<<<< HEAD
 
     try {
       return await axios.post(
         `${API_URL}/modules/${moduleId}/reorder-contents`,
         contentIds,
       );
+=======
+    
+    try {
+      return await axios.post(`${API_URL}/modules/${moduleId}/reorder-contents`, contentIds);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     } catch (error) {
       console.error(`Error reordering contents for module ${moduleId}:`, error);
       throw error;
@@ -182,12 +258,18 @@ class ModuleService {
       // Mock implementation would add tag to content here
       return { data: { success: true } };
     }
+<<<<<<< HEAD
 
     try {
       return await axios.post(
         `${API_URL}/modules/${contentId}/add-tag`,
         tagData,
       );
+=======
+    
+    try {
+      return await axios.post(`${API_URL}/modules/${contentId}/add-tag`, tagData);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     } catch (error) {
       console.error(`Error adding tag to content ${contentId}:`, error);
       throw error;
@@ -201,12 +283,18 @@ class ModuleService {
       // Mock validation - always returns valid for now
       return { data: { valid: true } };
     }
+<<<<<<< HEAD
 
     try {
       return await axios.post(
         `${API_URL}/modules/${moduleId}/validate-sequence`,
         contentIds,
       );
+=======
+    
+    try {
+      return await axios.post(`${API_URL}/modules/${moduleId}/validate-sequence`, contentIds);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     } catch (error) {
       console.error(`Error validating sequence for module ${moduleId}:`, error);
       throw error;
@@ -217,6 +305,7 @@ class ModuleService {
   async getContentsOrder(moduleId) {
     if (USE_MOCK) {
       await this.mockDelay();
+<<<<<<< HEAD
       const contents = mockContentOrders.filter((c) => c.moduleId == moduleId);
       return { data: contents };
     }
@@ -230,6 +319,18 @@ class ModuleService {
       );
       await this.mockDelay();
       const contents = mockContentOrders.filter((c) => c.moduleId == moduleId);
+=======
+      const contents = mockContentOrders.filter(c => c.moduleId == moduleId);
+      return { data: contents };
+    }
+    
+    try {
+      return await axios.get(`${API_URL}/modules/${moduleId}/contents-order`);
+    } catch (error) {
+      console.error(`Error fetching contents order for module ${moduleId}:`, error);
+      await this.mockDelay();
+      const contents = mockContentOrders.filter(c => c.moduleId == moduleId);
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
       return { data: contents };
     }
   }
@@ -238,6 +339,7 @@ class ModuleService {
   async updateModule(id, moduleData) {
     if (USE_MOCK) {
       await this.mockDelay();
+<<<<<<< HEAD
       const index = mockModules.findIndex((m) => m.id == id);
       if (index === -1) throw new Error("Module not found");
 
@@ -245,6 +347,15 @@ class ModuleService {
       return { data: mockModules[index] };
     }
 
+=======
+      const index = mockModules.findIndex(m => m.id == id);
+      if (index === -1) throw new Error("Module not found");
+      
+      mockModules[index] = { ...mockModules[index], ...moduleData };
+      return { data: mockModules[index] };
+    }
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.put(`${API_URL}/modules/${id}`, moduleData);
     } catch (error) {
@@ -257,6 +368,7 @@ class ModuleService {
   async deleteModule(id) {
     if (USE_MOCK) {
       await this.mockDelay();
+<<<<<<< HEAD
       const index = mockModules.findIndex((m) => m.id == id);
       if (index === -1) throw new Error("Module not found");
 
@@ -264,6 +376,15 @@ class ModuleService {
       return { data: deleted };
     }
 
+=======
+      const index = mockModules.findIndex(m => m.id == id);
+      if (index === -1) throw new Error("Module not found");
+      
+      const deleted = mockModules.splice(index, 1)[0];
+      return { data: deleted };
+    }
+    
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     try {
       return await axios.delete(`${API_URL}/modules/${id}`);
     } catch (error) {
@@ -273,4 +394,8 @@ class ModuleService {
   }
 }
 
+<<<<<<< HEAD
 export default new ModuleService();
+=======
+export default new ModuleService();
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2

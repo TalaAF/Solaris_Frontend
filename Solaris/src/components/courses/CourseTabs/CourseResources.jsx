@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 import {
   Card,
@@ -21,6 +22,16 @@ import "./CourseResources.css";
 /**
  * CourseResources Component
  *
+=======
+import React from 'react';
+import { Card, CardHeader, CardContent, Typography, Button, Chip, Tabs, Tab, Box, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { BookOpen, Image, FileText, Download } from 'lucide-react';
+import './CourseResources.css';
+
+/**
+ * CourseResources Component
+ * 
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
  * Displays additional learning materials and references for the course,
  * such as textbooks, interactive resources, documents, and downloads.
  */
@@ -30,6 +41,7 @@ function CourseResources({ courseData }) {
   // Helper function to get resource type icon
   const getResourceIcon = (type) => {
     switch (type) {
+<<<<<<< HEAD
       case "book":
         return <BookOpen className="resource-icon" />;
       case "interactive":
@@ -37,6 +49,15 @@ function CourseResources({ courseData }) {
       case "document":
         return <FileText className="resource-icon" />;
       case "download":
+=======
+      case 'book':
+        return <BookOpen className="resource-icon" />;
+      case 'interactive':
+        return <Image className="resource-icon" />;
+      case 'document':
+        return <FileText className="resource-icon" />;
+      case 'download':
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         return <Download className="resource-icon" />;
       default:
         return <FileText className="resource-icon" />;
@@ -45,13 +66,21 @@ function CourseResources({ courseData }) {
 
   return (
     <Card className="resources-card">
+<<<<<<< HEAD
       <CardHeader
+=======
+      <CardHeader 
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         title="Course Resources"
         subheader="Additional learning materials and references"
       />
       <CardContent>
         <div className="resources-list">
+<<<<<<< HEAD
           {courseData.resources.map((resource) => (
+=======
+          {courseData.resources.map(resource => (
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
             <a
               key={resource.id}
               href={resource.url}
@@ -64,6 +93,7 @@ function CourseResources({ courseData }) {
                   {getResourceIcon(resource.type)}
                 </div>
                 <div className="resource-details">
+<<<<<<< HEAD
                   <Typography variant="h6" className="resource-title">
                     {resource.title}
                   </Typography>
@@ -72,6 +102,10 @@ function CourseResources({ courseData }) {
                     color="text.secondary"
                     className="resource-meta"
                   >
+=======
+                  <Typography variant="h6" className="resource-title">{resource.title}</Typography>
+                  <Typography variant="body2" color="text.secondary" className="resource-meta">
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
                     <span className="resource-type">{resource.type}</span>
                   </Typography>
                 </div>
@@ -80,9 +114,13 @@ function CourseResources({ courseData }) {
           ))}
         </div>
       </CardContent>
+<<<<<<< HEAD
       <div
         style={{ padding: "16px", borderTop: "1px solid rgba(0, 0, 0, 0.12)" }}
       >
+=======
+      <div style={{ padding: '16px', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         Footer content
       </div>
       <Chip variant="outlined" label="Label" size="small" />

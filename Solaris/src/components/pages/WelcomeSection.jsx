@@ -5,7 +5,11 @@ const WelcomeSection = () => {
   return (
     <div className="welcome-container">
       <div className="welcome-header">
+<<<<<<< HEAD
         <h1>Good evening, Dr. Johnson</h1>
+=======
+        <h1>Good evening, Saja Shawawra</h1>
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         <p className="date">Friday, April 18, 2025</p>
       </div>
 
@@ -13,8 +17,13 @@ const WelcomeSection = () => {
         <div className="bell-icon-container">
           <svg
             className="bell-icon"
+<<<<<<< HEAD
             width="20"
             height="20"
+=======
+            width="24"
+            height="24"
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

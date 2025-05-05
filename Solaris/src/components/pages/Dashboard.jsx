@@ -1,11 +1,33 @@
+<<<<<<< HEAD
 import React from "react";
 import "./Dashboard.css";
 import Layout from "../layout/Layout";
+=======
+<<<<<<<< HEAD:Solaris/src/components/Dashboard.jsx
+import React from "react";
+import "./Dashboard.css";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 import WelcomeSection from "./WelcomeSection";
 import QuickAccessSection from "./QuickAccessSection";
 import ScheduleSection from "./ScheduleSection";
 import ProgressSection from "./ProgressSection";
 import DeadlinesSection from "./DeadlinesSection";
+<<<<<<< HEAD
+=======
+// Remove DemoTrigger import
+========
+import React from 'react';
+import './Dashboard.css';
+import Layout from '../layout/Layout';
+import WelcomeSection from './WelcomeSection';
+import QuickAccessSection from './QuickAccessSection';
+import ScheduleSection from './ScheduleSection';
+import ProgressSection from './ProgressSection';
+import DeadlinesSection from './DeadlinesSection';
+>>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2:Solaris/src/components/pages/Dashboard.jsx
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
 
 const Dashboard = () => {
   // Today's schedule data
@@ -113,23 +135,73 @@ const Dashboard = () => {
   ];
 
   return (
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:Solaris/src/components/Dashboard.jsx
+    <div className="app-container">
+      {/* Header Component */}
+      <Header />
+
+      <div className="main-container">
+        {/* Sidebar Component */}
+        <Sidebar />
+
+        {/* Main Content */}
+        <div className="main-content">
+          {/* Welcome Section - Full width */}
+          <WelcomeSection />
+
+          <div className="content-grid">
+            {/* Left column - Wider (65%) */}
+            <div className="content-column left-column">
+              {/* Quick Access */}
+              <QuickAccessSection quickAccessItems={quickAccessItems} />
+
+              {/* Today's Schedule */}
+              <ScheduleSection scheduleItems={scheduleItems} />
+
+              {/* Removed DemoTrigger component */}
+            </div>
+
+            {/* Right column - Narrower (35%) */}
+            <div className="content-column right-column">
+              {/* Course Progress */}
+              <ProgressSection progressData={progressData} />
+
+              {/* Upcoming Deadlines */}
+              <DeadlinesSection deadlines={deadlines} />
+            </div>
+========
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
     <>
       <div className="dashboard-content">
         {/* Welcome Section */}
         <WelcomeSection />
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
         <div className="content-grid">
           {/* Left column */}
           <div className="content-column">
             <QuickAccessSection quickAccessItems={quickAccessItems} />
             <ScheduleSection scheduleItems={scheduleItems} />
           </div>
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
           {/* Right column */}
           <div className="content-column">
             <ProgressSection progressData={progressData} />
             <div className="component-spacer"></div>
             <DeadlinesSection deadlines={deadlines} />
+<<<<<<< HEAD
+=======
+>>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2:Solaris/src/components/pages/Dashboard.jsx
+>>>>>>> 9e8d092adf75508b4d3d715542f0b6cf5979a6a2
           </div>
         </div>
       </div>
