@@ -5,12 +5,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "../../components/ui/tabs";
-import {
-  CourseOverview,
-  CourseSyllabus,
-  CourseAssessments,
-  CourseResources,
-} from "./index";
+import { CourseOverview, CourseSyllabus, CourseAssessments, CourseResources } from "./";
 import "./CourseTabs.css";
 
 /**

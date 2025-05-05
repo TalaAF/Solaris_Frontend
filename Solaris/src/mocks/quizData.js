@@ -3,170 +3,174 @@ const quizData = [
     id: 1,
     title: "Programming Quiz 1",
     moduleId: 1,
+    description: "Test your understanding of basic programming concepts.",
+    timeLimit: 15, // minutes
+    totalPoints: 30,
+    passingScore: 70, // percentage
+    attempts: {
+      max: 2,
+      used: 0,
+      remaining: 2
+    },
+    status: "not-started", // not-started, in-progress, completed
+    dueDate: "2025-06-05T23:59:00Z",
     questions: [
       {
         id: 1,
-        question: "What does the acronym 'API' stand for?",
+        question: "What does the 'print()' function do in Python?",
+        type: "multiple-choice",
+        points: 3,
         options: [
-          "Application Programming Interface",
-          "Automated Programming Installation",
-          "Advanced Programming Integration",
-          "Application Process Integration"
+          "Prints the result to the console",
+          "Sends content to a printer",
+          "Creates a printed copy of a variable",
+          "Formats a string for output"
         ],
         correctAnswer: 0
       },
       {
         id: 2,
-        question: "Which of the following is NOT a programming language?",
+        question: "Which of these is NOT a valid variable name in most programming languages?",
+        type: "multiple-choice",
+        points: 3,
         options: [
-          "Java",
-          "Python",
-          "HTML",
-          "Microsoft Word"
+          "my_variable",
+          "_variable",
+          "variable1",
+          "1variable"
         ],
         correctAnswer: 3
       },
       {
         id: 3,
-        question: "What is the correct value to return to exit a function in Python?",
+        question: "What is the purpose of comments in code?",
+        type: "multiple-choice",
+        points: 3,
         options: [
-          "exit",
-          "return",
-          "break",
-          "end"
+          "To make the code run faster",
+          "To explain the code to other developers",
+          "To create documentation that appears in the user interface",
+          "To hide code from certain users"
         ],
         correctAnswer: 1
       }
-    ],
-    timeLimit: 10,
-    passingScore: 70,
-    attempts: {
-      allowed: 2,
-      completed: 0
-    },
-    dueDate: "2025-05-20",
-    status: "not-started", // not-started, in-progress, completed
-    weight: 10 // Percentage of final grade
+    ]
   },
   {
     id: 2,
     title: "Data Structures Quiz",
     moduleId: 2,
+    description: "Test your knowledge on basic data structures.",
+    timeLimit: 20,
+    totalPoints: 40,
+    passingScore: 75,
+    attempts: {
+      max: 2,
+      used: 1,
+      remaining: 1
+    },
+    status: "completed", // Example of a completed quiz
+    dueDate: "2025-06-20T23:59:00Z",
+    completedDate: "2025-06-18T15:30:00Z",
+    score: 85,
     questions: [
       {
-        id: 1,
-        question: "Which data structure follows the LIFO (Last In First Out) principle?",
+        id: 4,
+        question: "Which data structure operates on a LIFO principle?",
+        type: "multiple-choice",
+        points: 4,
         options: [
           "Queue",
           "Stack",
           "Linked List",
-          "Tree"
+          "Array"
         ],
         correctAnswer: 1
       },
       {
-        id: 2,
-        question: "What is the time complexity of binary search?",
-        options: [
-          "O(n)",
-          "O(n²)",
-          "O(log n)",
-          "O(n log n)"
-        ],
-        correctAnswer: 2
-      },
-      {
-        id: 3,
-        question: "Which of these is NOT a linear data structure?",
-        options: [
-          "Array",
-          "Linked List",
-          "Queue",
-          "Tree"
-        ],
-        correctAnswer: 3
-      }
-    ],
-    timeLimit: 15,
-    passingScore: 70,
-    attempts: {
-      allowed: 2,
-      completed: 1
-    },
-    dueDate: "2025-05-27",
-    status: "completed",
-    weight: 15
-  },
-  {
-    id: 3,
-    title: "Final Exam",
-    moduleId: null, // Not tied to a specific module
-    questions: [
-      {
-        id: 1,
-        question: "What is the time complexity of inserting an element at the beginning of an array?",
+        id: 5,
+        question: "What is the time complexity of accessing an element in an array by index?",
+        type: "multiple-choice",
+        points: 4,
         options: [
           "O(1)",
           "O(log n)",
           "O(n)",
           "O(n²)"
         ],
-        correctAnswer: 2
+        correctAnswer: 0
       },
       {
-        id: 2,
-        question: "Which sorting algorithm has the best average-case time complexity?",
+        id: 6,
+        question: "Which data structure is best for implementing a priority queue?",
+        type: "multiple-choice",
+        points: 4,
+        options: [
+          "Array",
+          "Stack",
+          "Queue",
+          "Heap"
+        ],
+        correctAnswer: 3
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Algorithms Quiz",
+    moduleId: 3,
+    description: "Test your understanding of fundamental algorithms.",
+    timeLimit: 25,
+    totalPoints: 50,
+    passingScore: 80,
+    attempts: {
+      max: 2,
+      used: 0,
+      remaining: 2
+    },
+    status: "not-started",
+    dueDate: "2025-07-10T23:59:00Z",
+    questions: [
+      {
+        id: 7,
+        question: "What is the time complexity of binary search?",
+        type: "multiple-choice",
+        points: 5,
+        options: [
+          "O(1)",
+          "O(log n)",
+          "O(n)",
+          "O(n²)"
+        ],
+        correctAnswer: 1
+      },
+      {
+        id: 8,
+        question: "Which sorting algorithm is generally the fastest for large datasets?",
+        type: "multiple-choice",
+        points: 5,
         options: [
           "Bubble Sort",
-          "Selection Sort",
-          "Quick Sort",
-          "Insertion Sort"
+          "Insertion Sort",
+          "Merge Sort",
+          "Quick Sort"
+        ],
+        correctAnswer: 3
+      },
+      {
+        id: 9,
+        question: "What algorithm is used to find the shortest path in a weighted graph?",
+        type: "multiple-choice",
+        points: 5,
+        options: [
+          "Breadth-First Search",
+          "Depth-First Search",
+          "Dijkstra's Algorithm",
+          "Bubble Sort"
         ],
         correctAnswer: 2
-      },
-      {
-        id: 3,
-        question: "What is the output of the following Python code?\n\nx = 5\ndef func():\n    x = 10\n    print(x)\nfunc()\nprint(x)",
-        options: [
-          "10, 10",
-          "5, 5",
-          "10, 5",
-          "5, 10"
-        ],
-        correctAnswer: 2
-      },
-      {
-        id: 4,
-        question: "Which of these is used to prevent SQL injection attacks?",
-        options: [
-          "Concatenating strings directly",
-          "Using parameterized queries",
-          "Disabling database error messages",
-          "Encrypting the database"
-        ],
-        correctAnswer: 1
-      },
-      {
-        id: 5,
-        question: "What design pattern is used when you want to create an object but let subclasses decide which class to instantiate?",
-        options: [
-          "Singleton",
-          "Factory Method",
-          "Observer",
-          "Decorator"
-        ],
-        correctAnswer: 1
       }
-    ],
-    timeLimit: 45,
-    passingScore: 75,
-    attempts: {
-      allowed: 1,
-      completed: 0
-    },
-    dueDate: "2025-06-10",
-    status: "not-started",
-    weight: 40
+    ]
   }
 ];
 
