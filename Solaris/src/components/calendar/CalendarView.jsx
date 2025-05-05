@@ -344,19 +344,6 @@ function CalendarView({ events }) {
     return [hour, minutes];
   };
 
-  // Simplified version of parseTimeSlot that returns time components
-  const parseTimeSlot = (timeSlot) => {
-    const [hourStr, minuteStr] = timeSlot.split(":");
-    let hour = parseInt(hourStr);
-    const isPM = timeSlot.includes("PM");
-    const minutes = minuteStr ? parseInt(minuteStr) : 0;
-
-    if (isPM && hour !== 12) hour += 12;
-    if (!isPM && hour === 12) hour = 0;
-
-    return [hour, minutes];
-  };
-
   // Check if an event occurs within a given time slot
   const eventOccursDuringTimeSlot = (event, slotTime) => {
     const eventStart = parseTimeString(event.startTime);
@@ -390,7 +377,6 @@ function CalendarView({ events }) {
   };
 
   // Check if current time is in a given time slot
-  // Check if current time is in a given time slot
   const isCurrentTimeInSlot = (timeSlot) => {
     const now = new Date();
     const currentHour = now.getHours();
@@ -399,7 +385,6 @@ function CalendarView({ events }) {
     return currentHour === slotHour;
   };
 
-  // Format date for day view header
   // Format date for day view header
   const formatDayViewDate = (date) => {
     return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
@@ -582,11 +567,8 @@ function CalendarView({ events }) {
         )}
 
         {/* Day View - Combined approach from both implementations */}
-        {/* Day View - Combined approach from both implementations */}
         {view === "day" && !isLoading && (
           <div className="calendar-day-view">
-            {/* Day view header - taking the more detailed one */}
-            <div className={`calendar-day-view-header ${isToday(currentDate) ? "calendar-day-today" : ""}`}>
             {/* Day view header - taking the more detailed one */}
             <div className={`calendar-day-view-header ${isToday(currentDate) ? "calendar-day-today" : ""}`}>
               <div className="calendar-day-view-title">
@@ -648,7 +630,6 @@ function CalendarView({ events }) {
                             key={`day-event-${event.id}`}
                             className={getEventClassName(event.type)}
                             style={{ borderLeftColor: getEventDotColor(event.type) }}
-                            style={{ borderLeftColor: getEventDotColor(event.type) }}
                           >
                             <div className="calendar-event-title">
                               {event.title}
@@ -659,7 +640,6 @@ function CalendarView({ events }) {
                                 className="calendar-event-icon"
                               />
                               <span>
-                                {formatTime(event.startTime)} - {formatTime(event.endTime)}
                                 {formatTime(event.startTime)} - {formatTime(event.endTime)}
                               </span>
                             </div>
@@ -683,7 +663,6 @@ function CalendarView({ events }) {
               })}
 
               {/* Only show empty state when there are no events for the day */}
-              {dayEvents.filter(event => !event.allDay).length === 0 && (
               {dayEvents.filter(event => !event.allDay).length === 0 && (
                 <div className="calendar-day-no-events">
                   <div className="calendar-empty-state">
