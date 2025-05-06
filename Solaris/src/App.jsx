@@ -27,6 +27,7 @@ import UserManagement from './components/pages/Admin/Users';
 import Departments from './components/pages/Admin/Departments'; // New import
 import ContentManagement from './components/pages/Admin/ContentManagement'; 
 import CourseManagement from './components/pages/Admin/CourseManagement'; // New import
+import AssessmentManagement from './components/pages/Admin/AssessmentManagement'; // New import
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
@@ -76,6 +77,7 @@ function App() {
                 <Route path="/admin/departments" element={<Departments />} />
                 <Route path="/admin/courses" element={<CourseManagement />} />
                 <Route path="/admin/content" element={<ContentManagement />} />
+                <Route path="/admin/assessments" element={<AssessmentManagement />} />
                 {/* Add more admin routes as you implement them */}
               </Route>
               

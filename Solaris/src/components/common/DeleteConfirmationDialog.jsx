@@ -7,12 +7,15 @@ const DeleteConfirmationDialog = ({ isOpen, onClose, onConfirm, title, descripti
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={title || "Confirm Deletion"}
+      maxWidth="400px"
     >
-      <div className="delete-dialog">
-        <p className="delete-description">{description}</p>
+      <div className="delete-confirmation-container">
+        <p className="delete-confirmation-message">
+          {description || "Are you sure you want to delete this item? This action cannot be undone."}
+        </p>
         
-        <div className="delete-actions">
+        <div className="delete-confirmation-actions">
           <button className="cancel-button" onClick={onClose}>
             Cancel
           </button>
