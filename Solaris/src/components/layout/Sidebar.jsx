@@ -11,61 +11,198 @@ import {
   BarChart2,
   Users,
   Headset,
+  LayoutDashboard,
+  Building2,
+  BookOpen,
+  FolderOpen,
+  Award,
+  ShieldCheck,
+  Settings,
+  Presentation,
+  Clipboard,
+  GraduationCap,
 } from "lucide-react";
 import "./Sidebar.css";
+import { useAuth } from "../../context/AuthContext"; 
 
-// Remove the onToggle prop since we'll control it from Layout
 const Sidebar = ({ isOpen }) => {
-  const navigationItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: <Home size={20} />,
-      iconClass: "icon-home",
-    },
-    {
-      name: "Courses",
-      path: "/courses",
-      icon: <Book size={20} />,
-      iconClass: "icon-book",
-    },
-    {
-      name: "Calendar",
-      path: "/calendar",
-      icon: <Calendar size={20} />,
-      iconClass: "icon-calendar",
-    },
-    {
-      name: "VR Lab",
-      path: "/vr-lab",
-      icon: <Headset size={20} />,
-      iconClass: "icon-vr",
-    },
-    {
-      name: "Messages",
-      path: "/messages",
-      icon: <MessageSquare size={20} />,
-      iconClass: "icon-message-square",
-    },
-    {
-      name: "Clinical Skills",
-      path: "/clinical-skills",
-      icon: <Stethoscope size={20} />,
-      iconClass: "icon-stethoscope",
-    },
-    {
-      name: "Progress",
-      path: "/progress",
-      icon: <BarChart2 size={20} />,
-      iconClass: "icon-bar-chart-2",
-    },
-    {
-      name: "Community",
-      path: "/community",
-      icon: <Users size={20} />,
-      iconClass: "icon-users",
-    },
-  ];
+  // Get user role from auth context
+  const { currentUser } = useAuth();
+  const userRole = currentUser?.role || "admin"; // Default to admin if no role found
+
+  // Define navigation items for different roles
+  const navigationConfig = {
+    student: [
+      {
+        name: "Dashboard",
+        path: "/dashboard",
+        icon: <Home size={20} />,
+        iconClass: "icon-home",
+      },
+      {
+        name: "Courses",
+        path: "/courses",
+        icon: <Book size={20} />,
+        iconClass: "icon-book",
+      },
+      {
+        name: "Calendar",
+        path: "/calendar",
+        icon: <Calendar size={20} />,
+        iconClass: "icon-calendar",
+      },
+      {
+        name: "VR Lab",
+        path: "/vr-lab",
+        icon: <Headset size={20} />,
+        iconClass: "icon-vr",
+      },
+      {
+        name: "Messages",
+        path: "/messages",
+        icon: <MessageSquare size={20} />,
+        iconClass: "icon-message-square",
+      },
+      {
+        name: "Clinical Skills",
+        path: "/clinical-skills",
+        icon: <Stethoscope size={20} />,
+        iconClass: "icon-stethoscope",
+      },
+      {
+        name: "Progress",
+        path: "/progress",
+        icon: <BarChart2 size={20} />,
+        iconClass: "icon-bar-chart-2",
+      },
+      {
+        name: "Community",
+        path: "/community",
+        icon: <Users size={20} />,
+        iconClass: "icon-users",
+      },
+    ],
+
+    admin: [
+      {
+        name: "Dashboard",
+        path: "/admin/dashboard",
+        icon: <LayoutDashboard size={20} />,
+        iconClass: "icon-dashboard",
+      },
+      {
+        name: "User Management",
+        path: "/admin/users",
+        icon: <Users size={20} />,
+        iconClass: "icon-users",
+      },
+      {
+        name: "Department Management",
+        path: "/admin/departments",
+        icon: <Building2 size={20} />,
+        iconClass: "icon-building",
+      },
+      {
+        name: "Course Management",
+        path: "/admin/courses",
+        icon: <BookOpen size={20} />,
+        iconClass: "icon-book-open",
+      },
+      {
+        name: "Content Management",
+        path: "/admin/content",
+        icon: <FolderOpen size={20} />,
+        iconClass: "icon-folder",
+      },
+      {
+        name: "Assessment Management",
+        path: "/admin/assessments",
+        icon: <FileText size={20} />,
+        iconClass: "icon-file",
+      },
+      {
+        name: "Certificate Management",
+        path: "/admin/certificates",
+        icon: <Award size={20} />,
+        iconClass: "icon-award",
+      },
+      {
+        name: "Security Management",
+        path: "/admin/security",
+        icon: <ShieldCheck size={20} />,
+        iconClass: "icon-shield",
+      },
+      {
+        name: "Settings",
+        path: "/admin/settings",
+        icon: <Settings size={20} />,
+        iconClass: "icon-settings",
+      },
+    ],
+
+    instructor: [
+      {
+        name: "Dashboard",
+        path: "/instructor/dashboard",
+        icon: <LayoutDashboard size={20} />,
+        iconClass: "icon-dashboard",
+      },
+      {
+        name: "My Courses",
+        path: "/instructor/courses",
+        icon: <BookOpen size={20} />,
+        iconClass: "icon-book-open",
+      },
+      {
+        name: "Content Library",
+        path: "/instructor/content",
+        icon: <FolderOpen size={20} />,
+        iconClass: "icon-folder",
+      },
+      {
+        name: "Student Progress",
+        path: "/instructor/student-progress",
+        icon: <BarChart2 size={20} />,
+        iconClass: "icon-chart",
+      },
+      {
+        name: "Assessments",
+        path: "/instructor/assessments",
+        icon: <Clipboard size={20} />,
+        iconClass: "icon-clipboard",
+      },
+      {
+        name: "Calendar",
+        path: "/instructor/calendar",
+        icon: <Calendar size={20} />,
+        iconClass: "icon-calendar",
+      },
+      {
+        name: "Lectures",
+        path: "/instructor/lectures",
+        icon: <Presentation size={20} />,
+        iconClass: "icon-presentation",
+      },
+      {
+        name: "Student Management",
+        path: "/instructor/students",
+        icon: <GraduationCap size={20} />,
+        iconClass: "icon-graduation",
+      },
+      {
+        name: "Messages",
+        path: "/instructor/messages",
+        icon: <MessageSquare size={20} />,
+        iconClass: "icon-message",
+      },
+    ],
+  };
+
+  // Get navigation items based on user role
+  const navigationItems = navigationConfig[userRole] || navigationConfig.student;
+
+  // Check if the current user is an admin
+  const isAdmin = userRole === "admin";
 
   return (
     <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
@@ -83,7 +220,9 @@ const Sidebar = ({ isOpen }) => {
           </NavLink>
         ))}
       </List>
-      {isOpen && (
+      
+      {/* Show help section only if not admin and sidebar is open */}
+      {isOpen && !isAdmin && (
         <div className="help-section">
           <h3>Need Help?</h3>
           <p>Access our support center or contact technical support.</p>

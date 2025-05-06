@@ -1,12 +1,14 @@
+/* Use CSS custom properties for dynamic layout */
 :root {
-  --content-width: calc(100% - 240px); /* Default when sidebar is open */
-  --card-width: 390px; /* Default card width when sidebar is open */
+  /* Base values that can be updated via JavaScript when sidebar changes */
+  --sidebar-width: 240px;
+  --content-padding: 24px;
 }
-
 .vr-lab-container {
-  padding: 1.5rem;
-  margin-top: 77px;
-  transition: all 0.3s ease;
+   width: calc(100% - var(--content-padding) * 2);
+  margin-top: 70px;
+  padding: var(--content-padding);
+  transition: width 0.3s ease;
 }
 
 /* Page header styling */

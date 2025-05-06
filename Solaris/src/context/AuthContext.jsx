@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-  // Add this method to your AuthProvider if it's missing
   const setOAuthUser = (userData) => {
     if (userData) {
       setCurrentUser(userData);
@@ -105,10 +104,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
+  // Update the hasRole function to handle both arrays and single role
   const hasRole = (role) => {
-    return currentUser?.roles?.includes(role) || false;
+    if (!currentUser || !currentUser.roles) return false;
+    
+    // If roles is an array in the user object
+    if (Array.isArray(currentUser.roles)) {
+      return currentUser.roles.includes(role);
+    }
+    
+    // If role is stored as a single string property
+    return currentUser.role === role;
   };
   
+  // Get user's role - update this function to default to admin
+const getUserRole = () => {
+  // FOR DEVELOPMENT: Always return 'admin' to work on admin pages
+  return 'admin';
+  
+  // ORIGINAL CODE (comment out for now)
+  /*
+  if (!currentUser) return 'admin'; // Default role
+  
+  // If roles is an array, return the first one (primary role)
+  if (Array.isArray(currentUser.roles) && currentUser.roles.length > 0) {
+    return currentUser.roles[0];
+  }
+  
+  // If role is stored as a string
+  return currentUser.role || 'admin'; // Default to 'student' if no role found
+  */
+};
   // Make sure it's included in your context value
   const value = {
     currentUser,
@@ -117,8 +143,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    setOAuthUser, // Must include this
+    setOAuthUser,
     hasRole,
+    getUserRole, // Add this new function to the context
     isAuthenticated: !!currentUser,
     isLoggingIn,
     isRegistering,

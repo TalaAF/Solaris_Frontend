@@ -1,0 +1,70 @@
+.enrollment-chart {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  position: relative;
+}
+
+.chart-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  width: 40px;
+  height: 3px;
+  background-color: #E5BF03;
+  border-radius: 1.5px;
+}
+
+.chart-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.chart-content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 300px;
+}
+
+.chart-summary {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #E5BF03;
+}
