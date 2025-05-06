@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MoreHorizontal, Download, UserPlus } from 'lucide-react';
+import AddStudentModal from './AddStudentModal';
 import './StudentsTable.css';
 
 const StudentsTable = () => {
@@ -8,6 +9,7 @@ const StudentsTable = () => {
   const [selectedCourse, setSelectedCourse] = useState('All Courses');
   const [selectedStatus, setSelectedStatus] = useState('All Status');
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Mock data - in a real application, this would come from an API
   useEffect(() => {
@@ -92,6 +94,26 @@ const StudentsTable = () => {
   // All statuses from student data
   const allStatuses = ['All Status', 'Active', 'Inactive'];
 
+  // Open modal handler
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Close modal handler
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Add student handler
+  const handleAddStudent = (newStudent) => {
+    setStudents([...students, newStudent]);
+    
+    // Show a success notification (optional)
+    // You could add a toast notification here
+    
+    console.log('New student added:', newStudent);
+  };
+
   return (
     <div className="students-container">
       <div className="students-header">
@@ -101,7 +123,7 @@ const StudentsTable = () => {
             <Download size={18} />
             <span>Export</span>
           </button>
-          <button className="add-student-button">
+          <button className="add-student-button" onClick={handleOpenModal}>
             <UserPlus size={18} />
             <span>Add Student</span>
           </button>
@@ -179,9 +201,11 @@ const StudentsTable = () => {
                     </div>
                   </td>
                   <td className="courses-cell">
-                    {student.courses.map((course, index) => (
-                      <span key={index} className="course-badge">{course}</span>
-                    ))}
+                    <div className="courses-container">
+                      {student.courses.map((course, index) => (
+                        <span key={index} className="course-badge">{course}</span>
+                      ))}
+                    </div>
                   </td>
                   <td>
                     <span className={`status-badge ${student.status.toLowerCase()}`}>
@@ -196,7 +220,7 @@ const StudentsTable = () => {
                           style={{ width: `${student.progress}%` }}
                         ></div>
                       </div>
-                      <span className="progress-text">{student.progress}%</span>
+                      <div className="progress-label">{student.progress}%</div>
                     </div>
                   </td>
                   <td className="date-cell">{student.enrolledDate}</td>
@@ -211,6 +235,14 @@ const StudentsTable = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Add Student Modal */}
+      <AddStudentModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAddStudent={handleAddStudent}
+        courses={allCourses}
+      />
     </div>
   );
 };
