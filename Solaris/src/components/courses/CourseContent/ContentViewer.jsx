@@ -1,13 +1,15 @@
 import React from "react";
-import { Card, CardHeader, CardContent, Typography } from "@mui/material";
 import { Button } from "@mui/material";
-import { Chip as Badge } from "@mui/material";
-import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import VideoContent from "./VideoContent";
-import DocumentContent from "./DocumentContent";
-import QuizContent from "./QuizContent";
-// import InteractiveContent from './InteractiveContent';
-import "./ContentViewer.css";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+
+// Import different content type components
+import DocumentViewer from "./DocumentViewer";
+import VideoViewer from "./VideoViewer";
+import QuizViewer from "./QuizViewer";
+import AssignmentViewer from "./AssignmentViewer";
+
+import "./ContentViewer.css"; // Add appropriate styling
 
 /**
  * ContentViewer Component
@@ -16,86 +18,131 @@ import "./ContentViewer.css";
  * It renders different content types (video, document, quiz, interactive)
  * using specialized components.
  */
-function ContentViewer({ module, itemId, onNavigate }) {
-  if (!module || !itemId) return null;
-  
-  const item = module.items.find(item => item.id === itemId);
-  
-  if (!item) {
-    return (
-      <Card className="content-not-found">
-        <CardContent>
-          <p>Content item not found.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-  return (
-    <Card className="content-viewer">
-      <CardHeader className="content-header">
-        <div className="content-navigation">
-          <Typography className="content-title">{item.title}</Typography>
-          <div className="navigation-buttons">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate("prev")}
-              className="nav-button"
-            >
-              <ChevronLeft className="nav-icon" />
-              <span className="nav-text">Previous</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate("next")}
-              className="nav-button"
-            >
-              <span className="nav-text">Next</span>
-              <ChevronRight className="nav-icon" />
-            </Button>
-          </div>
-        </div>
-        <div className="content-meta">
-          <span className="module-name">{module.title}</span>
-          <span className="meta-separator">•</span>
-          <Badge variant="outline" className="content-type">
-            {item.type}
-          </Badge>
-          <span className="meta-separator">•</span>
-          <div className="content-duration">
-            <Clock className="duration-icon" />
-            <span>{item.duration}</span>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="content-body">{renderContent(item)}</CardContent>
-    </Card>
-  );
-}
+function ContentViewer({ module, itemId, onNavigate, contentData, quizData }) {
+  // Find the current item from the module
+  const currentItem = module.items.find((item) => item.id === itemId);
 
-// Helper function to render the appropriate content based on type
-function renderContent(item) {
-  switch (item.type) {
-    case "video":
-      return <VideoContent item={item} />;
-    case "document":
-      return <DocumentContent item={item} />;
-    case "quiz":
-      return <QuizContent item={item} />;
-    case "interactive":
-      return (
-        <div className="interactive-content-placeholder">
-          Interactive content is currently unavailable
-        </div>
-      );
-    default:
-      return (
-        <div className="unknown-content">
-          <p>Unknown content type: {item.type}</p>
-        </div>
-      );
+  if (!currentItem) {
+    return <div className="content-error">Content not found</div>;
   }
+
+  // Determine content display based on type
+  const renderContent = () => {
+    switch (currentItem.type) {
+      case "document":
+        return (
+          <DocumentViewer
+            title={currentItem.title}
+            content={
+              contentData?.content ||
+              `This is a placeholder for the document content: ${currentItem.title}. When connected to the backend, this will display actual document content.`
+            }
+          />
+        );
+
+      case "video":
+        return (
+          <VideoViewer
+            title={currentItem.title}
+            videoUrl={
+              contentData?.videoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            } // Placeholder video
+            transcript={
+              contentData?.transcript ||
+              "Transcript will be available when connected to the backend."
+            }
+          />
+        );
+
+      case "quiz":
+        return (
+          <QuizViewer
+            title={currentItem.title}
+            quizData={
+              quizData || {
+                title: currentItem.title,
+                questions: [
+                  {
+                    question:
+                      "This is a placeholder quiz question. Real questions will load when connected to the backend.",
+                    options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+                    correctAnswer: "Option 1",
+                  },
+                ],
+              }
+            }
+          />
+        );
+
+      case "assignment":
+        return (
+          <AssignmentViewer
+            title={currentItem.title}
+            assignment={
+              contentData || {
+                title: currentItem.title,
+                description:
+                  "This is a placeholder assignment. Real assignment details will load when connected to the backend.",
+                dueDate: "2025-05-15",
+                submissionStatus: "not-submitted",
+              }
+            }
+          />
+        );
+
+      default:
+        return <div>Unsupported content type</div>;
+    }
+  };
+
+  // Find the current item's index to determine if we can navigate prev/next
+  const items = module.items;
+  const currentIndex = items.findIndex((item) => item.id === itemId);
+  const isPrevAvailable = currentIndex > 0;
+  const isNextAvailable = currentIndex < items.length - 1;
+
+  return (
+    <div className="content-viewer">
+      <div className="content-header">
+        <h2>{currentItem.title}</h2>
+        <div className="content-info">
+          <span className="content-type">{currentItem.type}</span>
+          <span className="content-duration">{currentItem.duration}</span>
+        </div>
+      </div>
+
+      <div className="content-body">{renderContent()}</div>
+
+      <div className="content-navigation">
+        <Button
+          variant="contained"
+          disabled={!isPrevAvailable}
+          onClick={() => onNavigate("prev")}
+          startIcon={<NavigateBeforeIcon />}
+          sx={{
+            mr: 1,
+            backgroundColor: isPrevAvailable ? "#0f172a" : "#e5e7eb",
+            "&:hover": { backgroundColor: "#1e293b" },
+          }}
+        >
+          Previous
+        </Button>
+
+        <Button
+          variant="contained"
+          disabled={!isNextAvailable}
+          onClick={() => onNavigate("next")}
+          endIcon={<NavigateNextIcon />}
+          sx={{
+            backgroundColor: isNextAvailable ? "#0f172a" : "#e5e7eb",
+            "&:hover": { backgroundColor: "#1e293b" },
+          }}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export default ContentViewer;

@@ -1,0 +1,237 @@
+:root {
+  --content-width: calc(100% - 240px); /* Default when sidebar is open */
+  --card-width: 390px; /* Default card width when sidebar is open */
+}
+
+.vr-lab-container {
+  padding: 1.5rem;
+  margin-top: 77px;
+  transition: all 0.3s ease;
+}
+
+/* Page header styling */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.page-title {
+  color: #eab308; /* Yellow */
+  font-weight: 600;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.schedule-button {
+  background-color: #eab308 !important; /* Yellow */
+  text-transform: none;
+  padding: 0.5rem 1rem;
+}
+
+.schedule-button:hover {
+  background-color: #ca8a04 !important; /* Darker yellow on hover */
+}
+
+/* Tab styling */
+.tab-container {
+  margin-bottom: 1.5rem;
+}
+
+.vr-tabs {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.vr-tab {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 0.05rem;
+  min-height: 48px;
+}
+
+.vr-tab.Mui-selected {
+  color: #eab308; /* Yellow */
+}
+
+.tab-content {
+  padding-top: 1rem;
+}
+
+/* Empty state styling */
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  background-color: #f9fafc;
+}
+
+/* Modal styles */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.modal-category {
+  background-color: #eab308 !important; /* Light yellow background */
+  color: #ffffff !important; /* Yellow text */
+  margin-top: 0.5rem;
+}
+
+.close-button {
+  min-width: auto;
+  padding: 8px;
+  color: #6b7280 !important;
+}
+
+.preview-placeholder {
+  background-color: #1a1f36;
+  color: white;
+  height: 240px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.preview-3d {
+  color: #eab308; /* Yellow */
+  font-weight: 700;
+}
+
+.preview-text {
+  color: white;
+  margin-top: 0.5rem;
+}
+
+.simulation-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(30px, 1vw, 20px); /* Responsive gap that adjusts with viewport width */
+  padding: 1.5rem 0;
+  width: 100%;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-basis: 30%;
+}
+
+.detail-label {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.equipment-note {
+  color: #6b7280;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancel-button {
+  color: #6b7280 !important; 
+}
+
+.start-button {
+  background-color: #eab308 !important; /* Yellow */
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.start-button:hover {
+  background-color: #ca8a04 !important; /* Darker yellow on hover */
+}
+
+/* Simulation grid styles with dynamic adjustments */
+.simulation-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  width: 100%;
+  transition: all 0.3s ease;
+  justify-content: flex-start;
+}
+
+/* Flexible grid item that will allow proper wrapping */
+.simulation-grid-item {
+  flex: 0 0 auto; /* Don't grow, don't shrink, use auto width based on child */
+  width: calc((100% - 48px) / 3); /* Subtract gap space for 3 items per row */
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+.empty-state-container {
+  width: 100%; /* Full width for empty state */
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1400px) {
+  .simulation-grid-item {
+    width: calc((100% - 24px) / 2); /* Two cards per row on medium-large screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .simulation-grid-item {
+    width: 100%; /* One card per row on small screens */
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .simulation-grid {
+    justify-content: center;
+  }
+}
+
+/* Additional responsive adjustments */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .schedule-button {
+    width: 100%;
+  }
+  
+  .simulation-details {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .detail-item {
+    flex-basis: 100%;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+}

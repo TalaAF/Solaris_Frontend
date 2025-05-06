@@ -1,0 +1,157 @@
+:root {
+  --card-width: 390px; /* Default width when sidebar is open */
+}
+
+.simulation-card {
+  border-radius: 10px !important;
+  overflow: hidden; 
+  height: 440px; /* Fixed height */
+  width: 100%; /* Take full width of parent container */
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid #edf2f7;
+}
+
+.simulation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+/* Header with gradient background */
+.simulation-header {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+  color: white;
+  padding: 1.5rem;
+  position: relative;
+  height: 220px; /* Fixed height for header */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Add a pseudo-element for the background image */
+.simulation-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.simulation-card:nth-child(odd) .simulation-header::before {
+  background-color: #777; /* Lighter gray for odd cards */
+}
+
+.simulation-card:nth-child(even) .simulation-header::before {
+  background-color: #222; /* Darker gray for even cards */
+}
+
+.simulation-code-chip {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: #eab308; /* Yellow */
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.simulation-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  z-index: 1;
+}
+
+.simulation-content {
+  padding: 1.25rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+.simulation-category {
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.simulation-instructor {
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.simulation-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+}
+
+.progress-percentage {
+  font-weight: 600;
+}
+
+.simulation-description {
+  color: #4b5563;
+  margin-bottom: 1rem;
+  flex-grow: 0; /* Don't let it grow to fill space */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.simulation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1rem;
+  margin-top: auto; /* Push to bottom */
+  color: #6b7280;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.launch-button {
+  background-color: #eab308 !important; /* Yellow */
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: auto; /* Push to very bottom */
+}
+
+.launch-button:hover {
+  background-color: #ca8a04; /* Darker yellow on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .simulation-card {
+    width: calc(var(--card-width) - 40px); /* Slightly smaller on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .simulation-card {
+    width: 100%; /* Full width on small screens */
+    max-width: 440px; /* But not too wide */
+  }
+}
