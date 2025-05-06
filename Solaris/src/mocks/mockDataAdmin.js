@@ -556,3 +556,95 @@ export const dashboardStats = {
       duration: 180,
     }
   ];
+  
+  // Content data
+export const content = [
+  {
+    id: 1,
+    title: "Introduction to Web Development",
+    type: "lesson",
+    courseId: 1,
+    courseName: "Advanced Web Development",
+    createdBy: "Dr. John Smith",
+    createdAt: "2025-03-10T10:00:00Z",
+    isPublished: true,
+    duration: 45 // minutes
+  },
+  {
+    id: 2,
+    title: "HTML5 Fundamentals",
+    type: "video",
+    courseId: 1,
+    courseName: "Advanced Web Development",
+    createdBy: "Dr. John Smith",
+    createdAt: "2025-03-12T15:30:00Z",
+    isPublished: true,
+    duration: 30
+  },
+  {
+    id: 3,
+    title: "CSS Styling Techniques",
+    type: "document",
+    courseId: 1,
+    courseName: "Advanced Web Development",
+    createdBy: "Dr. Sarah Johnson",
+    createdAt: "2025-03-15T08:45:00Z",
+    isPublished: false,
+    duration: 60
+  },
+  {
+    id: 4,
+    title: "JavaScript Basics",
+    type: "presentation",
+    courseId: 1,
+    courseName: "Advanced Web Development",
+    createdBy: "Dr. John Smith",
+    createdAt: "2025-03-18T14:15:00Z",
+    isPublished: true,
+    duration: 50
+  },
+  {
+    id: 5,
+    title: "Introduction to Human Anatomy",
+    type: "lesson",
+    courseId: 2,
+    courseName: "Human Anatomy",
+    createdBy: "Dr. Michael Chen",
+    createdAt: "2025-02-05T09:20:00Z",
+    isPublished: true,
+    duration: 60
+  },
+  {
+    id: 6,
+    title: "Skeletal System Overview",
+    type: "video",
+    courseId: 2,
+    courseName: "Human Anatomy",
+    createdBy: "Dr. Michael Chen",
+    createdAt: "2025-02-08T11:30:00Z",
+    isPublished: true,
+    duration: 45
+  },
+  {
+    id: 7,
+    title: "Cardiovascular System",
+    type: "document",
+    courseId: 2,
+    courseName: "Human Anatomy",
+    createdBy: "Dr. Emily Davis",
+    createdAt: "2025-02-12T16:45:00Z",
+    isPublished: false,
+    duration: 75
+  },
+  {
+    id: 8,
+    title: "Introduction to Pharmacology",
+    type: "lesson",
+    courseId: 3,
+    courseName: "Clinical Pharmacology",
+    createdBy: "Dr. Emily Davis",
+    createdAt: "2025-01-15T10:00:00Z",
+    isPublished: true,
+    duration: 55
+  }
+];

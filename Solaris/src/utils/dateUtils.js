@@ -1,18 +1,14 @@
 /**
- * Formats a date string to a more readable format (MM/DD/YYYY)
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date
+ * Format a date string to 'Month Day, Year' format
+ * @param {string} dateString - The date string to format
+ * @returns {string} - The formatted date
  */
-export function formatDate(dateString) {
-  if (!dateString) return 'No date specified';
-  
+export const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(date);
-}
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  
+  return new Intl.DateTimeFormat('en-US', options).format(date);
+};
 
 /**
  * Formats a date string to include time (MM/DD/YYYY, hh:mm AM/PM)

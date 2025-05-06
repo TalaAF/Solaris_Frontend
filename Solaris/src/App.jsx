@@ -25,6 +25,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
 import UserManagement from './components/pages/Admin/Users';
 import Departments from './components/pages/Admin/Departments'; // New import
+import ContentManagement from './components/pages/Admin/ContentManagement'; 
+import CourseManagement from './components/pages/Admin/CourseManagement'; // New import
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
@@ -71,7 +73,9 @@ function App() {
               <Route element={<SimpleLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/departments" element={<Departments />} /> {/* New route */}
+                <Route path="/admin/departments" element={<Departments />} />
+                <Route path="/admin/courses" element={<CourseManagement />} />
+                <Route path="/admin/content" element={<ContentManagement />} />
                 {/* Add more admin routes as you implement them */}
               </Route>
               
