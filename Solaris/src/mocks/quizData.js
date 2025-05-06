@@ -1,3 +1,11 @@
+const QuestionType = {
+  MULTIPLE_CHOICE: "MULTIPLE_CHOICE",
+  MULTIPLE_ANSWER: "MULTIPLE_ANSWER",
+  TRUE_FALSE: "TRUE_FALSE",
+  SHORT_ANSWER: "SHORT_ANSWER",
+  ESSAY: "ESSAY"
+};
+
 const quizData = [
   {
     id: 1,
@@ -5,7 +13,7 @@ const quizData = [
     moduleId: 1,
     description: "Test your understanding of basic programming concepts.",
     timeLimit: 15, // minutes
-    totalPoints: 30,
+    totalPoints: 40,
     passingScore: 70, // percentage
     attempts: {
       max: 2,
@@ -18,7 +26,7 @@ const quizData = [
       {
         id: 1,
         question: "What does the 'print()' function do in Python?",
-        type: "multiple-choice",
+        type: QuestionType.MULTIPLE_CHOICE,
         points: 3,
         options: [
           "Prints the result to the console",
@@ -30,29 +38,43 @@ const quizData = [
       },
       {
         id: 2,
-        question: "Which of these is NOT a valid variable name in most programming languages?",
-        type: "multiple-choice",
-        points: 3,
+        question: "Which of these are valid variable names in Python? (Select all that apply)",
+        type: QuestionType.MULTIPLE_ANSWER,
+        points: 4,
         options: [
           "my_variable",
           "_variable",
-          "variable1",
-          "1variable"
+          "1variable",
+          "class",
+          "variable1"
         ],
-        correctAnswer: 3
+        correctAnswers: [0, 1, 4]
       },
       {
         id: 3,
-        question: "What is the purpose of comments in code?",
-        type: "multiple-choice",
+        question: "In Python, strings are mutable data types.",
+        type: QuestionType.TRUE_FALSE,
         points: 3,
-        options: [
-          "To make the code run faster",
-          "To explain the code to other developers",
-          "To create documentation that appears in the user interface",
-          "To hide code from certain users"
-        ],
-        correctAnswer: 1
+        correctAnswer: false
+      },
+      {
+        id: 4,
+        question: "What symbol is used for the modulo operator in most programming languages?",
+        type: QuestionType.SHORT_ANSWER,
+        points: 5,
+        correctAnswer: "%",
+        caseSensitive: false
+      },
+      {
+        id: 5,
+        question: "Explain the concept of inheritance in object-oriented programming and provide a simple example.",
+        type: QuestionType.ESSAY,
+        points: 10,
+        rubric: [
+          "Clearly defines inheritance - 3 points",
+          "Explains the benefits of inheritance - 3 points",
+          "Provides a relevant example - 4 points"
+        ]
       }
     ]
   },
@@ -62,22 +84,22 @@ const quizData = [
     moduleId: 2,
     description: "Test your knowledge on basic data structures.",
     timeLimit: 20,
-    totalPoints: 40,
+    totalPoints: 45,
     passingScore: 75,
     attempts: {
       max: 2,
       used: 1,
       remaining: 1
     },
-    status: "completed", // Example of a completed quiz
+    status: "completed",
     dueDate: "2025-06-20T23:59:00Z",
     completedDate: "2025-06-18T15:30:00Z",
     score: 85,
     questions: [
       {
-        id: 4,
+        id: 6,
         question: "Which data structure operates on a LIFO principle?",
-        type: "multiple-choice",
+        type: QuestionType.MULTIPLE_CHOICE,
         points: 4,
         options: [
           "Queue",
@@ -88,30 +110,33 @@ const quizData = [
         correctAnswer: 1
       },
       {
-        id: 5,
-        question: "What is the time complexity of accessing an element in an array by index?",
-        type: "multiple-choice",
-        points: 4,
-        options: [
-          "O(1)",
-          "O(log n)",
-          "O(n)",
-          "O(n²)"
-        ],
-        correctAnswer: 0
-      },
-      {
-        id: 6,
-        question: "Which data structure is best for implementing a priority queue?",
-        type: "multiple-choice",
-        points: 4,
+        id: 7,
+        question: "Select all data structures that allow O(1) access to elements by index.",
+        type: QuestionType.MULTIPLE_ANSWER,
+        points: 5,
         options: [
           "Array",
-          "Stack",
-          "Queue",
-          "Heap"
+          "Linked List",
+          "ArrayList/Vector",
+          "Hash Table",
+          "Binary Search Tree"
         ],
-        correctAnswer: 3
+        correctAnswers: [0, 2, 3]
+      },
+      {
+        id: 8,
+        question: "Hash tables require a hash function that produces unique outputs for every possible input.",
+        type: QuestionType.TRUE_FALSE,
+        points: 4,
+        correctAnswer: false
+      },
+      {
+        id: 9,
+        question: "What is the time complexity of binary search?",
+        type: QuestionType.SHORT_ANSWER,
+        points: 6,
+        correctAnswer: "O(log n)",
+        acceptableAnswers: ["O(log n)", "O(logn)", "log n", "logn"]
       }
     ]
   },
@@ -132,9 +157,9 @@ const quizData = [
     dueDate: "2025-07-10T23:59:00Z",
     questions: [
       {
-        id: 7,
+        id: 10,
         question: "What is the time complexity of binary search?",
-        type: "multiple-choice",
+        type: QuestionType.MULTIPLE_CHOICE,
         points: 5,
         options: [
           "O(1)",
@@ -145,9 +170,9 @@ const quizData = [
         correctAnswer: 1
       },
       {
-        id: 8,
+        id: 11,
         question: "Which sorting algorithm is generally the fastest for large datasets?",
-        type: "multiple-choice",
+        type: QuestionType.MULTIPLE_CHOICE,
         points: 5,
         options: [
           "Bubble Sort",
@@ -158,9 +183,9 @@ const quizData = [
         correctAnswer: 3
       },
       {
-        id: 9,
+        id: 12,
         question: "What algorithm is used to find the shortest path in a weighted graph?",
-        type: "multiple-choice",
+        type: QuestionType.MULTIPLE_CHOICE,
         points: 5,
         options: [
           "Breadth-First Search",
@@ -174,4 +199,5 @@ const quizData = [
   }
 ];
 
+export { QuestionType };
 export default quizData;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, Typography, Button, Box } from "@mui/material";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
 import mockAssignmentData from "../../../mocks/assignmentData";
-import mockQuizData from "../../../mocks/quizData";
+import mockQuizData, { QuestionType } from "../../../mocks/quizData";
 import "./CourseAssessments.css";
 
 /**
@@ -19,6 +19,8 @@ function CourseAssessments({ courseData }) {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -44,36 +46,111 @@ function CourseAssessments({ courseData }) {
     setQuizInProgress(true);
   };
 
-  const handleAnswerChange = (questionId, answerIndex) => {
-    setQuizAnswers({
-      ...quizAnswers,
-      [questionId]: answerIndex,
-    });
+  const handleAnswerChange = (questionId, value, type) => {
+    switch (type) {
+      case QuestionType.MULTIPLE_CHOICE:
+      case QuestionType.TRUE_FALSE:
+        setQuizAnswers({
+          ...quizAnswers,
+          [questionId]: value
+        });
+        break;
+      case QuestionType.MULTIPLE_ANSWER:
+        const currentSelections = quizAnswers[questionId] || [];
+        const updatedSelections = currentSelections.includes(value)
+          ? currentSelections.filter(item => item !== value)
+          : [...currentSelections, value];
+        
+        setQuizAnswers({
+          ...quizAnswers,
+          [questionId]: updatedSelections
+        });
+        break;
+      case QuestionType.SHORT_ANSWER:
+      case QuestionType.ESSAY:
+        setQuizAnswers({
+          ...quizAnswers,
+          [questionId]: value
+        });
+        break;
+      default:
+        break;
+    }
   };
 
   const submitQuiz = () => {
-    // Calculate score based on answers
     const quiz = selectedAssessment;
     let correct = 0;
     let totalPoints = 0;
+    let unansweredEssays = 0;
 
     quiz.questions.forEach((q) => {
       totalPoints += q.points;
-      if (quizAnswers[q.id] === q.correctAnswer) {
-        correct += q.points;
+      
+      if (q.type === QuestionType.ESSAY) {
+        // Essays need manual grading, track them separately
+        unansweredEssays++;
+        return;
+      }
+      
+      const answer = quizAnswers[q.id];
+      
+      if (answer === undefined) return; // Skip unanswered questions
+      
+      switch (q.type) {
+        case QuestionType.MULTIPLE_CHOICE:
+          if (answer === q.correctAnswer) {
+            correct += q.points;
+          }
+          break;
+        case QuestionType.MULTIPLE_ANSWER:
+          if (answer && Array.isArray(answer) && Array.isArray(q.correctAnswers)) {
+            // Check if arrays have same length and all items match
+            const isCorrect = 
+              answer.length === q.correctAnswers.length && 
+              answer.every(item => q.correctAnswers.includes(item)) &&
+              q.correctAnswers.every(item => answer.includes(item));
+            
+            if (isCorrect) {
+              correct += q.points;
+            }
+          }
+          break;
+        case QuestionType.TRUE_FALSE:
+          if ((answer === true && q.correctAnswer === true) || 
+              (answer === false && q.correctAnswer === false)) {
+            correct += q.points;
+          }
+          break;
+        case QuestionType.SHORT_ANSWER:
+          const userAnswer = String(answer).trim().toLowerCase();
+          const correctAnswer = String(q.correctAnswer).toLowerCase();
+          const acceptableAnswers = 
+            q.acceptableAnswers?.map(a => String(a).toLowerCase()) || [];
+          
+          if (userAnswer === correctAnswer || acceptableAnswers.includes(userAnswer)) {
+            correct += q.points;
+          }
+          break;
+        default:
+          break;
       }
     });
 
-    const percentage = Math.round((correct / totalPoints) * 100);
+    // Calculate score, excluding essay questions
+    const nonEssayQuestions = quiz.questions.filter(q => q.type !== QuestionType.ESSAY);
+    const nonEssayPoints = nonEssayQuestions.reduce((sum, q) => sum + q.points, 0);
+    const percentage = Math.round((correct / nonEssayPoints) * 100);
     const passed = percentage >= quiz.passingScore;
 
-    // Set results
     setQuizResult({
       score: percentage,
       passed,
       pointsEarned: correct,
-      totalPoints,
+      totalPoints: nonEssayPoints,
       submittedDate: new Date().toISOString(),
+      pendingEssays: unansweredEssays > 0,
+      totalEssayPoints: totalPoints - nonEssayPoints
     });
 
     setQuizSubmitted(true);
@@ -82,6 +159,59 @@ function CourseAssessments({ courseData }) {
   const handleBackToAssessments = () => {
     setSelectedAssessment(null);
     setAssessmentType(null);
+    setUploadedFile(null);
+    setUploadError(null);
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Reset error state
+    setUploadError(null);
+    
+    // Get file extension
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const allowedTypes = selectedAssessment.allowedFileTypes || ".py,.txt";
+    const allowedExtensions = allowedTypes.split(',').map(type => 
+      type.trim().replace('.', '').toLowerCase()
+    );
+    
+    // Validate file type
+    if (!allowedExtensions.includes(fileExtension)) {
+      setUploadError(`Invalid file type. Allowed types: ${allowedTypes}`);
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("File size exceeds the 10MB limit");
+      return;
+    }
+    
+    // Set the file if it passes validation
+    setUploadedFile(file);
+  };
+
+  const handleSubmitAssignment = () => {
+    if (!uploadedFile) {
+      setUploadError("Please upload a file before submitting");
+      return;
+    }
+
+    // In a real application, you would send the file to your API
+    console.log("Submitting file:", uploadedFile);
+    
+    // For the mock implementation, we'll update the local state to simulate submission
+    setSelectedAssessment({
+      ...selectedAssessment,
+      status: "submitted",
+      submissionDate: new Date().toISOString(),
+    });
+    
+    // Reset upload state
+    setUploadedFile(null);
+    setUploadError(null);
   };
 
   const renderAssessmentsList = () => {
@@ -130,22 +260,38 @@ function CourseAssessments({ courseData }) {
                 onClick={() => handleSelectAssessment(assignment, "assignment")}
               >
                 <div className="assessment-card-content">
-                  <div className="assessment-icon assignment-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
+                  <div className="assessment-card-header">
+                    <div className="assessment-icon assignment-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                    </div>
+                    <div className="assessment-title-wrapper">
+                      <h3>{assignment.title}</h3>
+                    </div>
                   </div>
-                  <div className="assessment-details">
-                    <h3>{assignment.title}</h3>
-                    <p className="assessment-due-date">Due: {formatDate(assignment.dueDate)}</p>
+                  
+                  <div className="assessment-card-body">
                     <p className="assessment-description">{assignment.description}</p>
+                  </div>
+                  
+                  <div className="assessment-card-footer">
+                    <p className="assessment-due-date">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      Due: {formatDate(assignment.dueDate)}
+                    </p>
                     <div className={`assessment-status status-${assignment.status}`}>
                       {assignment.status === "not-submitted" ? (
-                        "Not Submitted"
+                        "Due"
                       ) : assignment.status === "submitted" ? (
                         "Submitted"
                       ) : (
@@ -164,17 +310,33 @@ function CourseAssessments({ courseData }) {
                 onClick={() => handleSelectAssessment(quiz, "quiz")}
               >
                 <div className="assessment-card-content">
-                  <div className="assessment-icon quiz-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
+                  <div className="assessment-card-header">
+                    <div className="assessment-icon quiz-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg>
+                    </div>
+                    <div className="assessment-title-wrapper">
+                      <h3>{quiz.title}</h3>
+                    </div>
                   </div>
-                  <div className="assessment-details">
-                    <h3>{quiz.title}</h3>
-                    <p className="assessment-due-date">Due: {formatDate(quiz.dueDate)}</p>
+                  
+                  <div className="assessment-card-body">
                     <p className="assessment-description">{quiz.description}</p>
+                  </div>
+                  
+                  <div className="assessment-card-footer">
+                    <p className="assessment-due-date">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      Due: {formatDate(quiz.dueDate)}
+                    </p>
                     <div className={`assessment-status status-${quiz.status}`}>
                       {quiz.status === "not-started" ? (
                         "Not Started"
@@ -218,24 +380,111 @@ function CourseAssessments({ courseData }) {
             {quiz.questions.map((question, index) => (
               <div key={question.id} className="quiz-question">
                 <h4>Question {index + 1} ({question.points} pts)</h4>
-                <p>{question.question}</p>
+                <p className="question-text">{question.question}</p>
 
-                <div className="question-options">
-                  {question.options.map((option, optIndex) => (
-                    <div key={optIndex} className="option">
+                {question.type === QuestionType.MULTIPLE_CHOICE && (
+                  <div className="question-options">
+                    {question.options.map((option, optIndex) => (
+                      <div key={optIndex} className="option">
+                        <label className="option-label">
+                          <input
+                            type="radio"
+                            name={`question-${question.id}`}
+                            value={optIndex}
+                            checked={quizAnswers[question.id] === optIndex}
+                            onChange={() => handleAnswerChange(question.id, optIndex, question.type)}
+                          />
+                          <span className="option-text">{option}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {question.type === QuestionType.MULTIPLE_ANSWER && (
+                  <div className="question-options">
+                    {question.options.map((option, optIndex) => (
+                      <div key={optIndex} className="option">
+                        <label className="option-label">
+                          <input
+                            type="checkbox"
+                            name={`question-${question.id}`}
+                            value={optIndex}
+                            checked={(quizAnswers[question.id] || []).includes(optIndex)}
+                            onChange={() => handleAnswerChange(question.id, optIndex, question.type)}
+                          />
+                          <span className="option-text">{option}</span>
+                        </label>
+                      </div>
+                    ))}
+                    <p className="question-hint">Select all that apply</p>
+                  </div>
+                )}
+
+                {question.type === QuestionType.TRUE_FALSE && (
+                  <div className="question-options true-false-options">
+                    <div className="option">
                       <label className="option-label">
                         <input
                           type="radio"
                           name={`question-${question.id}`}
-                          value={optIndex}
-                          checked={quizAnswers[question.id] === optIndex}
-                          onChange={() => handleAnswerChange(question.id, optIndex)}
+                          value="true"
+                          checked={quizAnswers[question.id] === true}
+                          onChange={() => handleAnswerChange(question.id, true, question.type)}
                         />
-                        <span className="option-text">{option}</span>
+                        <span className="option-text">True</span>
                       </label>
                     </div>
-                  ))}
-                </div>
+                    <div className="option">
+                      <label className="option-label">
+                        <input
+                          type="radio"
+                          name={`question-${question.id}`}
+                          value="false"
+                          checked={quizAnswers[question.id] === false}
+                          onChange={() => handleAnswerChange(question.id, false, question.type)}
+                        />
+                        <span className="option-text">False</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {question.type === QuestionType.SHORT_ANSWER && (
+                  <div className="question-text-input">
+                    <input
+                      type="text"
+                      placeholder="Your answer..."
+                      value={quizAnswers[question.id] || ''}
+                      onChange={(e) => handleAnswerChange(question.id, e.target.value, question.type)}
+                      className="short-answer-input"
+                    />
+                  </div>
+                )}
+
+                {question.type === QuestionType.ESSAY && (
+                  <div className="question-text-input">
+                    <textarea
+                      placeholder="Your answer..."
+                      value={quizAnswers[question.id] || ''}
+                      onChange={(e) => handleAnswerChange(question.id, e.target.value, question.type)}
+                      className="essay-input"
+                      rows="6"
+                    />
+                    {question.rubric && (
+                      <div className="rubric-info">
+                        <details>
+                          <summary>Grading Rubric</summary>
+                          <ul className="rubric-list">
+                            {question.rubric.map((criterion, idx) => (
+                              <li key={idx}>{criterion}</li>
+                            ))}
+                          </ul>
+                        </details>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -284,6 +533,17 @@ function CourseAssessments({ courseData }) {
               </div>
             </div>
           </div>
+
+          {quizResult.pendingEssays && (
+            <div className="pending-essays">
+              <h3>Essay Questions Pending Review</h3>
+              <p>Your essay responses have been submitted and will be graded by your instructor.
+              {quizResult.totalEssayPoints > 0 && 
+                ` These questions are worth an additional ${quizResult.totalEssayPoints} points 
+                and are not included in your current score.`}
+              </p>
+            </div>
+          )}
 
           <div className="results-actions">
             <Button className="back-to-assessments" onClick={handleBackToAssessments}>
@@ -447,21 +707,74 @@ function CourseAssessments({ courseData }) {
             <div className="assessment-section">
               <h3>Submit Assignment</h3>
               <div className="file-upload-container">
-                <button className="upload-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  Upload File
-                </button>
-                <div className="file-types">
-                  Allowed file types: {assignment.allowedFileTypes}
-                </div>
+                {!uploadedFile ? (
+                  <>
+                    <label className="upload-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      Upload File
+                      <input 
+                        type="file" 
+                        hidden 
+                        onChange={handleFileUpload}
+                        accept={assignment.allowedFileTypes || ".py,.txt"}
+                      />
+                    </label>
+                    <div className="file-types">
+                      Allowed file types: {assignment.allowedFileTypes || ".py, .txt"}
+                    </div>
+                  </>
+                ) : (
+                  <div className="file-selected">
+                    <div className="file-info">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                      <div className="file-details">
+                        <span className="file-name">{uploadedFile.name}</span>
+                        <span className="file-size">{(uploadedFile.size / 1024).toFixed(2)} KB</span>
+                      </div>
+                    </div>
+                    <button 
+                      className="remove-file-btn" 
+                      onClick={() => setUploadedFile(null)}
+                      aria-label="Remove file"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                
+                {uploadError && (
+                  <div className="upload-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {uploadError}
+                  </div>
+                )}
               </div>
               
               <div className="submit-container">
-                <button className="submit-button">Submit Assignment</button>
+                <button 
+                  className={`submit-button ${!uploadedFile ? 'disabled' : ''}`}
+                  disabled={!uploadedFile}
+                  onClick={handleSubmitAssignment}
+                >
+                  Submit Assignment
+                </button>
               </div>
             </div>
           )}

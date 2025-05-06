@@ -10,6 +10,7 @@ import {
   Stethoscope,
   BarChart2,
   Users,
+  Headset,
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -35,10 +36,10 @@ const Sidebar = ({ isOpen }) => {
       iconClass: "icon-calendar",
     },
     {
-      name: "Resources",
-      path: "/resources",
-      icon: <FileText size={20} />,
-      iconClass: "icon-file",
+      name: "VR Lab",
+      path: "/vr-lab",
+      icon: <Headset size={20} />,
+      iconClass: "icon-vr",
     },
     {
       name: "Messages",
@@ -75,7 +76,9 @@ const Sidebar = ({ isOpen }) => {
             to={item.path}
             className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
-            <div className={`nav-icon ${item.iconClass}`}></div>
+            <div className={`nav-icon ${item.iconClass}`}>
+              {item.icon}
+            </div>
             <span className="nav-label">{item.name}</span>
           </NavLink>
         ))}

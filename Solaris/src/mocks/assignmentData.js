@@ -5,7 +5,7 @@ const assignmentData = [
     moduleId: 1,
     description: "Create a simple Python program that calculates student grades based on input scores.",
     instructions: "Write a program that takes input for multiple test scores and computes the average grade. The program should also determine the letter grade (A, B, C, D, F) based on standard grading scales.",
-    dueDate: "2025-06-01T23:59:00Z",
+    dueDate: "2025-06-02T23:59:00Z",
     totalPoints: 100,
     status: "not-submitted", // not-submitted, submitted, graded
     submissionType: "file", // file, text, both

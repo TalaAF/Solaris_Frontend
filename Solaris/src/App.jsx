@@ -11,6 +11,7 @@ import Collaboration from './components/pages/Collaboration';
 import ClinicalSkills from './components/pages/ClinicalSkills';
 import Progress from './components/pages/ProgressSection';
 import Community from './components/pages/Community';
+import VRLab from './components/pages/VRLab'; // Added VR Lab import
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
@@ -42,11 +43,14 @@ const RequireAuth = ({ children }) => {
 };
 
 function App() {
+  // Simple auth check (replace with your actual auth logic)
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+
   return (
     <AuthProvider>
       <NotificationProvider>
-        <Router>
-          <ErrorBoundary>
+        <ErrorBoundary>
+          <Router>
             <Routes>
               {/* Auth routes - outside the main layout */}
               <Route path="/login" element={<Login />} />
@@ -64,7 +68,7 @@ function App() {
                 {/* Main pages */}
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                
+
                 {/* Courses section with nested routes */}
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:courseId" element={<CourseView />} />
@@ -74,16 +78,17 @@ function App() {
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/assessments" element={<Assessments />} />
                 <Route path="/collaboration" element={<Collaboration />} />
+                <Route path="/vr-lab" element={<VRLab />} /> {/* Added VR Lab route */}
                 <Route path="/clinical-skills" element={<ClinicalSkills />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/community" element={<Community />} />
               </Route>
-              
+
               {/* Catch-all redirect */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
-          </ErrorBoundary>
-        </Router>
+          </Router>
+        </ErrorBoundary>
       </NotificationProvider>
     </AuthProvider>
   );
