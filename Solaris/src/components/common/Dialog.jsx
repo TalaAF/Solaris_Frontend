@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
 import { X } from "lucide-react";
 import "./Dialog.css";
 
@@ -31,7 +32,8 @@ const Dialog = ({ isOpen, onClose, title, children }) => {
     }
   };
 
-  return (
+  // Render the dialog using a portal to ensure it's at the root level
+  return ReactDOM.createPortal(
     <div className="dialog-overlay" onClick={handleBackdropClick}>
       <div className="dialog" onClick={(e) => e.stopPropagation()}>
         <div className="dialog-header">
@@ -48,7 +50,8 @@ const Dialog = ({ isOpen, onClose, title, children }) => {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body // Mount the portal directly to the body element
   );
 };
 

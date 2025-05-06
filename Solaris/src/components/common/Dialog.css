@@ -2,26 +2,23 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 9999; /* Ensure it's above everything */
-  padding: 16px;
+  align-items: center;
+  z-index: 1000; /* Make sure this is higher than your header's z-index */
 }
 
 .dialog {
   background-color: white;
   border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
+  z-index: 1001; /* Higher than the overlay */
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   animation: dialog-appear 0.2s ease-out;
 }
 
@@ -70,6 +67,7 @@
 
 .dialog-content {
   padding: 16px 24px;
+  max-height: calc(90vh - 64px); /* Allow scrolling if content is too tall */
   overflow-y: auto;
 }
 

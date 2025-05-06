@@ -48,7 +48,6 @@
   left: 0;
   width: 100%;
   height: 91px; /* Your header height */
-  z-index: 1100; /* High z-index to stay on top */
   background: white;
 }
 
