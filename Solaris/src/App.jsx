@@ -24,6 +24,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 // Import admin pages
 import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
 import UserManagement from './components/pages/Admin/Users';
+import Departments from './components/pages/Admin/Departments'; // New import
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
@@ -70,6 +71,7 @@ function App() {
               <Route element={<SimpleLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/departments" element={<Departments />} /> {/* New route */}
                 {/* Add more admin routes as you implement them */}
               </Route>
               

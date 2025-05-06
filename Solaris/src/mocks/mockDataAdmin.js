@@ -235,55 +235,91 @@ export const dashboardStats = {
     {
       id: 1,
       name: "Administration",
-      description: "Administrative department for institution management",
-      code: "ADMIN",
-      specialtyArea: "Administration",
-      headOfDepartment: "Admin User",
-      contactInformation: "admin@university.edu",
+      code: "ADM",
+      description: "Central administrative department for the university",
+      specialtyArea: "University Administration",
+      headOfDepartment: "Dr. Sarah Johnson",
+      contactInformation: "admin@solaris.edu",
       isActive: true,
-      userCount: 15
+      userCount: 12
     },
     {
       id: 2,
       name: "Mathematics",
-      description: "Department focusing on mathematics and statistics",
       code: "MATH",
-      specialtyArea: "Natural Sciences",
-      headOfDepartment: "Dr. Alan Turing",
-      contactInformation: "math@university.edu",
+      description: "Department of Mathematics and Statistical Sciences",
+      specialtyArea: "Pure and Applied Mathematics",
+      headOfDepartment: "Dr. Richard Brown",
+      contactInformation: "math@solaris.edu",
       isActive: true,
-      userCount: 120
+      userCount: 28
     },
     {
       id: 3,
       name: "Physics",
-      description: "Department focusing on physics and natural sciences",
       code: "PHYS",
-      specialtyArea: "Natural Sciences",
-      headOfDepartment: "Dr. Richard Feynman",
-      contactInformation: "physics@university.edu",
+      description: "Department of Physics and Astronomy",
+      specialtyArea: "Theoretical Physics and Astrophysics",
+      headOfDepartment: "Dr. Michael Chen",
+      contactInformation: "physics@solaris.edu",
       isActive: true,
-      userCount: 95
+      userCount: 23
+    },
+    {
+      id: 4,
+      name: "Biology",
+      code: "BIO",
+      description: "Department of Biological Sciences",
+      specialtyArea: "Molecular Biology and Genetics",
+      headOfDepartment: "Dr. Emily Davis",
+      contactInformation: "biology@solaris.edu",
+      isActive: true,
+      userCount: 31
     },
     {
       id: 5,
       name: "Computer Science",
-      description: "Department focusing on computer science and programming",
       code: "CS",
-      specialtyArea: "Information Technology",
-      headOfDepartment: "Dr. Grace Hopper",
-      contactInformation: "cs@university.edu",
+      description: "Department of Computer Science and Engineering",
+      specialtyArea: "Artificial Intelligence and Machine Learning",
+      headOfDepartment: "Dr. James Wilson",
+      contactInformation: "cs@solaris.edu",
       isActive: true,
-      userCount: 245
+      userCount: 45
     },
-    { id: 1, name: "Administration" },
-    { id: 2, name: "Mathematics" },
-    { id: 3, name: "Physics" },
-    { id: 4, name: "Biology" },
-    { id: 5, name: "Computer Science" },
-    { id: 6, name: "Chemistry" },
-    { id: 7, name: "Literature" },
-    { id: 8, name: "History" }
+    {
+      id: 6,
+      name: "Chemistry",
+      code: "CHEM",
+      description: "Department of Chemistry and Biochemistry",
+      specialtyArea: "Organic Chemistry and Biochemistry",
+      headOfDepartment: "Dr. Sophia Martinez",
+      contactInformation: "chemistry@solaris.edu",
+      isActive: false,
+      userCount: 19
+    },
+    {
+      id: 7,
+      name: "Literature",
+      code: "LIT",
+      description: "Department of Literature and Creative Writing",
+      specialtyArea: "Comparative Literature and Poetry",
+      headOfDepartment: "Dr. Thomas Lee",
+      contactInformation: "literature@solaris.edu",
+      isActive: true,
+      userCount: 17
+    },
+    {
+      id: 8,
+      name: "History",
+      code: "HIST",
+      description: "Department of Historical Studies",
+      specialtyArea: "World History and Archaeological Studies",
+      headOfDepartment: "Dr. Jennifer Adams",
+      contactInformation: "history@solaris.edu",
+      isActive: true,
+      userCount: 22
+    }
   ];
   
   // Content Data
