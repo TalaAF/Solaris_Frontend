@@ -1,18 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-// https://vite.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 3001,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        // If your API doesn't actually use /api prefix, you might need:
-        // rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+  resolve: {
+    alias: {
+      '@components': path.resolve(__dirname, './src/components'),
+    },
+  },
 })

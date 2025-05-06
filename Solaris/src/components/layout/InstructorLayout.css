@@ -1,0 +1,310 @@
+/* Light Theme CSS for Instructor Layout */
+.light-theme {
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #64748b;
+    --sidebar-active: #f1f5f9;
+    --sidebar-active-text: #f97316; /* Orange theme */
+    --header-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --accent-color: #f97316; /* Orange theme */
+    --profile-bg: #f97316; /* Orange theme */
+}
+
+/* Instructor Layout */
+.instructor-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    position: relative;
+}
+
+/* Header Styles */
+.instructor-header {
+    height: 64px;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 600;
+    height: 16px;
+    width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.user-profile {
+    cursor: pointer;
+}
+
+.profile-circle {
+    width: 36px;
+    height: 36px;
+    background-color: var(--profile-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+/* Instructor Sidebar Styles */
+.instructor-sidebar {
+    width: 240px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    height: calc(100vh - 64px);
+    left: 0;
+    top: 64px;
+    z-index: 20;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.sidebar-content {
+    height: 100%;
+    width: 100%;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.instructor-sidebar.closed {
+    width: 70px;
+}
+
+.instructor-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.nav-item:hover {
+    background-color: #f1f5f9;
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.nav-item.active {
+    background-color: var(--sidebar-active);
+    color: var(--accent-color);
+    font-weight: 500;
+    margin: 0;
+}
+
+.nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.nav-label {
+    display: block;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.instructor-sidebar.closed .nav-item {
+    justify-content: center;
+    padding: 12px;
+}
+
+.instructor-sidebar.closed .nav-icon {
+    margin-right: 0;
+}
+
+.instructor-sidebar.closed .nav-label {
+    display: none;
+}
+
+.instructor-profile {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.profile-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    text-align: center;
+}
+
+.profile-name {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--sidebar-text);
+}
+
+.sign-out-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--sidebar-text);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    text-align: center;
+}
+
+.sign-out-btn:hover {
+    background-color: #f1f5f9;
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Toggle button styles */
+.sidebar-toggle-button {
+    position: fixed;
+    top: 80px;
+    left: 240px; /* Aligned with sidebar edge when open */
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 25;
+    transition: left 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-toggle-button.closed {
+    left: 70px; /* Aligned with sidebar edge when closed */
+}
+
+.sidebar-toggle-button:hover {
+    background-color: #f8fafc;
+    color: var(--accent-color);
+}
+
+.instructor-main {
+    flex: 1;
+    margin-left: 240px; /* Default margin when sidebar is open */
+    margin-top: 64px;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+    box-sizing: border-box;
+}
+
+.instructor-main.expanded {
+    margin-left: 70px; /* Margin when sidebar is closed */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .instructor-sidebar {
+        width: 240px; /* Full width on mobile when open */
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .instructor-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .instructor-main {
+        margin-left: 0; /* No margin on mobile */
+    }
+    
+    .instructor-main.expanded {
+        margin-left: 0; /* Ensure no margin when sidebar is closed on mobile */
+    }
+    
+    .sidebar-toggle-button {
+        left: 1rem;
+        background-color: #f8fafc;
+    }
+    
+    .sidebar-toggle-button.closed {
+        left: 1rem;
+    }
+}
