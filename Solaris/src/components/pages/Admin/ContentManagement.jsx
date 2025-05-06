@@ -39,6 +39,14 @@ const ContentManagement = () => {
     alert(`Content ${newStatus ? "published" : "unpublished"} successfully`);
   };
 
+  const handleContentDelete = (contentId) => {
+    console.log("Deleting content with ID:", contentId);
+    // In a real app, you would make an API call here
+    const updatedContent = content.filter(item => item.id !== contentId);
+    setContent(updatedContent);
+    alert("Content deleted successfully");
+  };
+
   return (
     <>
       <div className="admin-content-page">
@@ -52,6 +60,7 @@ const ContentManagement = () => {
           onContentAdd={handleContentAdd} 
           onContentUpdate={handleContentUpdate}
           onContentToggleStatus={handleContentToggleStatus}
+          onContentDelete={handleContentDelete}
         />
       </div>
     </>

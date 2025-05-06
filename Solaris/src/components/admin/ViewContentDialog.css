@@ -1,0 +1,303 @@
+.view-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .content-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .content-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(229, 191, 3, 0.1);
+    color: #E5BF03;
+  }
+  
+  .content-type-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .content-title-info {
+    flex: 1;
+  }
+  
+  .content-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    margin-bottom: 6px;
+  }
+  
+  .content-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .content-course {
+    font-size: 14px;
+    color: #64748b;
+  }
+  
+  /* Type badges */
+  .type-badge {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .type-badge.lesson {
+    background-color: rgba(229, 191, 3, 0.1);
+    color: #E5BF03;
+  }
+  
+  .type-badge.video {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .type-badge.document {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+  
+  .type-badge.presentation {
+    background-color: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-badge.published {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+  }
+  
+  .status-badge.draft {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: #64748b;
+  }
+  
+  /* Tabs styling */
+  .content-tabs {
+    display: flex;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+  }
+  
+  .tab-button:hover {
+    color: #333;
+  }
+  
+  .tab-button.active {
+    color: #E5BF03;
+  }
+  
+  .tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #E5BF03;
+  }
+  
+  .content-tab-content {
+    min-height: 300px;
+  }
+  
+  /* Details tab */
+  .content-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .detail-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8fafc;
+  }
+  
+  .detail-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  .detail-value {
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  /* Content tab */
+  .content-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .content-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #334155;
+  }
+  
+  .video-container,
+  .presentation-container {
+    margin-top: 20px;
+  }
+  
+  .video-placeholder,
+  .presentation-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    padding: 40px;
+    color: #94a3b8;
+    height: 240px;
+  }
+  
+  /* Attachments tab */
+  .attachments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    transition: background-color 0.2s;
+  }
+  
+  .attachment-item:hover {
+    background-color: #f1f5f9;
+  }
+  
+  .attachment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .file-icon {
+    color: #64748b;
+  }
+  
+  .attachment-info {
+    flex: 1;
+  }
+  
+  .attachment-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+  }
+  
+  .attachment-size {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  
+  .attachment-download-button {
+    padding: 6px 12px;
+    background-color: #E5BF03;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .attachment-download-button:hover {
+    background-color: #c9a703;
+  }
+  
+  .no-attachments {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    color: #64748b;
+    font-style: italic;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .content-tabs {
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    
+    .tab-button {
+      padding: 10px 15px;
+      white-space: nowrap;
+    }
+    
+    .detail-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .detail-value {
+      width: 100%;
+    }
+  }

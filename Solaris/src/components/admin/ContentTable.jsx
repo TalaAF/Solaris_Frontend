@@ -11,13 +11,17 @@ import {
   Eye 
 } from "lucide-react";
 import ContentDialog from "./ContentDialog";
+import ViewContentDialog from "./ViewContentDialog";
+import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 import "./ContentTable.css";
 import { formatDate } from "../../utils/dateUtils";
 
-const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, onContentToggleStatus }) => {
+const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, onContentToggleStatus, onContentDelete }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [content, setContent] = useState(initialContent);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("Add Content");
 
@@ -37,6 +41,16 @@ const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, 
     setSelectedContent(contentItem);
     setDialogTitle("Edit Content");
     setIsDialogOpen(true);
+  };
+
+  const handleViewContent = (contentItem) => {
+    setSelectedContent(contentItem);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleDeleteContent = (contentItem) => {
+    setSelectedContent(contentItem);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleToggleStatus = (contentItem) => {
@@ -76,6 +90,19 @@ const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, 
       }
     }
     setIsDialogOpen(false);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedContent) {
+      const updatedContent = content.filter(item => item.id !== selectedContent.id);
+      setContent(updatedContent);
+      
+      if (onContentDelete) {
+        onContentDelete(selectedContent.id);
+      }
+      
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const getContentIcon = (type) => {
@@ -182,16 +209,22 @@ const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, 
                           <Edit size={14} />
                           <span>Edit</span>
                         </button>
-                        <button className="dropdown-item">
+                        <button className="dropdown-item" onClick={() => handleViewContent(item)}>
                           <Eye size={14} />
                           <span>View Content</span>
                         </button>
-                        <div className="dropdown-divider"></div>
                         <button 
                           className={`dropdown-item ${item.isPublished ? "unpublish" : "publish"}`}
                           onClick={() => handleToggleStatus(item)}
                         >
                           <span>{item.isPublished ? "Unpublish" : "Publish"}</span>
+                        </button>
+                        <div className="dropdown-divider"></div>
+                        <button 
+                          className="dropdown-item delete"
+                          onClick={() => handleDeleteContent(item)}
+                        >
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
@@ -213,6 +246,22 @@ const ContentTable = ({ content: initialContent, onContentAdd, onContentUpdate, 
         onSubmit={handleSubmitContent}
         content={selectedContent}
         title={dialogTitle}
+      />
+
+      {isViewDialogOpen && selectedContent && (
+        <ViewContentDialog
+          isOpen={isViewDialogOpen}
+          onClose={() => setIsViewDialogOpen(false)}
+          content={selectedContent}
+        />
+      )}
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Content"
+        description="Are you sure you want to delete this content? This action cannot be undone."
       />
     </div>
   );
