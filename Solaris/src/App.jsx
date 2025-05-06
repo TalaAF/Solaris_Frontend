@@ -11,7 +11,7 @@ import Collaboration from './components/pages/Collaboration';
 import ClinicalSkills from './components/pages/ClinicalSkills';
 import Progress from './components/pages/ProgressSection';
 import Community from './components/pages/Community';
-import VRLab from './components/pages/VRLab'; // Added VR Lab import
+import VRLab from './components/pages/VRLab';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
@@ -20,32 +20,22 @@ import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
 import ErrorBoundary from './components/ErrorBoundary';
+
+// Import admin pages
+import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
+import UserManagement from './components/pages/Admin/Users';
+
+// Import instructor pages
+import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
+
 import './App.css';
 
-// Temporarily bypass authentication for development
-const RequireAuth = ({ children }) => {
-  // Simply return children without checking authentication
-  return children;
-  
-  /* Original code - comment it out for now
-  const { currentUser, loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
-
-  return children;
-  */
+// Simple Layout wrapper (no auth check)
+const SimpleLayout = ({ children }) => {
+  return <Layout>{children}</Layout>;
 };
 
 function App() {
-  // Simple auth check (replace with your actual auth logic)
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-
   return (
     <AuthProvider>
       <NotificationProvider>
@@ -59,29 +49,34 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/oauth2/success" element={<OAuthHandler />} />
               
-              {/* Protected routes - with layout */}
-              <Route element={
-                <RequireAuth>
-                  <Layout />
-                </RequireAuth>
-              }>
+              {/* Student routes */}
+              <Route element={<SimpleLayout />}>
                 {/* Main pages */}
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-
-                {/* Courses section with nested routes */}
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:courseId" element={<CourseView />} />
                 <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
-                
-                {/* Other pages */}
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/assessments" element={<Assessments />} />
                 <Route path="/collaboration" element={<Collaboration />} />
-                <Route path="/vr-lab" element={<VRLab />} /> {/* Added VR Lab route */}
+                <Route path="/vr-lab" element={<VRLab />} />
                 <Route path="/clinical-skills" element={<ClinicalSkills />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/community" element={<Community />} />
+              </Route>
+              
+              {/* Admin routes - no auth check for now */}
+              <Route element={<SimpleLayout />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UserManagement />} />
+                {/* Add more admin routes as you implement them */}
+              </Route>
+              
+              {/* Instructor routes - no auth check for now */}
+              <Route element={<SimpleLayout />}>
+                <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+                {/* Add more instructor routes as you implement them */}
               </Route>
 
               {/* Catch-all redirect */}

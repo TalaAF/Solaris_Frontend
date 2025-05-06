@@ -1,0 +1,48 @@
+.delete-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.delete-description {
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #f8fafc;
+}
+
+.delete-button {
+  padding: 8px 20px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #dc2626;
+}

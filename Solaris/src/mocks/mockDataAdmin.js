@@ -118,6 +118,66 @@ export const dashboardStats = {
       isActive: true,
       createdAt: "2023-06-15T08:00:00Z",
       updatedAt: "2023-08-20T11:45:00Z"
+    },
+    {
+      id: 1,
+      email: "admin@solaris.edu",
+      fullName: "Admin User",
+      departmentId: 1,
+      departmentName: "Administration",
+      roleNames: ["ADMIN"],
+      profilePicture: "https://github.com/shadcn.png",
+      isActive: true,
+      createdAt: "2025-01-01T10:30:00Z",
+      updatedAt: "2025-01-01T10:30:00Z"
+    },
+    {
+      id: 2,
+      email: "professor@solaris.edu",
+      fullName: "Jane Smith",
+      departmentId: 2,
+      departmentName: "Mathematics",
+      roleNames: ["INSTRUCTOR"],
+      profilePicture: "https://github.com/shadcn.png",
+      isActive: true,
+      createdAt: "2025-01-15T09:45:00Z",
+      updatedAt: "2025-01-15T09:45:00Z"
+    },
+    {
+      id: 3,
+      email: "student@solaris.edu",
+      fullName: "Alex Johnson",
+      departmentId: 5,
+      departmentName: "Computer Science",
+      roleNames: ["STUDENT"],
+      profilePicture: "https://github.com/shadcn.png",
+      isActive: true,
+      createdAt: "2025-02-01T14:20:00Z",
+      updatedAt: "2025-02-01T14:20:00Z"
+    },
+    {
+      id: 4,
+      email: "instructor@solaris.edu", 
+      fullName: "Michael Chen",
+      departmentId: 3,
+      departmentName: "Physics",
+      roleNames: ["INSTRUCTOR"],
+      profilePicture: "https://github.com/shadcn.png",
+      isActive: true,
+      createdAt: "2025-02-10T11:15:00Z",
+      updatedAt: "2025-02-10T11:15:00Z"
+    },
+    {
+      id: 5,
+      email: "student2@solaris.edu",
+      fullName: "Sarah Williams",
+      departmentId: 5,
+      departmentName: "Computer Science",
+      roleNames: ["STUDENT"],
+      profilePicture: "",
+      isActive: false,
+      createdAt: "2025-03-05T16:30:00Z",
+      updatedAt: "2025-04-10T09:15:00Z"
     }
   ];
   
@@ -215,7 +275,15 @@ export const dashboardStats = {
       contactInformation: "cs@university.edu",
       isActive: true,
       userCount: 245
-    }
+    },
+    { id: 1, name: "Administration" },
+    { id: 2, name: "Mathematics" },
+    { id: 3, name: "Physics" },
+    { id: 4, name: "Biology" },
+    { id: 5, name: "Computer Science" },
+    { id: 6, name: "Chemistry" },
+    { id: 7, name: "Literature" },
+    { id: 8, name: "History" }
   ];
   
   // Content Data
@@ -344,7 +412,10 @@ export const dashboardStats = {
         {id: 15, name: "content:read", description: "Can view content"},
         {id: 16, name: "assessment:submit", description: "Can submit assessments"}
       ]
-    }
+    },
+    { id: 1, name: "ADMIN" },
+    { id: 2, name: "INSTRUCTOR" },
+    { id: 3, name: "STUDENT" }
   ];
   
   // Certificate Data
@@ -449,4 +520,3 @@ export const dashboardStats = {
       duration: 180,
     }
   ];
-  
