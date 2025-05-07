@@ -1,35 +1,93 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
-import { departments, users } from "../../mocks/mockDataAdmin";
 import "./CourseDialog.css";
 
 const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
-  // Filter only instructors
-  const instructors = users.filter(user => 
-    user.roleNames && user.roleNames.includes("INSTRUCTOR")
-  );
-
-  const initialFormData = course || {
+  // Initial form state aligned with backend model
+  const initialFormData = {
     title: "",
+    code: "",
     description: "",
-    instructorEmail: "",
-    instructorName: "",
-    departmentId: 1,
-    departmentName: "",
+    department: { id: null },
+    instructor: { id: null },
     maxCapacity: 50,
-    isActive: true,
+    published: true,
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+    credits: 3,
+    semester: "Spring 2025",
+    academicLevel: "Undergraduate",
+    tags: []
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [departments, setDepartments] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch departments and instructors when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchDepartmentsAndInstructors();
+    }
+  }, [isOpen]);
 
   // Reset form when dialog opens with new data
   useEffect(() => {
     if (isOpen) {
-      setFormData(course || initialFormData);
+      if (course) {
+        // Map backend course model to form data
+        setFormData({
+          id: course.id,
+          title: course.title || "",
+          code: course.code || "",
+          description: course.description || "",
+          department: {
+            id: course.department?.id || 
+                (typeof course.departmentId === 'number' ? course.departmentId : null)
+          },
+          instructor: {
+            id: course.instructor?.id || 
+                (typeof course.instructorId === 'number' ? course.instructorId : null)
+          },
+          maxCapacity: course.maxCapacity || 50,
+          published: course.published !== undefined ? course.published : true,
+          startDate: course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "",
+          endDate: course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "",
+          credits: course.credits || 3,
+          semester: course.semester || "Spring 2025",
+          academicLevel: course.academicLevel || "Undergraduate",
+          tags: course.tags || []
+        });
+      } else {
+        setFormData(initialFormData);
+      }
     }
   }, [isOpen, course]);
+
+  const fetchDepartmentsAndInstructors = async () => {
+    setLoading(true);
+    try {
+      // In a real implementation, you would fetch these from your API
+      // For now we're using mock data
+      setDepartments([
+        { id: 1, name: "Administration" },
+        { id: 2, name: "Mathematics" },
+        { id: 3, name: "Physics" },
+        { id: 5, name: "Computer Science" }
+      ]);
+      
+      setInstructors([
+        { id: 1, name: "John Smith", email: "john.smith@example.com" },
+        { id: 2, name: "Jane Doe", email: "jane.doe@example.com" },
+        { id: 3, name: "Robert Brown", email: "robert.brown@example.com" }
+      ]);
+    } catch (error) {
+      console.error("Failed to fetch departments or instructors:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -49,42 +107,30 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
 
   const handleDepartmentChange = (e) => {
     const departmentId = parseInt(e.target.value, 10);
-    const selectedDepartment = departments.find(d => d.id === departmentId);
-    
     setFormData({
       ...formData,
-      departmentId,
-      departmentName: selectedDepartment ? selectedDepartment.name : "",
+      department: { id: departmentId }
     });
   };
 
   const handleInstructorChange = (e) => {
-    const instructorEmail = e.target.value;
-    const selectedInstructor = instructors.find(i => i.email === instructorEmail);
-    
+    const instructorId = parseInt(e.target.value, 10);
     setFormData({
       ...formData,
-      instructorEmail,
-      instructorName: selectedInstructor ? selectedInstructor.fullName : "",
+      instructor: { id: instructorId }
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Make sure departmentName is set
-    if (!formData.departmentName && formData.departmentId) {
-      const selectedDepartment = departments.find(d => d.id === formData.departmentId);
-      formData.departmentName = selectedDepartment ? selectedDepartment.name : "Unknown Department";
-    }
+    // Prepare data for API submission
+    const submissionData = {
+      ...formData,
+      // Convert any special fields as needed
+    };
     
-    // Make sure instructorName is set
-    if (!formData.instructorName && formData.instructorEmail) {
-      const selectedInstructor = instructors.find(i => i.email === formData.instructorEmail);
-      formData.instructorName = selectedInstructor ? selectedInstructor.fullName : "Unknown Instructor";
-    }
-    
-    onSubmit(formData);
+    onSubmit(submissionData);
   };
 
   return (
@@ -94,16 +140,30 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
       title={title}
     >
       <form onSubmit={handleSubmit} className="course-form">
-        <div className="form-group">
-          <label htmlFor="title">Course Title</label>
-          <input
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="form-input"
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="title">Course Title</label>
+            <input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="form-input"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="code">Course Code</label>
+            <input
+              id="code"
+              name="code"
+              value={formData.code}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="e.g. CS101"
+            />
+          </div>
         </div>
         
         <div className="form-group">
@@ -118,40 +178,43 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           />
         </div>
         
-        <div className="form-group">
-          <label htmlFor="instructorEmail">Instructor</label>
-          <select
-            id="instructorEmail"
-            name="instructorEmail"
-            value={formData.instructorEmail}
-            onChange={handleInstructorChange}
-            className="form-select"
-          >
-            <option value="">Select an instructor</option>
-            {instructors.map((instructor) => (
-              <option key={instructor.id} value={instructor.email}>
-                {instructor.fullName}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="departmentId">Department</label>
-          <select
-            id="departmentId"
-            name="departmentId"
-            value={formData.departmentId}
-            onChange={handleDepartmentChange}
-            className="form-select"
-            required
-          >
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="instructor">Instructor</label>
+            <select
+              id="instructor"
+              name="instructor"
+              value={formData.instructor.id || ""}
+              onChange={handleInstructorChange}
+              className="form-select"
+              disabled={loading}
+            >
+              <option value="">Select an instructor</option>
+              {instructors.map((instructor) => (
+                <option key={instructor.id} value={instructor.id}>
+                  {instructor.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="department">Department</label>
+            <select
+              id="department"
+              name="department"
+              value={formData.department.id || ""}
+              onChange={handleDepartmentChange}
+              className="form-select"
+              required
+            >
+              {departments.map((department) => (
+                <option key={department.id} value={department.id}>
+                  {department.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         
         <div className="form-row">
@@ -197,13 +260,13 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
         <div className="form-check">
           <input
             type="checkbox"
-            id="isActive"
-            name="isActive"
-            checked={formData.isActive}
+            id="published"
+            name="published"
+            checked={formData.published}
             onChange={handleCheckboxChange}
             className="form-checkbox"
           />
-          <label htmlFor="isActive">Active Course</label>
+          <label htmlFor="published">Published</label>
         </div>
         
         <div className="form-actions">
