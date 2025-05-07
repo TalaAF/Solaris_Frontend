@@ -2,6 +2,8 @@
 import CourseService from "./CourseService";
 import ModuleService from "./ModuleService";
 import ContentService from "./ContentService";
+import ProgressService from "./ProgressService";
+import NotificationService from "./NotificationService";
 import {
   transformCourseData,
   transformModuleData,
@@ -11,12 +13,25 @@ import {
   formatDuration,
   determineSemester,
   convertToLetterGrade,
-} from "./DataMapper";
+} from "./DataMapper.js"; // Added the .js extension
+
+import {
+  transformNotification,
+  mapNotificationType,
+  formatTimeAgo,
+  mapFrontendCategoryToBackend,
+  parseNotificationData
+} from "../utils/NotificationDataMapper";
 
 export {
+  // Services
   CourseService,
   ModuleService,
   ContentService,
+  ProgressService,
+  NotificationService,
+  
+  // Data Mappers
   transformCourseData,
   transformModuleData,
   transformContentItem,
@@ -25,4 +40,11 @@ export {
   formatDuration,
   determineSemester,
   convertToLetterGrade,
+  
+  // Notification Utilities
+  transformNotification,
+  mapNotificationType,
+  formatTimeAgo,
+  mapFrontendCategoryToBackend,
+  parseNotificationData
 };
