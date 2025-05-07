@@ -49,9 +49,9 @@ const CertificateManagement = () => {
   return (
     <>
       <div className="admin-certificate-page">
-        <div>
-          <h1 className="text-3xl font-bold">Certificate Management</h1>
-          <p className="text-gray-500 mt-1">Manage certification templates for courses and programs</p>
+        <div className="admin-certificate-header">
+          <h1 className="admin-title">Certificate Management</h1>
+          <p className="admin-subtitle">Manage certification templates for courses and programs</p>
         </div>
 
         <CertificateTable 

@@ -8,9 +8,9 @@ import "./Security.css";
 const Security = () => {
   return (
     <div className="security-container">
-      <div className="security-header">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-primary" />
+      <div className="admin-security-header">
+        <div className="header-title-container">
+          <ShieldCheck className="header-icon" />
           <h1 className="admin-title">Security Management</h1>
         </div>
         <p className="admin-subtitle">

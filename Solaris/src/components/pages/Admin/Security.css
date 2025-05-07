@@ -1,3 +1,33 @@
+/* Add these new styles at the top of the file */
+.admin-security-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.admin-security-header::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background-color: #E5BF03;
+  border-radius: 2px;
+}
+
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  color: #E5BF03;
+}
+
 /* Main container styles */
 .security-container {
     padding: 24px;
@@ -23,13 +53,14 @@
   }
   
   .admin-title {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: #111827;
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
     margin: 0;
   }
   
   .admin-subtitle {
+    font-size: 16px;
     color: #64748b;
     margin-top: 4px;
   }
