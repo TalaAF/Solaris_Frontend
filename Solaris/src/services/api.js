@@ -1,11 +1,17 @@
 import axios from "axios";
 
+// Use Vite's environment variable format instead of process.env
+const baseURL = import.meta.env.VITE_API_URL || "/api";
+
 const api = axios.create({
-  baseURL: "/api", // This will be forwarded to your server with a proxy
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 15000,
 });
+
+// Rest of your interceptors code remains the same
 
 // Add request interceptor to set authentication token
 api.interceptors.request.use(
@@ -69,8 +75,9 @@ api.interceptors.response.use(
     isRefreshing = true;
     
     try {
-      // Import needed here to avoid circular dependency
-      const AuthService = require("./AuthService").default;
+      // Fix: Handle circular dependency properly
+      // Dynamically import AuthService only when needed
+      const AuthService = (await import('./AuthService')).default;
       const refreshed = await AuthService.refreshToken();
       
       if (refreshed) {
@@ -83,6 +90,7 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
     } catch (refreshError) {
+      console.error("Token refresh error:", refreshError);
       processQueue(refreshError, null);
       return Promise.reject(refreshError);
     } finally {
@@ -90,5 +98,18 @@ api.interceptors.response.use(
     }
   }
 );
+
+// Debug method to verify API is properly configured
+api.testConnection = async () => {
+  try {
+    console.log("Testing API connection...");
+    const response = await api.get("/progress-visualization/health-check");
+    console.log("API connection successful:", response.data);
+    return true;
+  } catch (error) {
+    console.error("API connection failed:", error);
+    return false;
+  }
+};
 
 export default api;

@@ -2,91 +2,42 @@ import React from "react";
 import { useNotifications } from "./NotificationContext";
 import "./NotificationSimulator.css";
 
-// This component can be added to the Dashboard or any other page for testing
+// Note: In a real application, you would likely implement this differently or not at all
+// This component is just for demonstration/testing purposes
 const NotificationSimulator = () => {
-  const { addNotification } = useNotifications();
+  const { fetchNotifications } = useNotifications();
 
+  // These simulations don't directly create notifications - 
+  // they would trigger backend events that create notifications,
+  // which we then fetch from the server.
+  
   const simulateAcademicNotification = () => {
-    addNotification({
-      type: "academic",
-      title: "Midterm Exam Cheat Sheet",
-      message:
-        "The cheat sheet for your Midterm Exam has been changed in SWER354 - ADVANCED WEB TECHNOLOGIES.",
-      time: "Just now",
-      course: "SWER354 - ADVANCED WEB TECHNOLOGIES",
-      links: [
-        {
-          title: "View Cheat Sheet",
-          url: "/courses/swer354/resources/cheat-sheet",
-        },
-        { title: "Course Homepage", url: "/courses/swer354" },
-      ],
-      actionButtons: [
-        {
-          label: "View Changes",
-          primary: true,
-          action: () =>
-            (window.location.href = "/courses/swer354/resources/cheat-sheet"),
-        },
-      ],
-    });
+    // In a real app, you might have an admin API to simulate events
+    // For demonstration, we'll just refresh notifications after a delay
+    // to simulate a new notification appearing after a server event
+    setTimeout(() => {
+      fetchNotifications();
+    }, 1000);
   };
 
   const simulateReminderNotification = () => {
-    addNotification({
-      type: "reminder",
-      title: "Due: Docker Project Report",
-      message:
-        "The Docker Project Report for SWER354 is due today at 11:59 PM.",
-      time: "Just now",
-      course: "SWER354 - ADVANCED WEB TECHNOLOGIES",
-      links: [
-        {
-          title: "Submit Report",
-          url: "/courses/swer354/assignments/docker-project",
-        },
-        {
-          title: "Project Guidelines",
-          url: "/courses/swer354/assignments/guidelines",
-        },
-      ],
-      actionButtons: [
-        {
-          label: "Submit Now",
-          primary: true,
-          action: () =>
-            (window.location.href =
-              "/courses/swer354/assignments/docker-project"),
-        },
-      ],
-    });
+    setTimeout(() => {
+      fetchNotifications();
+    }, 1000);
   };
 
   const simulateAnnouncementNotification = () => {
-    addNotification({
-      type: "announcement",
-      title: "New Content Added",
-      message:
-        "New content has been added to SWER354 - ADVANCED WEB TECHNOLOGIES.",
-      time: "Just now",
-      course: "SWER354 - ADVANCED WEB TECHNOLOGIES",
-      links: [{ title: "View New Content", url: "/courses/swer354/content" }],
-      actionButtons: [
-        {
-          label: "Explore Content",
-          primary: true,
-          action: () => (window.location.href = "/courses/swer354/content"),
-        },
-      ],
-    });
+    setTimeout(() => {
+      fetchNotifications();
+    }, 1000);
   };
 
   return (
     <div className="notification-simulator">
       <h3>Simulation Tools</h3>
       <p>
-        Click the buttons below to simulate receiving different types of
-        notifications.
+        The buttons below would typically trigger backend events that create notifications.
+        In this demo, we'll just refresh the notification list to simulate new events.
       </p>
 
       <div className="simulator-buttons">

@@ -103,14 +103,6 @@ const Dashboard = () => {
     }
   ];
 
-  // Sample progress data
-  const progressData = [
-    { subject: "Anatomy and Physiology", progress: 75 },
-    { subject: "Clinical Pathology", progress: 45 },
-    { subject: "Pharmacology", progress: 60 },
-    { subject: "Medical Ethics", progress: 30 }
-  ];
-
   return (
     <div className="dashbored-main-content">
       {/* Welcome Section - Full width */}
@@ -128,8 +120,8 @@ const Dashboard = () => {
         
         {/* Right column - Narrower (35%) */}
         <div className="content-column right-column">
-          {/* Course Progress */}
-          <ProgressSection progressData={progressData} />
+          {/* Course Progress - Now using the updated component that fetches real data */}
+          <ProgressSection />
           
           {/* Upcoming Deadlines */}
           <DeadlinesSection deadlines={deadlines} />

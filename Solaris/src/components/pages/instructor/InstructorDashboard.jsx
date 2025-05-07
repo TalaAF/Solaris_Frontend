@@ -14,7 +14,8 @@ import {
   Search,
   ChevronDown,
   Download,
-  Loader
+  Loader,
+  X
 } from "lucide-react";
 import InstructorLayout from "../../layout/InstructorLayout";
 import { Chart, LinearScale, CategoryScale, BarController, BarElement, PieController, ArcElement, Legend, Title, Tooltip, LineElement, PointElement, LineController } from "chart.js";
@@ -48,7 +49,7 @@ const DashboardCard = ({ title, children, className = "", actionButton = null })
     </div>
   </div>
 );
-
+// Removed unused exportDashboardData function to resolve the error
 // Stat Card component
 const StatCard = ({ icon, title, value, trend = null }) => {
   const Icon = icon;
@@ -107,12 +108,168 @@ const LeaderboardItem = ({ rank, image, name, label, score }) => (
   </div>
 );
 
+// Fixed Filter Dropdown component
+const FilterDropdown = ({ label, options = [], onSelect = () => {} }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  return (
+    <div className="period-selector" ref={dropdownRef}>
+      <div 
+        className={`filter-dropdown ${isOpen ? 'active' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{label}</span>
+        <ChevronDown size={16} />
+      </div>
+      
+      {isOpen && options.length > 0 && (
+        <div className="date-picker">
+          <div className="date-picker-header">
+            <h3>Select Option</h3>
+            <button className="close-btn" onClick={() => setIsOpen(false)}>
+              <X size={18} />
+            </button>
+          </div>
+          <div className="date-options">
+            {options.map((option, index) => (
+              <div
+                key={index}
+                className={`date-option ${option === label ? 'active' : ''}`}
+                onClick={() => {
+                  onSelect(option);
+                  setIsOpen(false);
+                }}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+const exportDashboardData = () => {
+  // Sample data for export - replace with your actual data if needed
+  const statsData = [
+    { category: 'Active Courses', value: 8, change: '+2' },
+    { category: 'Total Students', value: 235, change: '+22' },
+    { category: 'Assessments', value: 12, change: '+4' },
+    { category: 'Unread Messages', value: 24, change: '+7' }
+  ];
+
+  const courseProgressData = [
+    { course: 'Anatomy 101', completion: '92%' },
+    { course: 'Clinical Diagnosis', completion: '78%' },
+    { course: 'Medical Ethics', completion: '65%' },
+    { course: 'Pathology', completion: '42%' }
+  ];
+
+  // Prepare the CSV content
+  let csvContent = 'data:text/csv;charset=utf-8,';
+  
+  // Add dashboard title and date
+  const currentDate = new Date().toLocaleDateString();
+  csvContent += `Instructor Dashboard Export - ${currentDate}\n\n`;
+  
+  // Add stats data
+  csvContent += 'DASHBOARD STATISTICS\n';
+  csvContent += 'Category,Value,Change\n';
+  statsData.forEach(item => {
+    csvContent += `${item.category},${item.value},${item.change}\n`;
+  });
+  csvContent += '\n';
+  
+  // Add course progress data
+  csvContent += 'COURSE COMPLETION\n';
+  csvContent += 'Course,Completion Rate\n';
+  courseProgressData.forEach(item => {
+    csvContent += `${item.course},${item.completion}\n`;
+  });
+  
+  // Create a download link
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `instructor_dashboard_export_${currentDate.replace(/\//g, '-')}.csv`);
+  document.body.appendChild(link);
+  
+  // Trigger download and remove link
+  link.click();
+  document.body.removeChild(link);
+};
+
 const InstructorDashboard = () => {
   const barChartRef = useRef(null);
   const pieChartRef = useRef(null);
   const lineChartRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [dateRange] = useState('This Week');
+  const [dateRange, setDateRange] = useState('This Week');
+  const [courseFilter, setCourseFilter] = useState('All Courses');
+  const [performanceFilter, setPerformanceFilter] = useState('By Course');
+  const [topicFilter, setTopicFilter] = useState('Anatomy 101');
+  const [timeRangeFilter, setTimeRangeFilter] = useState('Last 6 Months');
+
+  // Date range options
+  const dateRangeOptions = [
+    'Today',
+    'Yesterday',
+    'This Week',
+    'Last Week',
+    'This Month',
+    'Last Month',
+    'This Quarter',
+    'Custom Range'
+  ];
+
+  // Course filter options
+  const courseFilterOptions = [
+    'All Courses',
+    'Anatomy 101',
+    'Clinical Diagnosis',
+    'Medical Ethics',
+    'Pathology'
+  ];
+
+  // Performance filter options
+  const performanceFilterOptions = [
+    'By Course',
+    'By Student',
+    'By Topic',
+    'By Assessment'
+  ];
+
+  // Topic filter options
+  const topicFilterOptions = [
+    'Anatomy 101',
+    'Clinical Diagnosis',
+    'Medical Ethics',
+    'Pathology'
+  ];
+
+  // Time range filter options
+  const timeRangeFilterOptions = [
+    'Last Month',
+    'Last 3 Months',
+    'Last 6 Months',
+    'Last Year',
+    'All Time'
+  ];
 
   // Simulate loading data
   useEffect(() => {
@@ -352,14 +509,6 @@ const InstructorDashboard = () => {
     );
   }
 
-  // Filter dropdown component for dashboard header
-  const FilterDropdown = ({ label }) => (
-    <div className="filter-dropdown">
-      <span>{label}</span>
-      <ChevronDown size={16} />
-    </div>
-  );
-
   return (
     <InstructorLayout>
       <div className="dashboard-wrapper">
@@ -374,10 +523,12 @@ const InstructorDashboard = () => {
               <Search size={18} />
               <input type="text" placeholder="Search courses, students..." />
             </div>
-            <div className="period-selector">
-              <FilterDropdown label={dateRange} />
-            </div>
-            <button className="export-btn">
+            <FilterDropdown 
+              label={dateRange} 
+              options={dateRangeOptions}
+              onSelect={(option) => setDateRange(option)}
+            />
+            <button className="export-btn" onClick={exportDashboardData}>
               <Download size={16} />
               <span>Export</span>
             </button>
@@ -419,7 +570,13 @@ const InstructorDashboard = () => {
             <DashboardCard 
               title="Course Completion" 
               className="progress-card"
-              actionButton={<FilterDropdown label="All Courses" />}
+              actionButton={
+                <FilterDropdown 
+                  label={courseFilter} 
+                  options={courseFilterOptions}
+                  onSelect={(option) => setCourseFilter(option)}
+                />
+              }
             >
               <div className="course-progress-wrapper">
                 <div className="progress-circle">
@@ -492,7 +649,13 @@ const InstructorDashboard = () => {
             <DashboardCard 
               title="Student Engagement" 
               className="engagement-card"
-              actionButton={<FilterDropdown label="Last 6 Months" />}
+              actionButton={
+                <FilterDropdown 
+                  label={timeRangeFilter} 
+                  options={timeRangeFilterOptions}
+                  onSelect={(option) => setTimeRangeFilter(option)}
+                />
+              }
             >
               <div className="chart-container">
                 <canvas id="engagementChart" height="250"></canvas>
@@ -534,7 +697,13 @@ const InstructorDashboard = () => {
             <DashboardCard 
               title="Student Performance" 
               className="performance-card"
-              actionButton={<FilterDropdown label="By Course" />}
+              actionButton={
+                <FilterDropdown 
+                  label={performanceFilter} 
+                  options={performanceFilterOptions}
+                  onSelect={(option) => setPerformanceFilter(option)}
+                />
+              }
             >
               <div className="chart-container">
                 <canvas id="studentPerformanceChart" height="200"></canvas>
@@ -545,7 +714,13 @@ const InstructorDashboard = () => {
             <DashboardCard 
               title="Topic Distribution" 
               className="topic-card"
-              actionButton={<FilterDropdown label="Anatomy 101" />}
+              actionButton={
+                <FilterDropdown 
+                  label={topicFilter} 
+                  options={topicFilterOptions}
+                  onSelect={(option) => setTopicFilter(option)}
+                />
+              }
             >
               <div className="chart-container">
                 <canvas id="topicDistributionChart" height="200"></canvas>

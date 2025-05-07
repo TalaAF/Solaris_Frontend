@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { X, User } from 'lucide-react';
 import './AddStudentModal.css';
 
-const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
+const AddStudentModal = ({ isOpen, onClose, onAddStudent, currentCourse }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    status: 'Active',
-    selectedCourses: []
+    status: 'Active'
   });
   const [errors, setErrors] = useState({});
 
@@ -28,26 +27,6 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
     }
   };
 
-  // Handle course selection
-  const handleCourseToggle = (course) => {
-    const updatedCourses = formData.selectedCourses.includes(course)
-      ? formData.selectedCourses.filter(c => c !== course)
-      : [...formData.selectedCourses, course];
-    
-    setFormData({
-      ...formData,
-      selectedCourses: updatedCourses
-    });
-
-    // Clear course error if any courses are selected
-    if (errors.selectedCourses && updatedCourses.length > 0) {
-      setErrors({
-        ...errors,
-        selectedCourses: null
-      });
-    }
-  };
-
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -60,10 +39,6 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
-    }
-    
-    if (formData.selectedCourses.length === 0) {
-      newErrors.selectedCourses = 'At least one course must be selected';
     }
     
     return newErrors;
@@ -85,7 +60,7 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
       name: formData.name,
       email: formData.email,
       initials: formData.name.split(' ').map(n => n[0]).join('').toUpperCase(),
-      courses: formData.selectedCourses,
+      courses: [currentCourse], // Automatically assign to current course
       status: formData.status,
       progress: 0, // Default progress for new student
       enrolledDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -98,8 +73,7 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
     setFormData({
       name: '',
       email: '',
-      status: 'Active',
-      selectedCourses: []
+      status: 'Active'
     });
     setErrors({});
     
@@ -114,7 +88,7 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
       <div className="modal-backdrop" onClick={onClose}></div>
       <div className="add-student-modal">
         <div className="modal-header">
-          <h2>Add New Student</h2>
+          <h2>Add New Student to {currentCourse}</h2>
           <button className="close-button" onClick={onClose}>
             <X size={20} />
           </button>
@@ -160,24 +134,6 @@ const AddStudentModal = ({ isOpen, onClose, onAddStudent, courses }) => {
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
-          </div>
-          
-          <div className="form-group courses-group">
-            <label>Assign Courses</label>
-            <div className="courses-options">
-              {courses.filter(course => course !== 'All Courses').map((course) => (
-                <div key={course} className="course-option">
-                  <input
-                    type="checkbox"
-                    id={`course-${course}`}
-                    checked={formData.selectedCourses.includes(course)}
-                    onChange={() => handleCourseToggle(course)}
-                  />
-                  <label htmlFor={`course-${course}`}>{course}</label>
-                </div>
-              ))}
-            </div>
-            {errors.selectedCourses && <span className="error-message">{errors.selectedCourses}</span>}
           </div>
           
           <div className="form-actions">

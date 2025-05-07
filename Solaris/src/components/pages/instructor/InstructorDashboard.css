@@ -120,9 +120,38 @@
   color: var(--text-primary);
 }
 
+/* Reset default browser styling */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  line-height: inherit;
+  outline: none;
+}
+
+/* Hide default select arrow */
+select::-ms-expand {
+  display: none;
+}
+
+/* Improved Filter Dropdown Styles */
+.period-selector {
+  position: relative;
+  min-width: 130px;
+}
+
 .filter-dropdown {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -132,6 +161,7 @@
   font-size: 0.875rem;
   color: var(--text-primary);
   transition: all 0.2s ease;
+  user-select: none;
 }
 
 .filter-dropdown:hover {
@@ -143,9 +173,19 @@
   background-color: var(--primary-light);
 }
 
-.period-selector {
-  min-width: 130px;
-  position: relative;
+.filter-dropdown svg {
+  flex-shrink: 0;
+}
+
+/* Remove any default arrows that might be added by the browser */
+.filter-dropdown select {
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Fix for double arrows in select elements */
+.dashboard-card select {
+  background-image: none;
 }
 
 /* Date Picker Styles */
