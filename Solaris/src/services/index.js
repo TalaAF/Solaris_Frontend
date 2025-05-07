@@ -4,6 +4,7 @@ import ModuleService from "./ModuleService";
 import ContentService from "./ContentService";
 import ProgressService from "./ProgressService";
 import NotificationService from "./NotificationService";
+import EnrollmentService from "./EnrollmentService";
 import {
   transformCourseData,
   transformModuleData,
@@ -23,6 +24,14 @@ import {
   parseNotificationData
 } from "../utils/NotificationDataMapper";
 
+// Add enrollment data mapper functions
+import {
+  mapEnrollmentDTO,
+  formatEnrollmentDate,
+  getEnrollmentStatusClass,
+  getEnrollmentStatusLabel
+} from "./EnrollmentMapper";
+
 export {
   // Services
   CourseService,
@@ -30,6 +39,7 @@ export {
   ContentService,
   ProgressService,
   NotificationService,
+  EnrollmentService,
   
   // Data Mappers
   transformCourseData,
@@ -46,5 +56,11 @@ export {
   mapNotificationType,
   formatTimeAgo,
   mapFrontendCategoryToBackend,
-  parseNotificationData
+  parseNotificationData,
+  
+  // Enrollment Utilities
+  mapEnrollmentDTO,
+  formatEnrollmentDate,
+  getEnrollmentStatusClass,
+  getEnrollmentStatusLabel
 };
