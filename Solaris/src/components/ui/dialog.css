@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: 1000; /* Base dialog z-index */
   padding: 1rem;
 }
 
@@ -99,4 +99,15 @@
   .solaris-dialog-footer {
     padding: 0 1rem 1rem;
   }
+}
+
+/* filepath: c:\Users\tala3\OneDrive\Desktop\Spring 2025\ADVANCED WEB TECHNOLOGIES\Solaris-Project\Solaris1\Solaris\src\components\common\Dialog.css */
+.dialog-overlay {
+  z-index: 1000; /* Match base dialog z-index */
+}
+
+/* filepath: c:\Users\tala3\OneDrive\Desktop\Spring 2025\ADVANCED WEB TECHNOLOGIES\Solaris-Project\Solaris1\Solaris\src\components\admin\AddStudentDialog.css */
+/* Special dialogs can have slightly higher z-index */
+.add-student-dialog {
+  z-index: 1050 !important; /* Higher than base dialogs */
 }

@@ -1,23 +1,86 @@
 .course-students-container {
+  padding: 24px;
   max-width: 1200px;
+  margin: 0 auto;
   margin-top: 70px;
-  padding: 24px 0;
 }
 
 /* Header section styling */
 .course-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 24px;
-  padding: 0 4px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 38px; /* Standardize height */
+}
+
+.back-button:hover {
+  background-color: #f8fafc;
+  color: #333;
 }
 
 .course-header-title {
-  margin: 0;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #111827;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Add action buttons container on right side */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  height: 38px;
+}
+
+.action-button.primary {
+  background-color: #E5BF03;
+  color: white;
+  border: none;
+}
+
+.action-button.primary:hover {
+  background-color: #d4b003;
 }
 
 /* Progress bar styling */

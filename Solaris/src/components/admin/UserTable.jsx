@@ -184,13 +184,7 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
                 <tr key={user.id}>
                   <td>
                     <div className="user-info">
-                      <div className="user-avatar">
-                        {user.profilePicture ? (
-                          <img src={user.profilePicture} alt={user.fullName} />
-                        ) : (
-                          <span>{user.fullName.charAt(0)}</span>
-                        )}
-                      </div>
+                      
                       <div className="user-details">
                         <div className="user-name">{user.fullName}</div>
                         <div className="user-email">{user.email}</div>

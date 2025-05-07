@@ -143,7 +143,6 @@ const CourseTable = ({ courses: initialCourses, onCourseAdd, onCourseUpdate, onC
                       </div>
                       <div className="course-details">
                         <div className="course-name">{course.title}</div>
-                        <div className="course-description">{course.description}</div>
                       </div>
                     </div>
                   </td>

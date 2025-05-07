@@ -158,3 +158,115 @@
 .add-policy-btn:hover {
   background-color: #d4af03 !important;
 }
+
+/* Standard button classes */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 38px;
+}
+
+.btn-primary {
+  background-color: var(--solaris-yellow);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #d4b003;
+}
+
+.btn-secondary {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-danger {
+  background-color: #E11D48;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #BE123C;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background-color: var(--solaris-yellow);
+  color: white;
+}
+
+.status-badge.inactive {
+  background-color: #e2e8f0;
+  color: #64748b;
+}
+
+.status-badge.published {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.status-badge.draft {
+  background-color: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+}
+
+/* Standardize search components */
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .search-container {
+    width: 280px;
+  }
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  width: 16px;
+  height: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 8px 8px 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  height: 38px;
+  box-sizing: border-box;
+}

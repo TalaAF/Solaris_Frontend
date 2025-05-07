@@ -90,6 +90,7 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
               onChange={handleChange}
               required
               className="form-input"
+              placeholder="Enter content title"
             />
           </div>
           
@@ -97,7 +98,6 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
             <label>Content Type</label>
             <div className="radio-group">
               <div className="radio-item">
-              <label htmlFor="lesson" className="radio-label">Lesson</label>
                 <input
                   type="radio"
                   id="lesson"
@@ -107,11 +107,10 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
                   onChange={handleTypeChange}
                   className="radio-input"
                 />
-               
+                <label htmlFor="lesson" className="radio-label">Lesson</label>
               </div>
               
               <div className="radio-item">
-              <label htmlFor="video" className="radio-label">Video</label>
                 <input
                   type="radio"
                   id="video"
@@ -121,11 +120,10 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
                   onChange={handleTypeChange}
                   className="radio-input"
                 />
-                
+                <label htmlFor="video" className="radio-label">Video</label>
               </div>
               
               <div className="radio-item">
-              <label htmlFor="document" className="radio-label">Document</label>
                 <input
                   type="radio"
                   id="document"
@@ -135,11 +133,10 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
                   onChange={handleTypeChange}
                   className="radio-input"
                 />
-                
+                <label htmlFor="document" className="radio-label">Document</label>
               </div>
               
               <div className="radio-item">
-              <label htmlFor="presentation" className="radio-label">Presentation</label>
                 <input
                   type="radio"
                   id="presentation"
@@ -149,28 +146,30 @@ const ContentDialog = ({ isOpen, onClose, onSubmit, content, title }) => {
                   onChange={handleTypeChange}
                   className="radio-input"
                 />
-               
+                <label htmlFor="presentation" className="radio-label">Presentation</label>
               </div>
             </div>
           </div>
           
           <div className="form-group">
             <label htmlFor="courseId">Course</label>
-            <select
-              id="courseId"
-              name="courseId"
-              value={formData.courseId}
-              onChange={handleCourseChange}
-              className="form-select"
-              required
-            >
-              <option value="">Select a course</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
+            <div className="custom-select-wrapper">
+              <select
+                id="courseId"
+                name="courseId"
+                value={formData.courseId}
+                onChange={handleCourseChange}
+                className="form-select"
+                required
+              >
+                <option value="">Select a course</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div className="form-group">

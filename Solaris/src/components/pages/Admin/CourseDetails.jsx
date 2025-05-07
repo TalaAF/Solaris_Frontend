@@ -79,24 +79,25 @@ const CourseDetails = () => {
   }
   
   return (
-    <>
-      <div className="course-details-container">
-        <div className="course-details-header">
-          <div className="back-button-container">
-            <button className="back-button" onClick={() => navigate('/admin/courses')}>
-              <ChevronLeft size={18} />
-              <span>Back</span>
-            </button>
-          </div>
-          <h1 className="course-title">{course.title}</h1>
-          <span className={`status-badge ${course.isActive ? "active" : "inactive"}`}>
-            {course.isActive ? "Active" : "Inactive"}
-          </span>
+    <div className="course-details-container">
+      <div className="course-details-header">
+        <div className="header-left">
+          <button className="back-button" onClick={() => navigate('/admin/courses')}>
+            <ChevronLeft size={18} />
+            <span>Back</span>
+          </button>
+          
+          <h1 className="course-title">
+            {course.title}
+            <span className={`status-badge ${course.isActive ? "active" : "inactive"}`}>
+              {course.isActive ? "Active" : "Inactive"}
+            </span>
+          </h1>
         </div>
 
         <div className="action-buttons">
           <button 
-            className="action-button"
+            className="action-button primary"
             onClick={() => navigate(`/admin/courses/${course.id}/students`)}
           >
             <UserRound size={18} />
@@ -110,55 +111,55 @@ const CourseDetails = () => {
             <span>Settings</span>
           </button>
         </div>
-        
-        <div className="course-details-card">
-          <div className="card-header">
-            <BookOpen size={20} className="card-icon" />
-            <h2 className="card-title">Course Details</h2>
+      </div>
+      
+      <div className="course-details-card">
+        <div className="card-header">
+          <BookOpen size={20} className="card-icon" />
+          <h2 className="card-title">Course Details</h2>
+        </div>
+        <div className="card-content">
+          <div className="details-grid">
+            <div className="details-column">
+              <div className="detail-item">
+                <h3 className="detail-label">Department</h3>
+                <p className="detail-value">{course.departmentName}</p>
+              </div>
+              <div className="detail-item">
+                <h3 className="detail-label">Instructor</h3>
+                <p className="detail-value">{course.instructorName}</p>
+              </div>
+              <div className="detail-item">
+                <h3 className="detail-label">Duration</h3>
+                <p className="detail-value">
+                  {formatDate(course.startDate)} - {formatDate(course.endDate)}
+                </p>
+              </div>
+            </div>
+            <div className="details-column">
+              <div className="detail-item">
+                <h3 className="detail-label">Enrollment</h3>
+                <p className="detail-value">{course.enrolledStudents}/{course.maxCapacity} students</p>
+              </div>
+              <div className="detail-item">
+                <h3 className="detail-label">Prerequisites</h3>
+                <p className="detail-value">
+                  {course.prerequisiteCourseIds && course.prerequisiteCourseIds.length > 0
+                    ? course.prerequisiteCourseIds.join(", ")
+                    : "None"
+                  }
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="card-content">
-            <div className="details-grid">
-              <div className="details-column">
-                <div className="detail-item">
-                  <h3 className="detail-label">Department</h3>
-                  <p className="detail-value">{course.departmentName}</p>
-                </div>
-                <div className="detail-item">
-                  <h3 className="detail-label">Instructor</h3>
-                  <p className="detail-value">{course.instructorName}</p>
-                </div>
-                <div className="detail-item">
-                  <h3 className="detail-label">Duration</h3>
-                  <p className="detail-value">
-                    {formatDate(course.startDate)} - {formatDate(course.endDate)}
-                  </p>
-                </div>
-              </div>
-              <div className="details-column">
-                <div className="detail-item">
-                  <h3 className="detail-label">Enrollment</h3>
-                  <p className="detail-value">{course.enrolledStudents}/{course.maxCapacity} students</p>
-                </div>
-                <div className="detail-item">
-                  <h3 className="detail-label">Prerequisites</h3>
-                  <p className="detail-value">
-                    {course.prerequisiteCourseIds && course.prerequisiteCourseIds.length > 0
-                      ? course.prerequisiteCourseIds.join(", ")
-                      : "None"
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="course-description">
-              <h3 className="description-label">Description</h3>
-              <p className="description-content">{course.description || "No description provided."}</p>
-            </div>
+          
+          <div className="course-description">
+            <h3 className="description-label">Description</h3>
+            <p className="description-content">{course.description || "No description provided."}</p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

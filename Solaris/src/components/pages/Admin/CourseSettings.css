@@ -2,7 +2,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-top: 68px;
 }
 
 .course-settings-header {
@@ -17,6 +17,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  
 }
 
 .back-button {
