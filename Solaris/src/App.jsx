@@ -34,6 +34,11 @@ import SecurityManage from './components/pages/Admin/Security'; // New import
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
 
+// Import course management components
+import CourseDetails from './components/pages/Admin/CourseDetails';
+import CourseSettings from './components/pages/Admin/CourseSettings';
+import CourseStudents from './components/pages/Admin/CourseStudents';
+
 import './App.css';
 import { Security } from '@mui/icons-material';
 
@@ -79,6 +84,12 @@ function App() {
                 <Route path="/admin/users" element={<UserManagement />} />
                 <Route path="/admin/departments" element={<Departments />} />
                 <Route path="/admin/courses" element={<CourseManagement />} />
+                
+                {/* New course management routes */}
+                <Route path="/admin/courses/:id" element={<CourseDetails />} />
+                <Route path="/admin/courses/:id/settings" element={<CourseSettings />} />
+                <Route path="/admin/courses/:id/students" element={<CourseStudents />} />
+                
                 <Route path="/admin/content" element={<ContentManagement />} />
                 <Route path="/admin/assessments" element={<AssessmentManagement />} />
                 <Route path="/admin/certificates" element={<CertificateManagement />} />

@@ -6,11 +6,14 @@ import {
   Edit, 
   MoreHorizontal, 
   Plus, 
-  Search 
+  Search,
+  Settings,
+  Eye
 } from "lucide-react";
 import CourseDialog from "./CourseDialog";
 import "./CourseTable.css";
 import { formatDate } from "../../utils/dateUtils";
+import { useNavigate } from "react-router-dom";
 
 const CourseTable = ({ courses: initialCourses, onCourseAdd, onCourseUpdate, onCourseToggleStatus }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,6 +21,7 @@ const CourseTable = ({ courses: initialCourses, onCourseAdd, onCourseUpdate, onC
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("Add Course");
+  const navigate = useNavigate();
 
   const filteredCourses = courses.filter((course) => 
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,6 +83,18 @@ const CourseTable = ({ courses: initialCourses, onCourseAdd, onCourseUpdate, onC
   // Calculate enrollment percentage
   const getEnrollmentPercentage = (enrolled, capacity) => {
     return (enrolled / capacity) * 100;
+  };
+
+  const handleViewDetails = (course) => {
+    navigate(`/admin/courses/${course.id}`);
+  };
+
+  const handleManageStudents = (course) => {
+    navigate(`/admin/courses/${course.id}/students`);
+  };
+
+  const handleSettings = (course) => {
+    navigate(`/admin/courses/${course.id}/settings`);
   };
 
   return (
@@ -167,12 +183,17 @@ const CourseTable = ({ courses: initialCourses, onCourseAdd, onCourseUpdate, onC
                           <Edit size={14} />
                           <span>Edit</span>
                         </button>
-                        <button className="dropdown-item">
+                        <button className="dropdown-item" onClick={() => handleViewDetails(course)}>
+                          <Eye size={14} />
                           <span>View Details</span>
                         </button>
-                        <button className="dropdown-item">
+                        <button className="dropdown-item" onClick={() => handleManageStudents(course)}>
                           <Users size={14} />
                           <span>Manage Students</span>
+                        </button>
+                        <button className="dropdown-item" onClick={() => handleSettings(course)}>
+                          <Settings size={14} />
+                          <span>Settings</span>
                         </button>
                         <div className="dropdown-divider"></div>
                         <button 
