@@ -27,9 +27,14 @@ const AdminUserService = {
     return apiClient.delete(`/admin/users/${userId}`);
   },
   
-  // Update user status (activate/deactivate)
-  updateUserStatus: async (userId, status) => {
-    return apiClient.patch(`/admin/users/${userId}/status`, { status });
+  // Activate user
+  activateUser: async (userId) => {
+    return apiClient.patch(`/admin/users/${userId}/activate`);
+  },
+  
+  // Deactivate user
+  deactivateUser: async (userId) => {
+    return apiClient.patch(`/admin/users/${userId}/deactivate`);
   }
 };
 

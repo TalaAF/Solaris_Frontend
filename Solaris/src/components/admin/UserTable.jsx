@@ -172,7 +172,8 @@ const UserTable = ({
 
   const handleStatusChange = (user) => {
     if (onStatusChange) {
-      onStatusChange(user.id, !user.isActive);
+      // Just pass the user ID and current status
+      onStatusChange(user.id, user.isActive);
     } else {
       // Client-side fallback
       const updatedUsers = users.map(u => {

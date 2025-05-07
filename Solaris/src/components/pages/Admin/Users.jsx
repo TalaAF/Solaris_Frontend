@@ -103,11 +103,18 @@ const Users = () => {
     }
   };
 
-  const handleStatusChange = async (userId, status) => {
+  const handleStatusChange = async (userId, currentStatus) => {
     try {
       setLoading(true);
-      await AdminUserService.updateUserStatus(userId, status);
-      toast.success(`User ${status === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`);
+      if (currentStatus === true || currentStatus === "ACTIVE") {
+        // If currently active, deactivate
+        await AdminUserService.deactivateUser(userId);
+        toast.success("User deactivated successfully");
+      } else {
+        // If currently inactive, activate
+        await AdminUserService.activateUser(userId);
+        toast.success("User activated successfully");
+      }
       fetchUsers(); // Refresh the list
     } catch (err) {
       console.error("Error updating user status:", err);
