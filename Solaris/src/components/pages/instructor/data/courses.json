@@ -1,0 +1,45 @@
+[
+    {
+      "id": "CSE101",
+      "title": "Introduction to Computer Science",
+      "code": "CSE101",
+      "semester": "Spring 2025",
+      "instructor": "Dr. Sarah Khalil",
+      "credits": 3,
+      "status": "active",
+      "studentsEnrolled": 52,
+      "schedule": {
+        "days": ["Monday", "Wednesday"],
+        "time": "10:00 - 11:30 AM"
+      }
+    },
+    {
+      "id": "BIO204",
+      "title": "Human Anatomy II",
+      "code": "BIO204",
+      "semester": "Spring 2025",
+      "instructor": "Prof. Nidal Aljuneidi",
+      "credits": 4,
+      "status": "active",
+      "studentsEnrolled": 40,
+      "schedule": {
+        "days": ["Sunday", "Tuesday"],
+        "time": "12:00 - 1:30 PM"
+      }
+    },
+    {
+      "id": "MED303",
+      "title": "Clinical Skills III",
+      "code": "MED303",
+      "semester": "Spring 2025",
+      "instructor": "Dr. Rana Hammad",
+      "credits": 2,
+      "status": "archived",
+      "studentsEnrolled": 35,
+      "schedule": {
+        "days": ["Thursday"],
+        "time": "9:00 - 11:00 AM"
+      }
+    }
+  ]
+  

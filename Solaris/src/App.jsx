@@ -20,6 +20,7 @@ import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
 import InstructorDashboard from './components/pages/instructor/InstructorDashboard.jsx';
 import Students from "./components/pages/instructor/Students";
+import InstructorCourse from "./components/pages/instructor/InstructorCourse";
 import './App.css';
 
 // Temporarily bypass authentication for development
@@ -77,8 +78,26 @@ function App() {
               <Route path="/clinical-skills" element={<ClinicalSkills />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/community" element={<Community />} />
-              <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
-              <Route path="/instructor/students" element={<Students />} />
+              
+
+              <Route
+  path="/instructor/dashboard"
+  element={
+    <RequireAuth>
+      <Layout />
+    </RequireAuth>
+  }
+>
+  {/* Default Dashboard Page */}
+  <Route index element={<InstructorDashboard />} />
+
+  {/* Nested Instructor Pages */}
+  <Route path="students" element={<Students />} />
+  <Route path="Instructorcourse" element={<InstructorCourse />} />
+</Route>
+
+
+
             </Route>
             
             {/* Catch-all redirect */}

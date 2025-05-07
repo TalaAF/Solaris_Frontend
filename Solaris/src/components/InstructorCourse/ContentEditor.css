@@ -1,0 +1,119 @@
+/* ContentEditor.css */
+/* Styles for the ContentEditor component, aligned with Solaris theme */
+
+.content-editor {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .editor-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a; /* slate-900 */
+    margin-bottom: 1.5rem;
+  }
+  
+  .editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-field {
+    margin-bottom: 1rem;
+  }
+  
+  .quiz-editor {
+    padding: 1rem;
+    background-color: #f8fafc; /* slate-50 */
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+  }
+  
+  .quiz-editor-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1e293b; /* slate-800 */
+    margin-bottom: 1rem;
+  }
+  
+  .question-editor {
+    padding: 1rem;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  
+  .delete-question {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: #ef4444; /* red-500 */
+  }
+  
+  .delete-question:hover {
+    color: #b91c1c; /* red-700 */
+  }
+  
+  .add-question-button {
+    background-color: transparent;
+    border: 1px solid #e6b400; /* solaris-yellow */
+    color: #e6b400;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .add-question-button:hover {
+    background-color: #e6b400; /* solaris-yellow */
+    color: #ffffff;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+  
+  .save-button {
+    background-color: #e6b400; /* solaris-yellow */
+    color: #ffffff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+  
+  .save-button:hover {
+    background-color: #c49000; /* solaris-yellow-dark */
+  }
+  
+  .cancel-button {
+    background-color: transparent;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    color: #64748b; /* slate-500 */
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .cancel-button:hover {
+    background-color: #f1f5f9; /* slate-100 */
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .content-editor {
+      padding: 1rem;
+    }
+  
+    .editor-title {
+      font-size: 1.25rem;
+    }
+  }

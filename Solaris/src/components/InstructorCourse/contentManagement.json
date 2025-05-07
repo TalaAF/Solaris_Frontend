@@ -1,0 +1,21 @@
+{
+  "lectures": [
+    { "title": "Introduction to Anatomy", "type": "PDF", "uploadDate": "2025-03-01", "published": true },
+    { "title": "Skeletal System", "type": "Video", "uploadDate": "2025-03-03", "published": true }
+  ],
+  "labs": [
+    { "title": "Bone Dissection Lab", "type": "PDF", "uploadDate": "2025-03-10", "published": true }
+  ],
+  "clinicalRotations": [
+    { "title": "Clinical - Patient Case #5", "type": "PDF", "uploadDate": "2025-03-20", "published": true }
+  ],
+  "tutorials": [
+    { "title": "Tutorial 1 - Anatomy Basics", "type": "PDF", "uploadDate": "2025-03-15", "published": true }
+  ],
+  "interactiveTools": [
+    { "toolName": "3D Anatomy Viewer", "link": "https://viewer.example.com", "published": true }
+  ],
+  "scheduledReleases": [
+    { "title": "Nervous System Lecture", "releaseDate": "2025-04-10", "published": false }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+    "courseName": "Human Anatomy I",
+    "courseCode": "MED101",
+    "description": "Introduction to human anatomy with emphasis on musculoskeletal and cardiovascular systems.",
+    "startDate": "2025-03-01",
+    "endDate": "2025-05-30",
+    "studentsEnrolled": 35,
+    "lecturesCount": 12,
+    "filesCount": 8,
+    "assignmentsCount": 3,
+    "completionRate": 0.67,
+    "status": "Active",
+    "recentActivity": [
+      "Lecture 'Anatomy - Heart' uploaded",
+      "5 students submitted Assignment 3",
+      "Midterm scheduled for 2025-05-10"
+    ],
+    "bannerImage": "/images/anatomy_banner.jpg"
+  }
+  

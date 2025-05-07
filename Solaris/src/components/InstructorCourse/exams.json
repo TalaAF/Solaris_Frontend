@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Exam 1 - Chapter 5",
+    "dateTime": "2025-05-10T14:00:00",
+    "totalMarks": 20,
+    "published": true,
+    "studentsCompleted": 25,
+    "questions": [
+      {
+        "type": "multiple-choice",
+        "text": "What is the capital of France?",
+        "options": ["Paris", "London", "Berlin", "Madrid"],
+        "numberOfOptions": 4
+      },
+      {
+        "type": "true-false",
+        "text": "The Earth is flat.",
+        "options": ["True", "False"]
+      },
+      {
+        "type": "constructive",
+        "text": "Describe the main causes of World War I.",
+        "options": []
+      }
+    ],
+    "immediateResults": true
+  },
+  {
+    "name": "Exam 2 - Chapter 6",
+    "dateTime": "2025-05-15T10:00:00",
+    "totalMarks": 15,
+    "published": false,
+    "studentsCompleted": 0,
+    "questions": [],
+    "immediateResults": false
+  }
+]

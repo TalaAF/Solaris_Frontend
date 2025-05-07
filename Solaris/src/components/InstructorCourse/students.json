@@ -1,0 +1,19 @@
+[
+    {
+      "id": "S001",
+      "name": "Ahmad Jaber",
+      "email": "ahmad.jaber@univ.edu",
+      "attendance": "92%",
+      "grade": "B+",
+      "status": "Active"
+    },
+    {
+      "id": "S002",
+      "name": "Sara Odeh",
+      "email": "sara.odeh@univ.edu",
+      "attendance": "100%",
+      "grade": "A",
+      "status": "Active"
+    }
+  ]
+  
