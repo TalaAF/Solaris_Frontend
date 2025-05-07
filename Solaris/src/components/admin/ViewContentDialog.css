@@ -1,303 +1,228 @@
 .view-content-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
   }
   
   .content-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
   }
   
-  .content-icon-wrapper {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+  .content-title-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: rgba(229, 191, 3, 0.1);
-    color: #E5BF03;
+    gap: 12px;
   }
   
-  .content-type-icon {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .content-title-info {
-    flex: 1;
-  }
-  
-  .content-title {
-    font-size: 22px;
+  .content-title-row h2 {
+    font-size: 1.25rem;
     font-weight: 600;
     color: #111827;
     margin: 0;
-    margin-bottom: 6px;
   }
   
-  .content-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .content-type-icon {
+    color: #4b5563;
   }
   
-  .content-course {
-    font-size: 14px;
-    color: #64748b;
+  .content-type-icon.video {
+    color: #ec4899;
   }
   
-  /* Type badges */
-  .type-badge {
-    display: inline-flex;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-  
-  .type-badge.lesson {
-    background-color: rgba(229, 191, 3, 0.1);
-    color: #E5BF03;
-  }
-  
-  .type-badge.video {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-  
-  .type-badge.document {
-    background-color: rgba(59, 130, 246, 0.1);
+  .content-type-icon.document {
     color: #3b82f6;
   }
   
-  .type-badge.presentation {
-    background-color: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+  .content-type-icon.presentation {
+    color: #f59e0b;
   }
   
-  /* Status badges */
+  .content-type-icon.lesson {
+    color: #10b981;
+  }
+  
   .status-badge {
     display: inline-flex;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
     font-weight: 500;
   }
   
   .status-badge.published {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #16a34a;
+    background-color: #d1fae5;
+    color: #065f46;
   }
   
   .status-badge.draft {
-    background-color: rgba(148, 163, 184, 0.1);
-    color: #64748b;
+    background-color: #f3f4f6;
+    color: #4b5563;
   }
   
-  /* Tabs styling */
-  .content-tabs {
-    display: flex;
-    border-bottom: 1px solid #f1f5f9;
-    margin-bottom: 20px;
-  }
-  
-  .tab-button {
-    padding: 10px 20px;
-    background: none;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-    cursor: pointer;
-    position: relative;
-    transition: color 0.2s;
-  }
-  
-  .tab-button:hover {
-    color: #333;
-  }
-  
-  .tab-button.active {
-    color: #E5BF03;
-  }
-  
-  .tab-button.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #E5BF03;
-  }
-  
-  .content-tab-content {
-    min-height: 300px;
-  }
-  
-  /* Details tab */
-  .content-details {
+  .content-preview-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-  }
-  
-  .detail-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f8fafc;
-  }
-  
-  .detail-label {
-    display: flex;
-    align-items: center;
     gap: 8px;
-    color: #64748b;
-    font-size: 14px;
   }
   
-  .detail-value {
-    font-weight: 500;
-    font-size: 14px;
+  .content-preview-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0;
   }
   
-  /* Content tab */
-  .content-body {
+  .content-preview {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .content-description-preview {
+    padding: 16px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+    background-color: #f9fafb;
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  
+  .video-preview,
+  .pdf-preview {
+    height: 300px;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .video-placeholder,
+  .pdf-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #6b7280;
+  }
+  
+  .content-metadata {
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
   
-  .content-text {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #334155;
-  }
-  
-  .video-container,
-  .presentation-container {
-    margin-top: 20px;
-  }
-  
-  .video-placeholder,
-  .presentation-placeholder {
+  .metadata-section {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #f8fafc;
-    border-radius: 6px;
-    padding: 40px;
-    color: #94a3b8;
-    height: 240px;
+    gap: 12px;
   }
   
-  /* Attachments tab */
-  .attachments-list {
-    list-style: none;
-    padding: 0;
+  .metadata-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
     margin: 0;
+  }
+  
+  .metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .metadata-item {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-  }
-  
-  .attachment-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    gap: 4px;
     padding: 12px;
+    background-color: #f9fafb;
     border-radius: 6px;
-    background-color: #f8fafc;
-    transition: background-color 0.2s;
+    position: relative;
   }
   
-  .attachment-item:hover {
-    background-color: #f1f5f9;
+  .metadata-item svg {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: #9ca3af;
   }
   
-  .attachment-icon {
+  .metadata-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  
+  .metadata-value {
+    font-size: 0.875rem;
+    color: #111827;
+    font-weight: 500;
+    word-break: break-word;
+  }
+  
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  
+  .content-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .content-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  
+  .download-button {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    background-color: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  .file-icon {
-    color: #64748b;
-  }
-  
-  .attachment-info {
-    flex: 1;
-  }
-  
-  .attachment-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #334155;
-  }
-  
-  .attachment-size {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 2px;
-  }
-  
-  .attachment-download-button {
-    padding: 6px 12px;
+    gap: 6px;
+    padding: 8px 16px;
     background-color: #E5BF03;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
   }
   
-  .attachment-download-button:hover {
-    background-color: #c9a703;
+  .download-button:hover {
+    background-color: #D4AF07;
   }
   
-  .no-attachments {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 150px;
-    color: #64748b;
-    font-style: italic;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    .content-tabs {
-      overflow-x: auto;
-      padding-bottom: 5px;
+  @media (max-width: 640px) {
+    .metadata-grid {
+      grid-template-columns: 1fr;
     }
     
-    .tab-button {
-      padding: 10px 15px;
-      white-space: nowrap;
-    }
-    
-    .detail-item {
+    .content-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 8px;
+      gap: 12px;
     }
     
-    .detail-value {
-      width: 100%;
+    .content-status {
+      align-self: flex-start;
     }
   }

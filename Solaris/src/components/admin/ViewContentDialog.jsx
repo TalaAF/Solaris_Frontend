@@ -1,62 +1,91 @@
 import React, { useState } from "react";
 import Dialog from "../common/Dialog";
-import { FileText, Video, FileType, Presentation, Clock, Calendar, User } from "lucide-react";
+import { 
+  FileText, 
+  Video, 
+  FileType, 
+  Presentation, 
+  Calendar, 
+  Clock,
+  User,
+  BookOpen,
+  Tag,
+  Download
+} from "lucide-react";
 import "./ViewContentDialog.css";
 import { formatDate } from "../../utils/dateUtils";
 
 const ViewContentDialog = ({ isOpen, onClose, content }) => {
   const [activeTab, setActiveTab] = useState("details");
 
-  // Mock content data for demonstration
-  const mockContentData = {
-    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.\n\nProin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue.",
-    attachments: [
-      { id: 1, name: "lesson-slides.pdf", type: "pdf", size: "2.4 MB" },
-      { id: 2, name: "example-video.mp4", type: "video", size: "14.7 MB" }
-    ]
-  };
-
-  const getContentIcon = (type) => {
-    switch (type) {
-      case "lesson":
-        return <FileText className="content-type-icon" />;
+  if (!content) return null;
+  
+  const getContentIcon = () => {
+    switch (content.type?.toLowerCase()) {
       case "video":
-        return <Video className="content-type-icon" />;
+        return <Video size={24} className="content-type-icon video" />;
       case "document":
-        return <FileType className="content-type-icon" />;
+        return <FileType size={24} className="content-type-icon document" />;
       case "presentation":
-        return <Presentation className="content-type-icon" />;
+        return <Presentation size={24} className="content-type-icon presentation" />;
       default:
-        return <FileText className="content-type-icon" />;
+        return <FileText size={24} className="content-type-icon lesson" />;
     }
   };
 
-  const getTypeBadgeClass = (type) => {
-    switch (type) {
-      case "lesson":
-        return "type-badge lesson";
-      case "video":
-        return "type-badge video";
-      case "document":
-        return "type-badge document";
-      case "presentation":
-        return "type-badge presentation";
-      default:
-        return "type-badge lesson";
+  const handleDownload = () => {
+    // In a real app, this would download the file from the server
+    const link = document.createElement('a');
+    link.href = content.filePath; // This should be a valid URL in production
+    link.download = content.title;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  const formatFileSize = (bytes) => {
+    if (!bytes) return 'Unknown size';
+    
+    const kb = bytes / 1024;
+    if (kb < 1024) {
+      return `${Math.round(kb)} KB`;
+    } else {
+      return `${(kb / 1024).toFixed(2)} MB`;
     }
   };
 
-  const getFileIcon = (fileType) => {
-    switch (fileType) {
-      case "pdf":
-        return <FileText className="file-icon" />;
-      case "video":
-        return <Video className="file-icon" />;
-      default:
-        return <FileType className="file-icon" />;
+  const renderPreview = () => {
+    // This is a simplified preview. In a real app, you'd have different
+    // preview components based on content type (PDF viewer, video player, etc.)
+    if (content.type?.toLowerCase() === 'video') {
+      return (
+        <div className="video-preview">
+          <div className="video-placeholder">
+            <Video size={48} />
+            <span>Video Preview</span>
+          </div>
+        </div>
+      );
     }
+    
+    if (content.filePath && content.fileType?.includes('pdf')) {
+      return (
+        <div className="pdf-preview">
+          <div className="pdf-placeholder">
+            <FileText size={48} />
+            <span>PDF Preview</span>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="content-description-preview">
+        {content.description || "No preview available for this content type."}
+      </div>
+    );
   };
-
+  
   return (
     <Dialog
       isOpen={isOpen}
@@ -66,133 +95,90 @@ const ViewContentDialog = ({ isOpen, onClose, content }) => {
     >
       <div className="view-content-container">
         <div className="content-header">
-          <div className="content-icon-wrapper">
-            {getContentIcon(content.type)}
+          <div className="content-title-row">
+            {getContentIcon()}
+            <h2>{content.title}</h2>
           </div>
-          <div className="content-title-info">
-            <h2 className="content-title">{content.title}</h2>
-            <div className="content-meta">
-              <span className={getTypeBadgeClass(content.type)}>
-                {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
-              </span>
-              <span className="content-course">{content.courseName}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="content-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'content' ? 'active' : ''}`}
-            onClick={() => setActiveTab('content')}
-          >
-            Content
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'attachments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('attachments')}
-          >
-            Attachments
-          </button>
-        </div>
-
-        <div className="content-tab-content">
-          {activeTab === 'details' && (
-            <div className="content-details">
-              <div className="detail-item">
-                <div className="detail-label">
-                  <User size={16} />
-                  <span>Created by</span>
-                </div>
-                <div className="detail-value">{content.createdBy || "Admin User"}</div>
-              </div>
-              
-              <div className="detail-item">
-                <div className="detail-label">
-                  <Calendar size={16} />
-                  <span>Created date</span>
-                </div>
-                <div className="detail-value">{formatDate(content.createdAt)}</div>
-              </div>
-              
-              <div className="detail-item">
-                <div className="detail-label">
-                  <Clock size={16} />
-                  <span>Duration</span>
-                </div>
-                <div className="detail-value">{content.duration} minutes</div>
-              </div>
-              
-              <div className="detail-item">
-                <div className="detail-label">
-                  <span>Status</span>
-                </div>
-                <div className="detail-value">
-                  <span className={`status-badge ${content.isPublished ? "published" : "draft"}`}>
-                    {content.isPublished ? "Published" : "Draft"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
           
-          {activeTab === 'content' && (
-            <div className="content-body">
-              <div className="content-text">
-                <p>{mockContentData.text}</p>
+          <div className="content-status">
+            <span className={`status-badge ${content.isPublished ? 'published' : 'draft'}`}>
+              {content.isPublished ? 'Published' : 'Draft'}
+            </span>
+          </div>
+        </div>
+        
+        <div className="content-preview-section">
+          <h3>Preview</h3>
+          <div className="content-preview">
+            {renderPreview()}
+          </div>
+        </div>
+        
+        <div className="content-metadata">
+          <div className="metadata-section">
+            <h3>Content Information</h3>
+            <div className="metadata-grid">
+              <div className="metadata-item">
+                <BookOpen size={16} />
+                <div className="metadata-label">Course</div>
+                <div className="metadata-value">{content.courseName || 'No course assigned'}</div>
               </div>
               
-              {content.type === 'video' && (
-                <div className="video-container">
-                  <div className="video-placeholder">
-                    <Video size={48} />
-                    <p>Video content would appear here</p>
-                  </div>
-                </div>
-              )}
+              <div className="metadata-item">
+                <Calendar size={16} />
+                <div className="metadata-label">Created</div>
+                <div className="metadata-value">{formatDate(content.createdAt)}</div>
+              </div>
               
-              {content.type === 'presentation' && (
-                <div className="presentation-container">
-                  <div className="presentation-placeholder">
-                    <Presentation size={48} />
-                    <p>Presentation slides would appear here</p>
+              <div className="metadata-item">
+                <Clock size={16} />
+                <div className="metadata-label">Updated</div>
+                <div className="metadata-value">{formatDate(content.updatedAt)}</div>
+              </div>
+              
+              <div className="metadata-item">
+                <Clock size={16} />
+                <div className="metadata-label">Duration</div>
+                <div className="metadata-value">{content.duration || 'N/A'} minutes</div>
+              </div>
+              
+              {content.tags && content.tags.length > 0 && (
+                <div className="metadata-item">
+                  <Tag size={16} />
+                  <div className="metadata-label">Tags</div>
+                  <div className="metadata-value tags-list">
+                    {content.tags.map(tag => (
+                      <span key={tag} className="content-tag">{tag}</span>
+                    ))}
                   </div>
                 </div>
               )}
             </div>
-          )}
+          </div>
           
-          {activeTab === 'attachments' && (
-            <div className="content-attachments">
-              {mockContentData.attachments.length > 0 ? (
-                <ul className="attachments-list">
-                  {mockContentData.attachments.map(attachment => (
-                    <li key={attachment.id} className="attachment-item">
-                      <div className="attachment-icon">
-                        {getFileIcon(attachment.type)}
-                      </div>
-                      <div className="attachment-info">
-                        <div className="attachment-name">{attachment.name}</div>
-                        <div className="attachment-size">{attachment.size}</div>
-                      </div>
-                      <button className="attachment-download-button">
-                        Download
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="no-attachments">
-                  <p>No attachments for this content</p>
-                </div>
-              )}
+          <div className="metadata-section">
+            <h3>File Details</h3>
+            <div className="metadata-grid">
+              <div className="metadata-item">
+                <FileType size={16} />
+                <div className="metadata-label">File Type</div>
+                <div className="metadata-value">{content.fileType || 'Unknown'}</div>
+              </div>
+              
+              <div className="metadata-item">
+                <Clock size={16} />
+                <div className="metadata-label">File Size</div>
+                <div className="metadata-value">{formatFileSize(content.fileSize)}</div>
+              </div>
             </div>
-          )}
+          </div>
+        </div>
+        
+        <div className="content-actions">
+          <button className="download-button" onClick={handleDownload}>
+            <Download size={16} />
+            <span>Download File</span>
+          </button>
         </div>
       </div>
     </Dialog>
