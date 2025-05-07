@@ -1,47 +1,144 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../layout/Layout";
 import UserTable from "../../admin/UserTable";
-import { users as initialUsers } from "../../../mocks/mockDataAdmin";
+import AdminUserService from "../../../services/AdminUserService";
+import { toast } from "../../ui/toaster";
 import "./Users.css";
 
 const Users = () => {
-  const [users, setUsers] = useState(initialUsers || []);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ 
+    page: 0, 
+    size: 10, 
+    totalElements: 0, 
+    totalPages: 0 
+  });
+  const [filters, setFilters] = useState({});
 
-  const handleUserAdd = (userData) => {
-    // In a real application, this would make an API call
-    console.log("Adding user:", userData);
-    // The actual user addition is handled in the UserTable component
-    alert("User added successfully");
+  // Load users when component mounts or when pagination/filters change
+  useEffect(() => {
+    fetchUsers();
+  }, [pagination.page, pagination.size, filters]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await AdminUserService.getUsers(
+        pagination.page, 
+        pagination.size, 
+        filters
+      );
+      
+      // Assuming the API returns { content: [...users], totalElements, totalPages }
+      setUsers(response.data.content);
+      setPagination(prev => ({
+        ...prev,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
+      }));
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Failed to load users. Please try again.");
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUserUpdate = (userData) => {
-    // In a real application, this would make an API call
-    console.log("Updating user:", userData);
-    alert("User updated successfully");
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
   };
 
-  const handleUserDelete = (userId) => {
-    // In a real application, this would make an API call
-    console.log("Deleting user with ID:", userId);
-    alert("User deleted successfully");
+  const handlePageSizeChange = (newSize) => {
+    setPagination(prev => ({ ...prev, size: newSize, page: 0 }));
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPagination(prev => ({ ...prev, page: 0 })); // Reset to first page when filters change
+  };
+
+  const handleUserAdd = async (userData) => {
+    try {
+      setLoading(true);
+      await AdminUserService.createUser(userData);
+      toast.success("User added successfully");
+      fetchUsers(); // Refresh the list
+    } catch (err) {
+      console.error("Error adding user:", err);
+      toast.error(err.response?.data?.message || "Failed to add user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserUpdate = async (userId, userData) => {
+    try {
+      setLoading(true);
+      await AdminUserService.updateUser(userId, userData);
+      toast.success("User updated successfully");
+      fetchUsers(); // Refresh the list to get updated data
+    } catch (err) {
+      console.error("Error updating user:", err);
+      toast.error(err.response?.data?.message || "Failed to update user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserDelete = async (userId) => {
+    try {
+      setLoading(true);
+      await AdminUserService.deleteUser(userId);
+      toast.success("User deleted successfully");
+      fetchUsers(); // Refresh the list
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      toast.error(err.response?.data?.message || "Failed to delete user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (userId, status) => {
+    try {
+      setLoading(true);
+      await AdminUserService.updateUserStatus(userId, status);
+      toast.success(`User ${status === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`);
+      fetchUsers(); // Refresh the list
+    } catch (err) {
+      console.error("Error updating user status:", err);
+      toast.error(err.response?.data?.message || "Failed to update user status");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
-      <div className="admin-users-page">
-        <div className="admin-users-header">
-          <h1 className="admin-title">User Management</h1>
-          <p className="admin-subtitle">Manage all users in the system</p>
-        </div>
-
-        <UserTable 
-          users={users} 
-          onUserAdd={handleUserAdd} 
-          onUserUpdate={handleUserUpdate} 
-          onUserDelete={handleUserDelete}
-        />
+    <div className="admin-users-page">
+      <div className="admin-users-header">
+        <h1 className="admin-title">User Management</h1>
+        <p className="admin-subtitle">Manage all users in the system</p>
       </div>
-    </>
+
+      {error && <div className="error-message">{error}</div>}
+      
+      <UserTable 
+        users={users} 
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        onFilterChange={handleFilterChange}
+        onUserAdd={handleUserAdd}
+        onUserUpdate={handleUserUpdate} 
+        onUserDelete={handleUserDelete}
+        onStatusChange={handleStatusChange}
+      />
+    </div>
   );
 };
 

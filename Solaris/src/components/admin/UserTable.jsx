@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Edit,
@@ -6,14 +6,35 @@ import {
   Search,
   Trash2,
   UserPlus,
-  Users
+  Users,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from "lucide-react";
 import UserDialog from "./UserDialog";
 import BulkUserDialog from "./BulkUserDialog";
 import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 import "./UserTable.css";
 
-const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete }) => {
+const UserTable = ({ 
+  users: initialUsers, 
+  loading = false,
+  pagination = { 
+    page: 0, 
+    size: 10, 
+    totalElements: 0, 
+    totalPages: 0 
+  },
+  onPageChange,
+  onPageSizeChange,
+  onFilterChange,
+  onUserAdd, 
+  onUserUpdate, 
+  onUserDelete,
+  onStatusChange
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState(initialUsers);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -21,39 +42,32 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    role: "",
+    status: "",
+    department: ""
+  });
 
+  // Update users when initialUsers prop changes
+  useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
+
+  // Client-side filtering for search input
   const filteredUsers = users.filter((user) => 
-    user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.departmentName.toLowerCase().includes(searchQuery.toLowerCase())
+    user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.departmentName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddUser = (user) => {
-    const newUser = {
-      id: Math.max(...users.map(u => u.id), 0) + 1,
-      email: user.email,
-      fullName: user.fullName,
-      departmentId: user.departmentId,
-      departmentName: user.departmentId === 5 ? "Computer Science" : 
-                      user.departmentId === 3 ? "Physics" : 
-                      user.departmentId === 2 ? "Mathematics" : "Administration",
-      roleNames: user.roleNames,
-      profilePicture: "https://github.com/shadcn.png",
-      isActive: user.isActive,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    setUsers([...users, newUser]);
-    if (onUserAdd) onUserAdd(user);
-    setIsAddDialogOpen(false);
-    alert("User added successfully");
-  };
-
-  const handleBulkAddUsers = (newUsers) => {
-    const createdUsers = newUsers.map((user, index) => {
-      return {
-        id: Math.max(...users.map(u => u.id), 0) + index + 1,
+    if (onUserAdd) {
+      onUserAdd(user);
+    } else {
+      // Fallback to client-side handling if no API integration
+      const newUser = {
+        id: Math.max(...users.map(u => u.id), 0) + 1,
         email: user.email,
         fullName: user.fullName,
         departmentId: user.departmentId,
@@ -66,20 +80,29 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-    });
-    
-    setUsers([...users, ...createdUsers]);
-    setIsBulkAddDialogOpen(false);
-    alert(`${newUsers.length} users added successfully`);
+      
+      setUsers([...users, newUser]);
+      alert("User added successfully");
+    }
+    setIsAddDialogOpen(false);
   };
 
-  const handleUpdateUser = (user) => {
-    if (!selectedUser) return;
-
-    const updatedUsers = users.map(u => {
-      if (u.id === selectedUser.id) {
+  const handleBulkAddUsers = (newUsers) => {
+    // Keep the bulk add functionality with server integration
+    if (onUserAdd && Array.isArray(newUsers)) {
+      // If backend supports bulk add
+      Promise.all(newUsers.map(user => onUserAdd(user)))
+        .then(() => {
+          setIsBulkAddDialogOpen(false);
+        })
+        .catch(err => {
+          console.error("Error adding users in bulk:", err);
+        });
+    } else {
+      // Client-side fallback
+      const createdUsers = newUsers.map((user, index) => {
         return {
-          ...u,
+          id: Math.max(...users.map(u => u.id), 0) + index + 1,
           email: user.email,
           fullName: user.fullName,
           departmentId: user.departmentId,
@@ -87,29 +110,79 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
                           user.departmentId === 3 ? "Physics" : 
                           user.departmentId === 2 ? "Mathematics" : "Administration",
           roleNames: user.roleNames,
+          profilePicture: "https://github.com/shadcn.png",
           isActive: user.isActive,
+          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-      }
-      return u;
-    });
-    
-    setUsers(updatedUsers);
-    if (onUserUpdate) onUserUpdate({...user, id: selectedUser.id});
+      });
+      
+      setUsers([...users, ...createdUsers]);
+      alert(`${newUsers.length} users added successfully`);
+    }
+    setIsBulkAddDialogOpen(false);
+  };
+
+  const handleUpdateUser = (user) => {
+    if (!selectedUser) return;
+
+    if (onUserUpdate) {
+      onUserUpdate(selectedUser.id, user);
+    } else {
+      // Client-side fallback
+      const updatedUsers = users.map(u => {
+        if (u.id === selectedUser.id) {
+          return {
+            ...u,
+            email: user.email,
+            fullName: user.fullName,
+            departmentId: user.departmentId,
+            departmentName: user.departmentId === 5 ? "Computer Science" : 
+                            user.departmentId === 3 ? "Physics" : 
+                            user.departmentId === 2 ? "Mathematics" : "Administration",
+            roleNames: user.roleNames,
+            isActive: user.isActive,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return u;
+      });
+      
+      setUsers(updatedUsers);
+      alert("User updated successfully");
+    }
     setIsEditDialogOpen(false);
     setSelectedUser(null);
-    alert("User updated successfully");
   };
 
   const handleDeleteUser = () => {
     if (!selectedUser) return;
     
-    const filteredUsers = users.filter(u => u.id !== selectedUser.id);
-    setUsers(filteredUsers);
-    if (onUserDelete) onUserDelete(selectedUser.id);
+    if (onUserDelete) {
+      onUserDelete(selectedUser.id);
+    } else {
+      // Client-side fallback
+      const filteredUsers = users.filter(u => u.id !== selectedUser.id);
+      setUsers(filteredUsers);
+      alert("User deleted successfully");
+    }
     setIsDeleteDialogOpen(false);
     setSelectedUser(null);
-    alert("User deleted successfully");
+  };
+
+  const handleStatusChange = (user) => {
+    if (onStatusChange) {
+      onStatusChange(user.id, !user.isActive);
+    } else {
+      // Client-side fallback
+      const updatedUsers = users.map(u => {
+        if (u.id === user.id) {
+          return { ...u, isActive: !u.isActive };
+        }
+        return u;
+      });
+      setUsers(updatedUsers);
+    }
   };
 
   const openEditDialog = (user) => {
@@ -138,6 +211,48 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
     return `${diffInMonths} months ago`;
   };
 
+  // Handle search with debounce
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    
+    // If backend search is enabled, update filters after a delay
+    if (onFilterChange) {
+      const timer = setTimeout(() => {
+        onFilterChange({
+          ...filters,
+          search: e.target.value
+        });
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  };
+
+  // Apply filters to backend
+  const applyFilters = () => {
+    if (onFilterChange) {
+      onFilterChange({
+        ...filters,
+        search: searchQuery
+      });
+    }
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setFilters({
+      role: "",
+      status: "",
+      department: ""
+    });
+    
+    if (onFilterChange) {
+      onFilterChange({
+        search: searchQuery
+      });
+    }
+  };
+
   return (
     <>
       <div className="user-table-container">
@@ -151,8 +266,16 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
                 placeholder="Search users..."
                 className="search-input"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
+                onKeyUp={(e) => e.key === 'Enter' && applyFilters()}
               />
+              <button 
+                className="filter-button"
+                onClick={() => setShowFilters(!showFilters)}
+                aria-label="Toggle filters"
+              >
+                <Filter size={18} />
+              </button>
             </div>
             <div className="action-buttons">
               <button className="add-button" onClick={() => setIsAddDialogOpen(true)}>
@@ -167,72 +290,198 @@ const UserTable = ({ users: initialUsers, onUserAdd, onUserUpdate, onUserDelete 
           </div>
         </div>
 
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="filter-panel">
+            <div className="filter-group">
+              <label>Department</label>
+              <select 
+                value={filters.department}
+                onChange={(e) => setFilters({...filters, department: e.target.value})}
+              >
+                <option value="">All Departments</option>
+                <option value="5">Computer Science</option>
+                <option value="3">Physics</option>
+                <option value="2">Mathematics</option>
+                <option value="1">Administration</option>
+              </select>
+            </div>
+            <div className="filter-group">
+              <label>Role</label>
+              <select 
+                value={filters.role}
+                onChange={(e) => setFilters({...filters, role: e.target.value})}
+              >
+                <option value="">All Roles</option>
+                <option value="ADMIN">Admin</option>
+                <option value="INSTRUCTOR">Instructor</option>
+                <option value="STUDENT">Student</option>
+              </select>
+            </div>
+            <div className="filter-group">
+              <label>Status</label>
+              <select 
+                value={filters.status}
+                onChange={(e) => setFilters({...filters, status: e.target.value})}
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+            <div className="filter-actions">
+              <button className="apply-filters" onClick={applyFilters}>Apply Filters</button>
+              <button className="reset-filters" onClick={resetFilters}>Reset</button>
+            </div>
+          </div>
+        )}
+
         <div className="user-table-wrapper">
-          <table className="user-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Department</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <div className="user-info">
-                      
-                      <div className="user-details">
-                        <div className="user-name">{user.fullName}</div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{user.departmentName}</td>
-                  <td>
-                    {user.roleNames.map((role) => (
-                      <span key={role} className="role-badge">
-                        {role.toLowerCase()}
-                      </span>
-                    ))}
-                  </td>
-                  <td>
-                    <span className={`status-badge ${user.isActive ? "active" : "inactive"}`}>
-                      {user.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td>{formatTimeAgo(user.createdAt)}</td>
-                  <td className="action-cell">
-                    <div className="dropdown">
-                      <button className="dropdown-trigger">
-                        <MoreHorizontal size={16} />
-                      </button>
-                      <div className="dropdown-menu">
-                        <div className="dropdown-header">Actions</div>
-                        <div className="dropdown-divider"></div>
-                        <button className="dropdown-item" onClick={() => openEditDialog(user)}>
-                          <Edit size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <Link to={`/admin/users/${user.id}`} className="dropdown-item">
-                          <span>View Details</span>
-                        </Link>
-                        <div className="dropdown-divider"></div>
-                        <button className="dropdown-item delete" onClick={() => openDeleteDialog(user)}>
-                          <Trash2 size={14} />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </div>
-                  </td>
+          {loading ? (
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p>Loading users...</p>
+            </div>
+          ) : (
+            <table className="user-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Department</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th className="text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="empty-table">
+                      No users found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="user-info">
+                          <div className="user-details">
+                            <div className="user-name">{user.fullName}</div>
+                            <div className="user-email">{user.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{user.departmentName}</td>
+                      <td>
+                        {user.roleNames && user.roleNames.map((role) => (
+                          <span key={role} className="role-badge">
+                            {role.toLowerCase()}
+                          </span>
+                        ))}
+                      </td>
+                      <td>
+                        <span 
+                          className={`status-badge ${user.isActive ? "active" : "inactive"}`}
+                          onClick={() => handleStatusChange(user)}
+                        >
+                          {user.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td>{user.createdAt ? formatTimeAgo(user.createdAt) : 'N/A'}</td>
+                      <td className="action-cell">
+                        <div className="dropdown">
+                          <button className="dropdown-trigger">
+                            <MoreHorizontal size={16} />
+                          </button>
+                          <div className="dropdown-menu">
+                            <div className="dropdown-header">Actions</div>
+                            <div className="dropdown-divider"></div>
+                            <button className="dropdown-item" onClick={() => openEditDialog(user)}>
+                              <Edit size={14} />
+                              <span>Edit</span>
+                            </button>
+                            <Link to={`/admin/users/${user.id}`} className="dropdown-item">
+                              <span>View Details</span>
+                            </Link>
+                            <div className="dropdown-divider"></div>
+                            <button className="dropdown-item delete" onClick={() => openDeleteDialog(user)}>
+                              <Trash2 size={14} />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
+
+        {/* Pagination controls */}
+        {pagination && pagination.totalPages > 0 && (
+          <div className="pagination-controls">
+            <div className="pagination-info">
+              <span>
+                Showing {pagination.page * pagination.size + 1} to{" "}
+                {Math.min((pagination.page + 1) * pagination.size, pagination.totalElements)} of{" "}
+                {pagination.totalElements} users
+              </span>
+            </div>
+            <div className="page-size-selector">
+              <label>
+                Items per page:
+                <select
+                  value={pagination.size}
+                  onChange={(e) => onPageSizeChange && onPageSizeChange(Number(e.target.value))}
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+              </label>
+            </div>
+            <div className="pagination-buttons">
+              <button
+                className="pagination-button"
+                onClick={() => onPageChange && onPageChange(0)}
+                disabled={pagination.page <= 0 || loading}
+                aria-label="First page"
+              >
+                <ChevronsLeft size={16} />
+              </button>
+              <button
+                className="pagination-button"
+                onClick={() => onPageChange && onPageChange(pagination.page - 1)}
+                disabled={pagination.page <= 0 || loading}
+                aria-label="Previous page"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="page-indicator">
+                Page {pagination.page + 1} of {pagination.totalPages}
+              </span>
+              <button
+                className="pagination-button"
+                onClick={() => onPageChange && onPageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.totalPages - 1 || loading}
+                aria-label="Next page"
+              >
+                <ChevronRight size={16} />
+              </button>
+              <button
+                className="pagination-button"
+                onClick={() => onPageChange && onPageChange(pagination.totalPages - 1)}
+                disabled={pagination.page >= pagination.totalPages - 1 || loading}
+                aria-label="Last page"
+              >
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Add User Dialog */}
