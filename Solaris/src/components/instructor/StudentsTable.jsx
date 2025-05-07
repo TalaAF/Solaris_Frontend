@@ -3,19 +3,19 @@ import { MoreHorizontal, Download, UserPlus } from 'lucide-react';
 import AddStudentModal from './AddStudentModal';
 import './StudentsTable.css';
 
-const StudentsTable = () => {
+const StudentsTable = ({ courseId }) => {
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('All Courses');
   const [selectedStatus, setSelectedStatus] = useState('All Status');
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentCourse, setCurrentCourse] = useState(null);
 
   // Mock data - in a real application, this would come from an API
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
-      setStudents([
+      const allStudents = [
         {
           id: 1,
           name: 'Sarah Johnson',
@@ -66,10 +66,16 @@ const StudentsTable = () => {
           progress: 85,
           enrolledDate: 'Feb 10, 2023'
         }
-      ]);
+      ];
+
+      // Find the current course based on courseId
+      const availableCourses = ['Anatomy 101', 'Clinical Diagnosis', 'Medical Ethics', 'Pathology', 'Pharmacology'];
+      setCurrentCourse(availableCourses.find(course => course === courseId) || availableCourses[0]);
+      
+      setStudents(allStudents);
       setIsLoading(false);
     }, 800);
-  }, []);
+  }, [courseId]);
 
   // Filter students based on search term, course, and status
   const filteredStudents = students.filter((student) => {
@@ -77,9 +83,7 @@ const StudentsTable = () => {
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCourse = 
-      selectedCourse === 'All Courses' || 
-      student.courses.includes(selectedCourse);
+    const matchesCourse = student.courses.includes(currentCourse);
     
     const matchesStatus = 
       selectedStatus === 'All Status' || 
@@ -88,9 +92,6 @@ const StudentsTable = () => {
     return matchesSearch && matchesCourse && matchesStatus;
   });
 
-  // All unique courses from student data
-  const allCourses = ['All Courses', ...new Set(students.flatMap(student => student.courses))];
-  
   // All statuses from student data
   const allStatuses = ['All Status', 'Active', 'Inactive'];
 
@@ -106,18 +107,20 @@ const StudentsTable = () => {
 
   // Add student handler
   const handleAddStudent = (newStudent) => {
-    setStudents([...students, newStudent]);
+    // Ensure the new student is associated with the current course
+    const updatedNewStudent = {
+      ...newStudent,
+      courses: [currentCourse]
+    };
     
-    // Show a success notification (optional)
-    // You could add a toast notification here
-    
-    console.log('New student added:', newStudent);
+    setStudents([...students, updatedNewStudent]);
+    console.log('New student added:', updatedNewStudent);
   };
 
   return (
     <div className="students-container">
       <div className="students-header">
-        <h1>Students</h1>
+        <h1>{currentCourse} Students</h1>
         <div className="header-actions">
           <button className="export-button">
             <Download size={18} />
@@ -143,16 +146,6 @@ const StudentsTable = () => {
 
         <div className="dropdown-filters">
           <select 
-            value={selectedCourse} 
-            onChange={(e) => setSelectedCourse(e.target.value)}
-            className="filter-dropdown"
-          >
-            {allCourses.map((course) => (
-              <option key={course} value={course}>{course}</option>
-            ))}
-          </select>
-
-          <select 
             value={selectedStatus} 
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="filter-dropdown"
@@ -169,7 +162,6 @@ const StudentsTable = () => {
           <thead>
             <tr>
               <th>Student</th>
-              <th>Courses</th>
               <th>Status</th>
               <th>Progress</th>
               <th>Enrolled Date</th>
@@ -179,15 +171,15 @@ const StudentsTable = () => {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="6" className="loading-cell">
+                <td colSpan="5" className="loading-cell">
                   <div className="loading-spinner"></div>
                   <span>Loading students...</span>
                 </td>
               </tr>
             ) : filteredStudents.length === 0 ? (
               <tr>
-                <td colSpan="6" className="empty-cell">
-                  No students found matching your filters.
+                <td colSpan="5" className="empty-cell">
+                  No students found in this course.
                 </td>
               </tr>
             ) : (
@@ -198,13 +190,6 @@ const StudentsTable = () => {
                     <div className="student-info">
                       <div className="student-name">{student.name}</div>
                       <div className="student-email">{student.email}</div>
-                    </div>
-                  </td>
-                  <td className="courses-cell">
-                    <div className="courses-container">
-                      {student.courses.map((course, index) => (
-                        <span key={index} className="course-badge">{course}</span>
-                      ))}
                     </div>
                   </td>
                   <td>
@@ -241,7 +226,7 @@ const StudentsTable = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onAddStudent={handleAddStudent}
-        courses={allCourses}
+        currentCourse={currentCourse}
       />
     </div>
   );
