@@ -1,10 +1,17 @@
 // src/components/enrollment/EnrollmentInterface.jsx
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from '../ui/Card';
-import { CheckCircle, Clock, BookOpen, ChevronLeft } from 'lucide-react';
+import { 
+  BookOpen, 
+  CheckCircle, 
+  Clock, 
+  Calendar, 
+  User, 
+  Award, 
+  Layers,
+  AlertCircle
+} from 'lucide-react';
 import './EnrollmentInterface.css';
 
-// Main enrollment component
 const EnrollmentInterface = () => {
   // State variables
   const [activeTab, setActiveTab] = useState(0);
@@ -85,205 +92,296 @@ const EnrollmentInterface = () => {
     }, 1000);
   };
 
+  // Get the appropriate icon for course type
+  const getCourseTypeIcon = (type) => {
+    switch (type) {
+      case 'Major Requirement':
+        return <BookOpen size={16} className="course-type-icon" />;
+      case 'Major Elective':
+        return <Layers size={16} className="course-type-icon" />;
+      case 'University Requirement':
+        return <Award size={16} className="course-type-icon" />;
+      case 'Medical Requirement':
+        return <AlertCircle size={16} className="course-type-icon" />;
+      default:
+        return <BookOpen size={16} className="course-type-icon" />;
+    }
+  };
+
   return (
     <div className="enrollment-container">
-      {/* Student Information Card */}
-      <Card className="student-info-card">
-        <div className="student-info-header">
-          <div className="student-info-left">
-            <h2 className="student-name">{studentData.name}</h2>
-            <p className="student-id">ID: <strong>{studentData.id}</strong></p>
-            <p className="student-status">Status: <strong>{studentData.status}</strong></p>
-          </div>
-          <div className="gpa-container">
-            <p>Major GPA: <strong>{studentData.majorGPA}</strong></p>
-            <p>Cumulative GPA: <strong>{studentData.cumulativeGPA}</strong></p>
-            <p>Term: <strong>{studentData.term}</strong></p>
+      {/* Student Profile Section */}
+      <div className="student-profile-section">
+        <div className="student-avatar">
+          <User size={32} />
+        </div>
+        <div className="student-details">
+          <h1 className="student-name">{studentData.name}</h1>
+          <div className="student-meta">
+            <div className="student-meta-item">
+              <span className="student-meta-label">ID</span>
+              <span className="student-meta-value">{studentData.id}</span>
+            </div>
+            <div className="student-meta-item">
+              <span className="student-meta-label">Status</span>
+              <span className="student-meta-value status-badge">{studentData.status}</span>
+            </div>
+            <div className="student-meta-item">
+              <span className="student-meta-label">Term</span>
+              <span className="student-meta-value">{studentData.term}</span>
+            </div>
           </div>
         </div>
-      </Card>
-
-      {/* Progress Overview */}
-      <Card className="progress-card">
-        <div className="progress-section">
-          <div className="progress-header">
-            <span>Overall Completion</span>
-            <span className="progress-percentage">{progress.completed}%</span>
+        <div className="student-academic-stats">
+          <div className="stat-box">
+            <div className="stat-value">{studentData.majorGPA}</div>
+            <div className="stat-label">Major GPA</div>
           </div>
+          <div className="stat-box">
+            <div className="stat-value">{studentData.cumulativeGPA}</div>
+            <div className="stat-label">Cumulative GPA</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Dashboard */}
+      <div className="progress-dashboard">
+        <div className="progress-header">
+          <h2>Degree Progress</h2>
+          <div className="progress-percentage-badge">{progress.completed}% Complete</div>
+        </div>
+        <div className="progress-visualization">
           <div className="progress-bar-container">
             <div 
               className="progress-bar" 
               style={{ width: `${progress.completed}%` }}
             ></div>
           </div>
-          <p className="progress-details">
-            {completedCredits} of {progress.allTotal} total credits completed
-          </p>
-        </div>
-      </Card>
-
-      {/* Course Tabs */}
-      <Card className="courses-card">
-        <div className="course-tabs">
-          <button 
-            className={`tab-button ${activeTab === 0 ? 'active' : ''}`} 
-            onClick={() => handleTabChange(0)}
-          >
-            Registered Courses
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 1 ? 'active' : ''}`} 
-            onClick={() => handleTabChange(1)}
-          >
-            Completed Courses
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 2 ? 'active' : ''}`} 
-            onClick={() => handleTabChange(2)}
-          >
-            Available Courses
-          </button>
-        </div>
-
-        {/* Registered Courses Tab */}
-        {activeTab === 0 && (
-          <div className="tab-content">
-            <h3 className="tab-title">Current Term: {studentData.term}</h3>
-            {courseData.registered.length > 0 ? (
-              <div className="course-list">
-                <div className="course-list-header">
-                  <div className="course-code">Code</div>
-                  <div className="course-title">Title</div>
-                  <div className="course-credits">Credits</div>
-                  <div className="course-type">Type</div>
-                </div>
-                {courseData.registered.map((course) => (
-                  <div className="course-item" key={course.code}>
-                    <div className="course-code-container">
-                      <span className="course-code">{course.code}</span>
-                    </div>
-                    <div className="course-title">{course.title}</div>
-                    <div className="course-credits">{course.credits}</div>
-                    <div className="course-type">{course.type}</div>
-                  </div>
-                ))}
-                <div className="course-summary">
-                  <div className="course-summary-title">Total Credits:</div>
-                  <div className="course-summary-value">{calculateTotalCredits(courseData.registered)}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="no-courses-message">
-                <p>You are not currently registered for any courses.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Completed Courses Tab */}
-        {activeTab === 1 && (
-          <div className="tab-content completed-tab">
-            {courseData.completed.length > 0 ? (
-              <div className="course-list">
-                <div className="course-list-header">
-                  <div className="course-code">Code</div>
-                  <div className="course-title">Title</div>
-                  <div className="course-credits">Credits</div>
-                  <div className="course-type">Type</div>
-                </div>
-                {courseData.completed.map((course) => (
-                  <div className="course-item" key={course.code}>
-                    <div className="course-code-container">
-                      <span className="course-code">{course.code}</span>
-                    </div>
-                    <div className="course-title">{course.title}</div>
-                    <div className="course-credits">{course.credits}</div>
-                    <div className="course-type">{course.type}</div>
-                  </div>
-                ))}
-                <div className="course-summary">
-                  <div className="course-summary-title">Total Credits:</div>
-                  <div className="course-summary-value">{calculateTotalCredits(courseData.completed)}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="no-courses-message">
-                <p>You have not completed any courses yet.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Available Courses Tab */}
-        {activeTab === 2 && (
-          <div className="tab-content available-tab">
-            <div className="registration-status">
-              <h3>Registration Status: 
-                <span className={registrationOpen ? 'status-open' : 'status-closed'}>
-                  {registrationOpen ? 'Open' : 'Closed'}
-                </span>
-              </h3>
-              <p className="registration-note">
-                Registration for Fall 2025 is currently {registrationOpen ? 'open' : 'closed'}.
-                {registrationOpen && ' Select courses below to register.'}
-              </p>
+          <div className="progress-stats">
+            <div className="progress-stat">
+              <div className="progress-stat-value">{completedCredits}</div>
+              <div className="progress-stat-label">Credits Completed</div>
             </div>
-            
-            {courseData.available.length > 0 ? (
-              <div className="course-list">
-                <div className="course-list-header">
-                  <div className="course-select">Select</div>
-                  <div className="course-code">Code</div>
-                  <div className="course-title">Title</div>
-                  <div className="course-credits">Credits</div>
-                  <div className="course-type">Type</div>
-                </div>
-                {courseData.available.map((course) => (
-                  <div className="course-item" key={course.code}>
-                    <div className="course-select">
-                      <input 
-                        type="checkbox" 
-                        disabled={!registrationOpen}
-                        checked={selectedCourses.includes(course.code)}
-                        onChange={() => handleCourseSelection(course.code)}
-                      />
-                    </div>
-                    <div className="course-code-container">
-                      <span className="course-code">{course.code}</span>
-                    </div>
-                    <div className="course-title">{course.title}</div>
-                    <div className="course-credits">{course.credits}</div>
-                    <div className="course-type">{course.type}</div>
+            <div className="progress-stat">
+              <div className="progress-stat-value">{progress.allTotal - completedCredits}</div>
+              <div className="progress-stat-label">Credits Remaining</div>
+            </div>
+            <div className="progress-stat">
+              <div className="progress-stat-value">{progress.allTotal}</div>
+              <div className="progress-stat-label">Total Required</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Course Management Section */}
+      <div className="course-management-section">
+        {/* Course Tabs */}
+        <div className="tabs-container">
+          <div className="tabs-header">
+            <button 
+              className={`tab-button ${activeTab === 0 ? 'active' : ''}`} 
+              onClick={() => handleTabChange(0)}
+            >
+              <Clock size={18} />
+              <span>Registered Courses</span>
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 1 ? 'active' : ''}`} 
+              onClick={() => handleTabChange(1)}
+            >
+              <CheckCircle size={18} />
+              <span>Completed Courses</span>
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 2 ? 'active' : ''}`} 
+              onClick={() => handleTabChange(2)}
+            >
+              <Calendar size={18} />
+              <span>Available Courses</span>
+            </button>
+          </div>
+
+          <div className="tab-content-container">
+            {/* Registered Courses Tab */}
+            {activeTab === 0 && (
+              <div className="tab-content fade-in">
+                <div className="tab-header">
+                  <h3>Current Term: {studentData.term}</h3>
+                  <div className="total-credits-badge">
+                    {calculateTotalCredits(courseData.registered)} Credits
                   </div>
-                ))}
-                <div className="course-summary">
-                  <div className="course-summary-title">Selected Credits:</div>
-                  <div className="course-summary-value">
-                    {calculateTotalCredits(courseData.available.filter(course => 
-                      selectedCourses.includes(course.code)))}
-                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="no-courses-message">
-                <p>There are no available courses for registration at this time.</p>
+                
+                {courseData.registered.length > 0 ? (
+                  <div className="courses-grid">
+                    {courseData.registered.map((course) => (
+                      <div className="course-card" key={course.code}>
+                        <div className="course-card-header">
+                          <div className="course-code">{course.code}</div>
+                          <div className="course-credits">{course.credits} CR</div>
+                        </div>
+                        <div className="course-card-body">
+                          <h4 className="course-title">{course.title}</h4>
+                          <div className="course-type">
+                            {getCourseTypeIcon(course.type)}
+                            <span>{course.type}</span>
+                          </div>
+                        </div>
+                        <div className="course-card-footer">
+                          <div className="course-status in-progress">
+                            <Clock size={14} />
+                            <span>In Progress</span>
+                          </div>
+                          <div className="course-term">{course.term}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-courses-message">
+                    <Calendar size={32} />
+                    <p>You are not currently registered for any courses.</p>
+                  </div>
+                )}
               </div>
             )}
-            
-            {registrationOpen && courseData.available.length > 0 && (
-              <div className="registration-actions">
-                <button 
-                  className="register-button"
-                  disabled={selectedCourses.length === 0 || loading}
-                  onClick={handleRegister}
-                >
-                  {loading ? "Processing..." : "Register for Selected Courses"}
-                </button>
+
+            {/* Completed Courses Tab */}
+            {activeTab === 1 && (
+              <div className="tab-content fade-in">
+                <div className="tab-header">
+                  <h3>Completed Courses</h3>
+                  <div className="total-credits-badge">
+                    {calculateTotalCredits(courseData.completed)} Credits
+                  </div>
+                </div>
+                
+                {courseData.completed.length > 0 ? (
+                  <div className="courses-grid">
+                    {courseData.completed.map((course) => (
+                      <div className="course-card completed" key={course.code}>
+                        <div className="course-card-header">
+                          <div className="course-code">{course.code}</div>
+                          <div className="course-credits">{course.credits} CR</div>
+                        </div>
+                        <div className="course-card-body">
+                          <h4 className="course-title">{course.title}</h4>
+                          <div className="course-type">
+                            {getCourseTypeIcon(course.type)}
+                            <span>{course.type}</span>
+                          </div>
+                        </div>
+                        <div className="course-card-footer">
+                          <div className="course-status completed">
+                            <CheckCircle size={14} />
+                            <span>Completed</span>
+                          </div>
+                          <div className="course-term">{course.term}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-courses-message">
+                    <CheckCircle size={32} />
+                    <p>You have not completed any courses yet.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Available Courses Tab */}
+            {activeTab === 2 && (
+              <div className="tab-content fade-in">
+                <div className="tab-header">
+                  <h3>Available Courses</h3>
+                  <div className={`registration-status-badge ${registrationOpen ? 'open' : 'closed'}`}>
+                    Registration {registrationOpen ? 'Open' : 'Closed'}
+                  </div>
+                </div>
+                
+                <div className="registration-info">
+                  <AlertCircle size={18} />
+                  <p>
+                    Registration for Fall 2025 is currently {registrationOpen ? 'open' : 'closed'}.
+                    {registrationOpen && ' Select courses below to register.'}
+                  </p>
+                </div>
+                
+                {courseData.available.length > 0 ? (
+                  <>
+                    <div className="selectable-courses-grid">
+                      {courseData.available.map((course) => (
+                        <div 
+                          className={`course-card available ${selectedCourses.includes(course.code) ? 'selected' : ''}`} 
+                          key={course.code}
+                          onClick={() => registrationOpen && handleCourseSelection(course.code)}
+                        >
+                          <div className="course-card-header">
+                            <div className="course-code">{course.code}</div>
+                            <div className="course-credits">{course.credits} CR</div>
+                          </div>
+                          <div className="course-card-body">
+                            <h4 className="course-title">{course.title}</h4>
+                            <div className="course-type">
+                              {getCourseTypeIcon(course.type)}
+                              <span>{course.type}</span>
+                            </div>
+                          </div>
+                          <div className="course-card-footer">
+                            <div className="course-term">{course.term}</div>
+                            <div className="selection-checkbox">
+                              <input 
+                                type="checkbox" 
+                                checked={selectedCourses.includes(course.code)}
+                                onChange={() => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="selection-summary">
+                      <div className="selected-courses-info">
+                        <span>{selectedCourses.length} courses selected</span>
+                        <span>|</span>
+                        <span>
+                          {calculateTotalCredits(courseData.available.filter(course => 
+                            selectedCourses.includes(course.code)))} credits
+                        </span>
+                      </div>
+                      
+                      {registrationOpen && (
+                        <button 
+                          className="register-button"
+                          disabled={selectedCourses.length === 0 || loading}
+                          onClick={handleRegister}
+                        >
+                          {loading ? (
+                            <>
+                              <div className="loading-spinner-small"></div>
+                              <span>Processing...</span>
+                            </>
+                          ) : (
+                            "Register for Selected Courses"
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-courses-message">
+                    <Calendar size={32} />
+                    <p>There are no available courses for registration at this time.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
