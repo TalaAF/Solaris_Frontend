@@ -1,0 +1,63 @@
+.solaris-alert {
+  position: relative;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+}
+
+.solaris-alert > svg {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  color: inherit;
+}
+
+.solaris-alert > svg ~ * {
+  padding-left: 1.75rem;
+}
+
+.solaris-alert > svg + div {
+  transform: translateY(-3px);
+}
+
+.solaris-alert.default {
+  background-color: #fff;
+  color: #333;
+}
+
+.solaris-alert.destructive {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.solaris-alert.destructive > svg {
+  color: #ef4444;
+}
+
+.solaris-alert.warning {
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.05);
+}
+
+.solaris-alert.success {
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.solaris-alert-title {
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.solaris-alert-description {
+  font-size: 0.875rem;
+}
+
+.solaris-alert-description p {
+  line-height: 1.5;
+}

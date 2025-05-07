@@ -26,13 +26,16 @@ import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
 import UserManagement from './components/pages/Admin/Users';
 import Departments from './components/pages/Admin/Departments'; // New import
 import ContentManagement from './components/pages/Admin/ContentManagement'; 
+import CertificateManagement from './components/pages/Admin/CertificateManagement'; // New import
 import CourseManagement from './components/pages/Admin/CourseManagement'; // New import
 import AssessmentManagement from './components/pages/Admin/AssessmentManagement'; // New import
+import SecurityManage from './components/pages/Admin/Security'; // New import
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
 
 import './App.css';
+import { Security } from '@mui/icons-material';
 
 // Simple Layout wrapper (no auth check)
 const SimpleLayout = ({ children }) => {
@@ -78,6 +81,8 @@ function App() {
                 <Route path="/admin/courses" element={<CourseManagement />} />
                 <Route path="/admin/content" element={<ContentManagement />} />
                 <Route path="/admin/assessments" element={<AssessmentManagement />} />
+                <Route path="/admin/certificates" element={<CertificateManagement />} />
+                <Route path="/admin/security" element={<SecurityManage />} />
                 {/* Add more admin routes as you implement them */}
               </Route>
               

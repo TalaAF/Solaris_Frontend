@@ -1,0 +1,65 @@
+.solaris-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .solaris-tabs-list {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    background-color: #f1f5f9;
+    padding: 0.25rem;
+    color: #64748b;
+  }
+  
+  .solaris-tabs-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  
+  .solaris-tabs-trigger.active {
+    background-color: white;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
+  
+  .solaris-tabs-trigger.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background-color: #E5BF03;
+    border-radius: 1px;
+  }
+  
+  .solaris-tabs-trigger:focus-visible {
+    outline: 2px solid #E5BF03;
+    outline-offset: 2px;
+  }
+  
+  .solaris-tabs-trigger:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  .solaris-tabs-content {
+    margin-top: 0.5rem;
+  }

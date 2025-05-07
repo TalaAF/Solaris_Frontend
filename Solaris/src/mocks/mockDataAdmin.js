@@ -650,3 +650,60 @@ export const content = [
 ];
 
 
+// Add this to your mockDataAdmin.js file
+
+// Certificate Templates
+export const certificateTemplates = [
+  {
+    id: 1,
+    name: "Web Development Certification",
+    description: "Certificate for completing the Advanced Web Development course",
+    courseId: 1,
+    courseName: "Advanced Web Development",
+    departmentId: 5,
+    departmentName: "Computer Science",
+    template: "Standard Certificate",
+    issuedCount: 32,
+    dateCreated: "2024-04-12T10:00:00Z",
+    lastModified: "2024-04-15T14:30:00Z",
+    isActive: true
+  },
+  {
+    id: 2,
+    name: "Data Science Excellence",
+    description: "Certificate for outstanding achievement in Data Science course",
+    courseId: 2,
+    courseName: "Machine Learning Fundamentals",
+    departmentId: 5,
+    departmentName: "Computer Science",
+    template: "Honors Certificate",
+    issuedCount: 15,
+    dateCreated: "2024-03-21T09:30:00Z",
+    lastModified: "2024-04-02T11:45:00Z",
+    isActive: true
+  },
+  {
+    id: 3,
+    name: "Physics Foundations",
+    description: "Certificate for completing the Physics Foundations course",
+    courseId: 3,
+    courseName: "Database Systems",
+    departmentId: 3,
+    departmentName: "Physics",
+    template: "Completion Certificate",
+    issuedCount: 45,
+    dateCreated: "2024-02-15T13:20:00Z",
+    lastModified: "2024-02-15T13:20:00Z",
+    isActive: false
+  }
+];
+
+// Make sure to export this in your default export
+// Add this to the default export at the bottom of the file
+export default {
+  // ... other exports
+  certificates,
+  certificateTemplates,
+  content,
+  assessments
+};

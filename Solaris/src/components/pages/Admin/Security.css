@@ -1,0 +1,75 @@
+.security-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin-top: 70px;
+  }
+  
+  .security-header {
+    margin-bottom: 24px;
+    position: relative;
+  }
+  
+  .security-header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background-color: #E5BF03;
+    border-radius: 2px;
+  }
+  
+  .admin-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .admin-subtitle {
+    font-size: 16px;
+    color: #64748b;
+  }
+  
+  /* Custom styles for tabs */
+  :global(.tabs-list) {
+    border-bottom-color: #E5BF03 !important;
+  }
+  
+  :global(.tabs-trigger[data-state="active"]) {
+    color: #E5BF03 !important;
+    border-color: #E5BF03 !important;
+  }
+  
+  :global(.alert-triangle) {
+    color: #ef4444;
+  }
+  
+  :global(.shield-icon) {
+    color: #E5BF03;
+  }
+  
+  /* Switch styling to match Solaris theme */
+  :global(.switch[data-state="checked"]) {
+    background-color: #E5BF03 !important;
+  }
+  
+  /* Button styling to match Solaris theme */
+  :global(.button) {
+    background-color: #E5BF03;
+    color: white;
+  }
+  
+  :global(.button:hover) {
+    background-color: #c9a703;
+  }
+  
+  :global(.button-outline) {
+    color: #E5BF03;
+    border-color: #E5BF03;
+  }
+  
+  :global(.button-outline:hover) {
+    background-color: rgba(229, 191, 3, 0.1);
+  }
