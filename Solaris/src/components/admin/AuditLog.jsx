@@ -1,23 +1,6 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
 import { Search } from "lucide-react";
+import "./AuditLog.css";
 
 // Mock audit log data
 const mockAuditLogs = [
@@ -110,85 +93,89 @@ const AuditLog = () => {
   });
 
   const uniqueActions = Array.from(new Set(logs.map((log) => log.action)));
+  
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}`;
+  };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-        <CardTitle>Audit Logs</CardTitle>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
+    <div className="audit-log-container">
+      <div className="audit-log-header">
+        <h2 className="audit-log-title">Audit Logs</h2>
+        <div className="audit-log-actions">
+          <div className="search-container">
+            <Search className="search-icon" />
+            <input
               type="search"
               placeholder="Search logs..."
-              className="pl-8 w-full"
+              className="search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Select
-            value={actionFilter}
-            onValueChange={setActionFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by action" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Actions</SelectItem>
+          <div className="select-container">
+            <select
+              className="filter-select"
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value)}
+            >
+              <option value="all">All Actions</option>
               {uniqueActions.map((action) => (
-                <SelectItem key={action} value={action}>
+                <option key={action} value={action}>
                   {action}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline">Export Logs</Button>
+            </select>
+            <div className="select-arrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <button className="export-button">
+            Export Logs
+          </button>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Action</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>Details</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredLogs.length > 0 ? (
-                filteredLogs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>{log.action}</TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{log.userName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {log.userEmail}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(log.timestamp).toLocaleString()}
-                    </TableCell>
-                    <TableCell>{log.ipAddress}</TableCell>
-                    <TableCell>{log.details}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    No logs found matching your filters
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Table container content */}
+      <div className="audit-log-table-container">
+        <table className="audit-log-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>User</th>
+              <th>Timestamp</th>
+              <th>IP Address</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLogs.length > 0 ? (
+              filteredLogs.map((log) => (
+                <tr key={log.id}>
+                  <td>{log.action}</td>
+                  <td>
+                    <div className="user-info">
+                      <div className="user-name">{log.userName}</div>
+                      <div className="user-email">{log.userEmail}</div>
+                    </div>
+                  </td>
+                  <td>{formatDate(log.timestamp)}</td>
+                  <td>{log.ipAddress}</td>
+                  <td>{log.details}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="empty-table">No logs found matching your filters</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+:root {
+  --solaris-yellow: #E5BF03;
+  --solaris-yellow-light: rgba(229, 191, 3, 0.1);
+  --solaris-text-primary: #111827;
+  --solaris-text-secondary: #64748b;
+  --solaris-text-light: #94a3b8;
+  --solaris-border: #e2e8f0;
+  --solaris-bg-light: #f8fafc;
+  --solaris-danger: #ef4444;
+  --solaris-danger-light: #FEEDEF;
+}
+
 .App {
   display: flex;
   height: 100vh;
@@ -126,4 +138,23 @@
 
 .day-glance-badge span {
   margin-right: 8px;
+}
+
+/* Text colors */
+.text-primary {
+  color: var(--solaris-yellow) !important;
+}
+
+.text-muted-foreground {
+  color: var(--solaris-text-secondary) !important;
+}
+
+/* Fix button colors */
+.add-policy-btn {
+  background-color: var(--solaris-yellow) !important;
+  color: var(--solaris-text-primary) !important;
+}
+
+.add-policy-btn:hover {
+  background-color: #d4af03 !important;
 }

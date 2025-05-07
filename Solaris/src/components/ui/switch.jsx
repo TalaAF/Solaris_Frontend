@@ -1,25 +1,21 @@
 import React from "react";
 import "./switch.css";
 
-const Switch = React.forwardRef(({ className, checked, onCheckedChange, disabled, ...props }, ref) => {
-  const handleChange = (e) => {
-    if (onCheckedChange) {
-      onCheckedChange(e.target.checked);
-    }
-  };
-
+const Switch = React.forwardRef(({ className = "", checked, onCheckedChange, ...props }, ref) => {
   return (
-    <label className={`solaris-switch-wrapper ${className || ""} ${disabled ? "disabled" : ""}`}>
+    <label className={`solaris-switch ${className}`}>
       <input
         type="checkbox"
-        className="solaris-switch-input"
-        checked={checked}
-        onChange={handleChange}
-        disabled={disabled}
         ref={ref}
+        checked={checked}
+        onChange={(e) => onCheckedChange && onCheckedChange(e.target.checked)}
+        className="solaris-switch-input"
         {...props}
       />
-      <span className="solaris-switch-slider"></span>
+      <span 
+        className="solaris-switch-slider" 
+        data-state={checked ? "checked" : "unchecked"}
+      ></span>
     </label>
   );
 });
