@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Layout from "../../layout/Layout";
 import ContentTable from "../../admin/ContentTable";
 import { content as initialContent } from "../../../mocks/mockDataAdmin";
 import "./ContentManagement.css";

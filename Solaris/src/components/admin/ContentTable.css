@@ -5,6 +5,7 @@
   overflow: hidden;
 }
 
+
 .content-table-header {
   padding: 16px 24px;
   border-bottom: 1px solid #f1f5f9;
@@ -38,11 +39,14 @@
   .content-table-actions {
     flex-direction: row;
     align-items: center;
+    gap: 16px;
   }
 }
 
 .search-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-icon {
@@ -53,6 +57,7 @@
   color: #64748b;
   width: 16px;
   height: 16px;
+  margin-top: 6px;
 }
 
 .search-input {
@@ -61,20 +66,27 @@
   border-radius: 6px;
   width: 100%;
   min-width: 240px;
+  height: 38px;
+  box-sizing: border-box;
+  margin-top: 11px;
 }
 
 .add-button {
+  height: 38px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 8px;
+  
   background-color: #E5BF03;
   color: white;
   border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+  margin: 0px !important;
 }
 
 .add-button:hover {
