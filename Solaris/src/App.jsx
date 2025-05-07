@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast'; // Add this import
 import Layout from './components/layout/Layout';
 import Dashboard from './components/pages/Dashboard';
 import Courses from './components/pages/Courses';
@@ -53,6 +54,38 @@ function App() {
       <NotificationProvider>
         <ErrorBoundary>
           <Router>
+            {/* Add Toaster component here */}
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  padding: '12px 20px',
+                },
+                success: {
+                  style: {
+                    background: '#10B981',
+                  },
+                  iconTheme: {
+                    primary: 'white',
+                    secondary: '#10B981',
+                  },
+                },
+                error: {
+                  style: {
+                    background: '#EF4444',
+                  },
+                  iconTheme: {
+                    primary: 'white',
+                    secondary: '#EF4444',
+                  },
+                },
+              }}
+            />
+            
             <Routes>
               {/* Auth routes - outside the main layout */}
               <Route path="/login" element={<Login />} />

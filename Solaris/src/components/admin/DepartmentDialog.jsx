@@ -40,7 +40,19 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Convert form data to match the backend DTO format
+    const departmentDTO = {
+      name: formData.name,
+      description: formData.description,
+      code: formData.code,
+      specialtyArea: formData.specialtyArea,
+      headOfDepartment: formData.headOfDepartment,
+      contactInformation: formData.contactInformation,
+      isActive: formData.isActive
+    };
+    
+    onSubmit(departmentDTO);
   };
 
   return (

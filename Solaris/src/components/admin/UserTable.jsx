@@ -16,6 +16,7 @@ import {
 import UserDialog from "./UserDialog";
 import BulkUserDialog from "./BulkUserDialog";
 import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
+import TablePagination from '../ui/TablePagination';
 import "./UserTable.css";
 
 const UserTable = ({ 
@@ -422,66 +423,15 @@ const UserTable = ({
         </div>
 
         {/* Pagination controls */}
-        {pagination && pagination.totalPages > 0 && (
-          <div className="pagination-controls">
-            <div className="pagination-info">
-              <span>
-                Showing {pagination.page * pagination.size + 1} to{" "}
-                {Math.min((pagination.page + 1) * pagination.size, pagination.totalElements)} of{" "}
-                {pagination.totalElements} users
-              </span>
-            </div>
-            <div className="page-size-selector">
-              <label>
-                Items per page:
-                <select
-                  value={pagination.size}
-                  onChange={(e) => onPageSizeChange && onPageSizeChange(Number(e.target.value))}
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </select>
-              </label>
-            </div>
-            <div className="pagination-buttons">
-              <button
-                className="pagination-button"
-                onClick={() => onPageChange && onPageChange(0)}
-                disabled={pagination.page <= 0 || loading}
-                aria-label="First page"
-              >
-                <ChevronsLeft size={16} />
-              </button>
-              <button
-                className="pagination-button"
-                onClick={() => onPageChange && onPageChange(pagination.page - 1)}
-                disabled={pagination.page <= 0 || loading}
-                aria-label="Previous page"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="page-indicator">
-                Page {pagination.page + 1} of {pagination.totalPages}
-              </span>
-              <button
-                className="pagination-button"
-                onClick={() => onPageChange && onPageChange(pagination.page + 1)}
-                disabled={pagination.page >= pagination.totalPages - 1 || loading}
-                aria-label="Next page"
-              >
-                <ChevronRight size={16} />
-              </button>
-              <button
-                className="pagination-button"
-                onClick={() => onPageChange && onPageChange(pagination.totalPages - 1)}
-                disabled={pagination.page >= pagination.totalPages - 1 || loading}
-                aria-label="Last page"
-              >
-                <ChevronsRight size={16} />
-              </button>
-            </div>
-          </div>
+        {!loading && (
+          <TablePagination
+            totalItems={pagination.totalElements}
+            currentPage={pagination.page}
+            pageSize={pagination.size}
+            itemName="users"
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
         )}
       </div>
 
