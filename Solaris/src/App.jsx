@@ -20,6 +20,7 @@ import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import Chatbot from './components/Chatbot/Chatbot';
 import './App.css';
 
 // Temporarily bypass authentication for development
@@ -51,6 +52,7 @@ function App() {
       <NotificationProvider>
         <ErrorBoundary>
           <Router>
+          <Chatbot />
             <Routes>
               {/* Auth routes - outside the main layout */}
               <Route path="/login" element={<Login />} />
