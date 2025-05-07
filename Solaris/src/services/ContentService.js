@@ -1,4 +1,3 @@
-
 // ContentService.js
 // Service to handle API calls for content with mock data support
 
@@ -423,6 +422,141 @@ class ContentService {
       return await axios.post(`${API_URL}/contents/${contentId}/mark-viewed`, { userId });
     } catch (error) {
       console.error(`Error marking content ${contentId} as viewed:`, error);
+      throw error;
+    }
+  }
+
+  // Get all contents with pagination (admin view)
+  async getAllContents(page = 0, size = 10, filters = {}) {
+    if (USE_MOCK) {
+      await this.mockDelay();
+      
+      let filtered = Object.values(mockContents);
+      
+      // Apply filters
+      if (filters.courseId) {
+        filtered = filtered.filter(c => c.courseId == filters.courseId);
+      }
+      
+      if (filters.type) {
+        filtered = filtered.filter(c => c.type === filters.type);
+      }
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        filtered = filtered.filter(c => 
+          c.title.toLowerCase().includes(searchLower) || 
+          c.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Sort
+      const sortField = filters.sortBy || 'createdAt';
+      const sortDir = filters.sortDir === 'desc' ? -1 : 1;
+      
+      filtered.sort((a, b) => {
+        if (a[sortField] < b[sortField]) return -1 * sortDir;
+        if (a[sortField] > b[sortField]) return 1 * sortDir;
+        return 0;
+      });
+      
+      // Pagination
+      const total = filtered.length;
+      const start = page * size;
+      const paginatedResults = filtered.slice(start, start + size);
+      
+      return { 
+        data: {
+          content: paginatedResults,
+          totalElements: total,
+          totalPages: Math.ceil(total / size),
+          size,
+          number: page,
+          last: start + size >= total
+        }
+      };
+    }
+    
+    try {
+      let url = `${API_URL}/contents?page=${page}&size=${size}`;
+      
+      // Add query parameters for filtering
+      if (filters.courseId) url += `&courseId=${filters.courseId}`;
+      if (filters.type) url += `&type=${filters.type}`;
+      if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
+      if (filters.sortBy) url += `&sort=${filters.sortBy},${filters.sortDir || 'asc'}`;
+      
+      return await axios.get(url);
+    } catch (error) {
+      console.error('Error fetching all contents:', error);
+      throw error;
+    }
+  }
+  
+  // Toggle content publish status (admin only)
+  async toggleContentStatus(id, isPublished) {
+    if (USE_MOCK) {
+      await this.mockDelay();
+      
+      if (!mockContents[id]) throw new Error("Content not found");
+      
+      mockContents[id].isPublished = isPublished;
+      mockContents[id].updatedAt = new Date().toISOString();
+      
+      return { data: mockContents[id] };
+    }
+    
+    try {
+      return await axios.patch(`${API_URL}/contents/${id}/publish`, { isPublished });
+    } catch (error) {
+      console.error(`Error toggling status for content ${id}:`, error);
+      throw error;
+    }
+  }
+  
+  // Bulk operations (admin only)
+  async bulkDeleteContents(contentIds) {
+    if (USE_MOCK) {
+      await this.mockDelay();
+      
+      contentIds.forEach(id => {
+        if (mockContents[id]) {
+          delete mockContents[id];
+        }
+      });
+      
+      return { data: { success: true, count: contentIds.length } };
+    }
+    
+    try {
+      return await axios.post(`${API_URL}/contents/bulk-delete`, { contentIds });
+    } catch (error) {
+      console.error('Error bulk deleting contents:', error);
+      throw error;
+    }
+  }
+  
+  // Move content between modules (admin/instructor)
+  async moveContent(contentId, targetModuleId, newOrder) {
+    if (USE_MOCK) {
+      await this.mockDelay();
+      
+      if (!mockContents[contentId]) throw new Error("Content not found");
+      
+      mockContents[contentId].moduleId = targetModuleId;
+      mockContents[contentId].order = newOrder;
+      mockContents[contentId].updatedAt = new Date().toISOString();
+      
+      return { data: mockContents[contentId] };
+    }
+    
+    try {
+      return await axios.put(`${API_URL}/contents/${contentId}/move`, {
+        moduleId: targetModuleId,
+        order: newOrder
+      });
+    } catch (error) {
+      console.error(`Error moving content ${contentId}:`, error);
       throw error;
     }
   }
