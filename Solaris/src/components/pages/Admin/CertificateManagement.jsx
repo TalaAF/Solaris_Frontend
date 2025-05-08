@@ -1,50 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CertificateTable from "../../../components/admin/CertificateTable";
-import { certificateTemplates } from "../../../mocks/mockDataAdmin";
+import CertificateService from "../../../services/CertificateService";
+import { toast } from "react-hot-toast";
 import "./CertificateManagement.css";
 
 const CertificateManagement = () => {
-  // Make sure we have data and it's an array
-  const initialCertificates = Array.isArray(certificateTemplates) ? certificateTemplates : [];
-  const [certificates, setCertificates] = useState(initialCertificates);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  console.log("Certificate templates data:", certificates); // Debugging
-
-  const handleCertificateAdd = (certificateData) => {
-    console.log("Adding certificate:", certificateData);
-    // In a real app, you would make an API call here
-    const newCertificate = {
-      ...certificateData,
-      id: Math.max(0, ...certificates.map((c) => c.id)) + 1,
-      issuedCount: 0,
-      dateCreated: new Date().toISOString(),
-      lastModified: new Date().toISOString()
+  useEffect(() => {
+    const fetchCertificateTemplates = async () => {
+      try {
+        setLoading(true);
+        const response = await CertificateService.getAllCertificateTemplates();
+        // Make sure we're getting an array of certificates
+        setCertificates(Array.isArray(response.data) ? response.data : []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching certificate templates:", error);
+        setError("Failed to load certificate templates");
+        setLoading(false);
+        toast.error("Failed to load certificate templates");
+      }
     };
-    setCertificates([...certificates, newCertificate]);
-    // Toast notification is handled in the CertificateTable component
+
+    fetchCertificateTemplates();
+  }, []);
+
+  const handleCertificateAdd = async (certificateData) => {
+    try {
+      const response = await CertificateService.createCertificateTemplate(certificateData);
+      setCertificates([...certificates, response.data]);
+      toast.success("Certificate template added successfully");
+    } catch (error) {
+      console.error("Error adding certificate template:", error);
+      toast.error("Failed to add certificate template");
+    }
   };
 
-  const handleCertificateUpdate = (certificateData) => {
-    console.log("Updating certificate:", certificateData);
-    // In a real app, you would make an API call here
-    const updatedCertificates = certificates.map(item => 
-      item.id === certificateData.id ? {
-        ...item,
-        ...certificateData,
-        lastModified: new Date().toISOString()
-      } : item
-    );
-    setCertificates(updatedCertificates);
-    // Toast notification is handled in the CertificateTable component
+  const handleCertificateUpdate = async (certificateData) => {
+    try {
+      const response = await CertificateService.updateCertificateTemplate(certificateData.id, certificateData);
+      const updatedCertificates = certificates.map(item => 
+        item.id === certificateData.id ? response.data : item
+      );
+      setCertificates(updatedCertificates);
+      toast.success("Certificate template updated successfully");
+    } catch (error) {
+      console.error("Error updating certificate template:", error);
+      toast.error("Failed to update certificate template");
+    }
   };
 
-  const handleCertificateDelete = (certificateId) => {
-    console.log("Deleting certificate with ID:", certificateId);
-    // In a real app, you would make an API call here
-    const updatedCertificates = certificates.filter(item => item.id !== certificateId);
-    setCertificates(updatedCertificates);
-    // Toast notification is handled in the CertificateTable component
+  const handleCertificateDelete = async (certificateId) => {
+    try {
+      await CertificateService.deleteCertificateTemplate(certificateId);
+      const updatedCertificates = certificates.filter(item => item.id !== certificateId);
+      setCertificates(updatedCertificates);
+      toast.success("Certificate template deleted successfully");
+    } catch (error) {
+      console.error("Error deleting certificate template:", error);
+      toast.error("Failed to delete certificate template");
+    }
   };
+
+  if (loading) {
+    return <div className="loading-container">Loading certificate templates...</div>;
+  }
+
+  if (error) {
+    return <div className="error-container">{error}</div>;
+  }
 
   return (
     <>

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Award, 
   Edit, 
   MoreHorizontal, 
   Plus, 
-  Search, 
   Eye, 
-  Trash2 
+  Trash2,
+  Search 
 } from "lucide-react";
 import CertificateDialog from "./CertificateDialog";
 import CertificatePreviewDialog from "./CertificatePreviewDialog";
@@ -21,12 +21,14 @@ const formatDate = (dateString) => {
 };
 
 const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUpdate, onCertificateDelete }) => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
 
   // Add defensive check for certificates
   if (!Array.isArray(certificates)) {
@@ -34,14 +36,33 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
     return <div>Error: Invalid certificate data</div>;
   }
 
-  const filteredCertificates = certificates.filter((certificate) => {
-    // Add null/undefined checks for each property
-    return (
-      (certificate.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (certificate.courseName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (certificate.departmentName || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  // Filter certificates based on search query
+  const filteredCertificates = searchQuery
+    ? certificates.filter(cert => 
+        cert.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.courseName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.departmentName?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : certificates;
+
+  // Handle click outside to close the dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
+  const toggleMenu = (id) => {
+    setOpenMenuId(openMenuId === id ? null : id);
+  };
 
   const handleOpenAddDialog = () => {
     setSelectedCertificate(null);
@@ -51,16 +72,19 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
   const handleOpenEditDialog = (certificate) => {
     setSelectedCertificate(certificate);
     setIsEditDialogOpen(true);
+    setOpenMenuId(null);
   };
 
   const handleOpenPreviewDialog = (certificate) => {
     setSelectedCertificate(certificate);
     setIsPreviewDialogOpen(true);
+    setOpenMenuId(null);
   };
 
   const handleOpenDeleteDialog = (certificate) => {
     setSelectedCertificate(certificate);
     setIsDeleteDialogOpen(true);
+    setOpenMenuId(null);
   };
 
   const handleAddCertificate = (formData) => {
@@ -83,7 +107,6 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
     }
     
     setIsAddDialogOpen(false);
-    alert("Certificate template added successfully");
   };
 
   const handleUpdateCertificate = (formData) => {
@@ -95,7 +118,6 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
     
     setIsEditDialogOpen(false);
     setSelectedCertificate(null);
-    alert("Certificate template updated successfully");
   };
 
   const handleConfirmDelete = () => {
@@ -107,7 +129,6 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
     
     setIsDeleteDialogOpen(false);
     setSelectedCertificate(null);
-    alert("Certificate template deleted successfully");
   };
 
   return (
@@ -118,9 +139,9 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
           <div className="search-container">
             <Search className="search-icon" />
             <input
-              type="search"
-              placeholder="Search certificates..."
+              type="text"
               className="search-input"
+              placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -142,7 +163,7 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
               <th>Issued</th>
               <th>Created</th>
               <th>Status</th>
-              <th className="text-right">Actions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -170,33 +191,38 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
                     </span>
                   </td>
                   <td className="action-cell">
-                    <div className="dropdown">
-                      <button className="dropdown-trigger">
+                    <div className="dropdown" ref={openMenuId === certificate.id ? menuRef : null}>
+                      <button 
+                        className="dropdown-trigger"
+                        onClick={() => toggleMenu(certificate.id)}
+                      >
                         <MoreHorizontal size={16} />
                       </button>
-                      <div className="dropdown-menu">
-                        <div className="dropdown-header">Actions</div>
-                        <div className="dropdown-divider"></div>
-                        <button className="dropdown-item" onClick={() => handleOpenEditDialog(certificate)}>
-                          <Edit size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <button className="dropdown-item" onClick={() => handleOpenPreviewDialog(certificate)}>
-                          <Eye size={14} />
-                          <span>Preview Template</span>
-                        </button>
-                        <button className="dropdown-item">
-                          <span>View Issued Certificates</span>
-                        </button>
-                        <div className="dropdown-divider"></div>
-                        <button 
-                          className="dropdown-item delete"
-                          onClick={() => handleOpenDeleteDialog(certificate)}
-                        >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
-                        </button>
-                      </div>
+                      {openMenuId === certificate.id && (
+                        <div className="dropdown-menu">
+                          <div className="dropdown-header">Actions</div>
+                          <div className="dropdown-divider"></div>
+                          <button className="dropdown-item" onClick={() => handleOpenEditDialog(certificate)}>
+                            <Edit size={14} />
+                            <span>Edit</span>
+                          </button>
+                          <button className="dropdown-item" onClick={() => handleOpenPreviewDialog(certificate)}>
+                            <Eye size={14} />
+                            <span>Preview Template</span>
+                          </button>
+                          <button className="dropdown-item">
+                            <span>View Issued Certificates</span>
+                          </button>
+                          <div className="dropdown-divider"></div>
+                          <button 
+                            className="dropdown-item delete"
+                            onClick={() => handleOpenDeleteDialog(certificate)}
+                          >
+                            <Trash2 size={14} />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -204,7 +230,9 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
             ) : (
               <tr>
                 <td colSpan="7" className="empty-table">
-                  No certificate templates found. Create your first template.
+                  {searchQuery 
+                    ? "No certificate templates match your search." 
+                    : "No certificate templates found. Create your first template."}
                 </td>
               </tr>
             )}

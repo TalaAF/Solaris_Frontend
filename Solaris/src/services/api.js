@@ -91,4 +91,15 @@ api.interceptors.response.use(
   }
 );
 
+// Add error response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 500) {
+      console.warn('Server error occurred. Falling back to mock data where available.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

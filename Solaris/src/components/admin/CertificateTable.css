@@ -83,6 +83,7 @@
   
   .certificate-table-wrapper {
     overflow-x: auto;
+    position: relative; /* Add this */
   }
   
   .certificate-table {
@@ -164,12 +165,12 @@
   
   /* Dropdown menu */
   .action-cell {
-    text-align: right;
+    text-align: center;
     position: relative;
   }
   
   .dropdown {
-    position: relative;
+    position: static; /* Change from relative to static */
     display: inline-block;
   }
   
@@ -188,21 +189,14 @@
   }
   
   .dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
+    position: fixed; /* Change from absolute to fixed */
     background-color: white;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 180px;
-    z-index: 10;
-    display: none;
-  }
-  
-  .dropdown:hover .dropdown-menu,
-  .dropdown:focus-within .dropdown-menu {
-    display: block;
+    z-index: 1000; /* Increase z-index significantly */
+    margin-top: 4px;
   }
   
   .dropdown-header {
@@ -210,6 +204,9 @@
     color: #64748b;
     font-size: 12px;
     font-weight: 500;
+    background-color: #f8fafc;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
   }
   
   .dropdown-divider {
@@ -227,9 +224,9 @@
     text-align: left;
     background: none;
     border: none;
-    font-size: 14px;
-    color: #333;
     cursor: pointer;
+    color: #333;
+    font-size: 14px;
   }
   
   .dropdown-item:hover {
@@ -241,7 +238,7 @@
   }
   
   .dropdown-item.delete:hover {
-    background-color: rgba(239, 68, 68, 0.05);
+    background-color: #fef2f2;
   }
   
   /* Empty table message */

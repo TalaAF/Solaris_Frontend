@@ -1,91 +1,78 @@
 /**
- * Format a date string to 'Month Day, Year' format
- * @param {string} dateString - The date string to format
- * @returns {string} - The formatted date
+ * Format a date object or string to a human-readable string
+ * @param {Date|string} date - Date to format
+ * @param {Object} options - Intl.DateTimeFormat options
+ * @returns {string} Formatted date string
  */
-export const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+export const formatDate = (date, options = {}) => {
+  if (!date) return "N/A";
   
-  return new Intl.DateTimeFormat('en-US', options).format(date);
+  const defaultOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  };
+  
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    return new Intl.DateTimeFormat("en-US", { ...defaultOptions, ...options }).format(dateObj);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
 };
 
 /**
- * Formats a date string to include time (MM/DD/YYYY, hh:mm AM/PM)
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date with time
+ * Format a date for HTML datetime-local input
+ * @param {Date|string} date - Date to format
+ * @returns {string} Formatted date string (YYYY-MM-DDThh:mm)
  */
-export function formatDateTime(dateString) {
-  if (!dateString) return 'No date specified';
+export const formatDateForInput = (date) => {
+  if (!date) return "";
   
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-}
-
-/**
- * Returns a relative time string (e.g., "2 days ago", "in 3 hours")
- * @param {string} dateString - ISO date string
- * @returns {string} Relative time string
- */
-export function getRelativeTime(dateString) {
-  if (!dateString) return '';
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = date - now;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) {
-    return 'Today';
-  } else if (diffDays === 1) {
-    return 'Tomorrow';
-  } else if (diffDays === -1) {
-    return 'Yesterday';
-  } else if (diffDays > 0) {
-    return `In ${diffDays} days`;
-  } else {
-    return `${Math.abs(diffDays)} days ago`;
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Format: YYYY-MM-DDThh:mm
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error("Error formatting date for input:", error);
+    return "";
   }
-}
+};
 
 /**
- * Checks if a date is in the past
- * @param {string} dateString - ISO date string
- * @returns {boolean} True if date is in the past
+ * Calculate time remaining from now until a future date
+ * @param {Date|string} endDate - Future date
+ * @returns {Object} Object with days, hours, minutes properties
  */
-export function isDatePast(dateString) {
-  if (!dateString) return false;
+export const getTimeRemaining = (endDate) => {
+  if (!endDate) return { days: 0, hours: 0, minutes: 0 };
   
-  const date = new Date(dateString);
-  const now = new Date();
-  return date < now;
-}
-
-/**
- * Calculates time remaining until a date in days, hours, minutes
- * @param {string} dateString - ISO date string 
- * @returns {Object} Object containing days, hours, minutes
- */
-export function getTimeRemaining(dateString) {
-  if (!dateString) return { days: 0, hours: 0, minutes: 0 };
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  
-  if (date < now) {
+  try {
+    const endDateObj = typeof endDate === "string" ? new Date(endDate) : endDate;
+    const now = new Date();
+    const diffMs = endDateObj - now;
+    
+    if (diffMs <= 0) {
+      return { days: 0, hours: 0, minutes: 0 };
+    }
+    
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return { days, hours, minutes };
+  } catch (error) {
+    console.error("Error calculating time remaining:", error);
     return { days: 0, hours: 0, minutes: 0 };
   }
-  
-  const diffTime = date - now;
-  const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-  
-  return { days, hours, minutes };
-}
+};

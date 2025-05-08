@@ -1,104 +1,172 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
-import { courses } from "../../mocks/mockDataCourses";
+import CourseService from "../../services/CourseService";
+import { formatDateForInput } from "../../utils/dateUtils";
 import "./AssessmentDialog.css";
 
-const AssessmentDialog = ({ isOpen, onClose, onSave, assessment, title }) => {
-  const initialFormData = assessment || {
-    title: "",
-    description: "",
-    type: "quiz",
-    courseId: courses[0]?.id || 1,
-    courseName: "",
-    dueDate: new Date().toISOString().split("T")[0],
-    totalPoints: 100,
-    passingPoints: 60,
-    duration: 60,
-    isPublished: false,
+const AssessmentDialog = ({ isOpen, onClose, onSubmit, assessment, title, assessmentType = "quiz" }) => {
+  // Initialize form data based on assessment type
+  const getInitialFormData = () => {
+    const baseFormData = {
+      title: "",
+      description: "",
+      courseId: "",
+      published: false
+    };
+
+    // Add fields specific to each assessment type
+    if (assessmentType === "quiz") {
+      return {
+        ...baseFormData,
+        type: "quiz",
+        timeLimit: 30,
+        startDate: formatDateForInput(new Date()),
+        endDate: formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+        passingScore: 70,
+        randomizeQuestions: false
+      };
+    } else {
+      return {
+        ...baseFormData,
+        type: "assignment",
+        dueDate: formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+        maxScore: 100
+      };
+    }
   };
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState(getInitialFormData());
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Reset form when dialog opens with new data
+  // Load courses and set initial form data when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setFormData(assessment || initialFormData);
+      fetchCourses();
+      
+      if (assessment) {
+        // Format dates for input fields based on assessment type
+        let formattedAssessment = { ...assessment };
+        
+        if (assessmentType === "quiz") {
+          formattedAssessment = {
+            ...formattedAssessment,
+            type: "quiz",
+            startDate: assessment.startDate ? formatDateForInput(assessment.startDate) : "",
+            endDate: assessment.endDate ? formatDateForInput(assessment.endDate) : ""
+          };
+        } else {
+          formattedAssessment = {
+            ...formattedAssessment,
+            type: "assignment",
+            dueDate: assessment.dueDate ? formatDateForInput(assessment.dueDate) : ""
+          };
+        }
+        
+        setFormData(formattedAssessment);
+      } else {
+        // Reset form for new assessment
+        setFormData(getInitialFormData());
+      }
+      
       setErrors({});
     }
-  }, [isOpen, assessment]);
+  }, [isOpen, assessment, assessmentType]);
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "number" ? parseInt(value, 10) : value,
-    });
-
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: null
-      });
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await CourseService.getCourses();
+      
+      // Extract courses depending on the response structure
+      let courseList = [];
+      if (response.data && response.data.content) {
+        courseList = response.data.content;
+      } else if (Array.isArray(response.data)) {
+        courseList = response.data;
+      }
+      
+      setCourses(courseList);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleCourseChange = (e) => {
-    const courseId = parseInt(e.target.value, 10);
-    const selectedCourse = courses.find((course) => course.id === courseId);
-    
-    setFormData({
-      ...formData,
-      courseId,
-      courseName: selectedCourse ? selectedCourse.title : "",
-    });
-  };
-
-  const handleTypeChange = (e) => {
-    setFormData({
-      ...formData,
-      type: e.target.value,
-    });
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: checked,
-    });
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.title.trim()) {
+    
+    // Common validations for both quiz and assignment
+    if (!formData.title?.trim()) {
       newErrors.title = "Title is required";
     }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
+    
+    if (!formData.courseId) {
+      newErrors.courseId = "Course is required";
     }
-
-    if (!formData.dueDate) {
-      newErrors.dueDate = "Due date is required";
+    
+    // Quiz-specific validations
+    if (assessmentType === "quiz") {
+      if (formData.timeLimit <= 0) {
+        newErrors.timeLimit = "Time limit must be greater than 0";
+      }
+      
+      if (formData.passingScore < 0 || formData.passingScore > 100) {
+        newErrors.passingScore = "Passing score must be between 0 and 100";
+      }
+      
+      if (formData.startDate && formData.endDate) {
+        const start = new Date(formData.startDate);
+        const end = new Date(formData.endDate);
+        
+        if (end <= start) {
+          newErrors.endDate = "End date must be after start date";
+        }
+      }
+    } 
+    // Assignment-specific validations
+    else {
+      if (!formData.dueDate) {
+        newErrors.dueDate = "Due date is required";
+      }
+      
+      if (!formData.maxScore || formData.maxScore <= 0) {
+        newErrors.maxScore = "Max score must be greater than 0";
+      }
     }
-
-    if (!formData.totalPoints || formData.totalPoints < 1) {
-      newErrors.totalPoints = "Total points must be at least 1";
-    }
-
-    if (formData.passingPoints < 0 || formData.passingPoints > formData.totalPoints) {
-      newErrors.passingPoints = "Passing points must be between 0 and total points";
-    }
-
-    if (!formData.duration || formData.duration < 1) {
-      newErrors.duration = "Duration must be at least 1 minute";
-    }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+    
+    // Clear error when field is changed
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+  
+  const handleNumberChange = (e) => {
+    const { name, value } = e.target;
+    const numericValue = value === "" ? "" : Number(value);
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: numericValue
+    }));
+    
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -108,13 +176,23 @@ const AssessmentDialog = ({ isOpen, onClose, onSave, assessment, title }) => {
       return;
     }
     
-    // Ensure courseName is set
-    if (!formData.courseName) {
-      const selectedCourse = courses.find((course) => course.id === formData.courseId);
-      formData.courseName = selectedCourse ? selectedCourse.title : "Unknown Course";
+    // Convert form data to match API expectations
+    let submissionData = { ...formData };
+    
+    if (assessmentType === "quiz") {
+      submissionData = {
+        ...submissionData,
+        timeLimit: parseInt(formData.timeLimit, 10),
+        passingScore: parseFloat(formData.passingScore)
+      };
+    } else {
+      submissionData = {
+        ...submissionData,
+        maxScore: parseInt(formData.maxScore, 10)
+      };
     }
     
-    onSave(formData);
+    onSubmit(submissionData);
   };
 
   return (
@@ -125,13 +203,14 @@ const AssessmentDialog = ({ isOpen, onClose, onSave, assessment, title }) => {
     >
       <form onSubmit={handleSubmit} className="assessment-form">
         <div className="form-group">
-          <label htmlFor="title">Assessment Title</label>
+          <label htmlFor="title">{assessmentType === "quiz" ? "Quiz" : "Assignment"} Title*</label>
           <input
             id="title"
             name="title"
-            value={formData.title}
+            value={formData.title || ""}
             onChange={handleChange}
             className={`form-input ${errors.title ? "error" : ""}`}
+            placeholder={`Enter ${assessmentType.toLowerCase()} title`}
           />
           {errors.title && <div className="error-message">{errors.title}</div>}
         </div>
@@ -141,144 +220,158 @@ const AssessmentDialog = ({ isOpen, onClose, onSave, assessment, title }) => {
           <textarea
             id="description"
             name="description"
-            value={formData.description}
+            value={formData.description || ""}
             onChange={handleChange}
-            className={`form-textarea ${errors.description ? "error" : ""}`}
-            rows="4"
+            className="form-textarea"
+            placeholder={`Enter ${assessmentType === "quiz" ? "quiz description" : "assignment instructions"}`}
+            rows={3}
           />
-          {errors.description && <div className="error-message">{errors.description}</div>}
         </div>
         
         <div className="form-group">
-          <label>Assessment Type</label>
-          <div className="radio-group">
-            <div className="radio-item">
-              <input
-                type="radio"
-                id="quiz"
-                name="type"
-                value="quiz"
-                checked={formData.type === "quiz"}
-                onChange={handleTypeChange}
-                className="radio-input"
-              />
-              <label htmlFor="quiz" className="radio-label">Quiz</label>
-            </div>
-            
-            <div className="radio-item">
-              <input
-                type="radio"
-                id="exam"
-                name="type"
-                value="exam"
-                checked={formData.type === "exam"}
-                onChange={handleTypeChange}
-                className="radio-input"
-              />
-              <label htmlFor="exam" className="radio-label">Exam</label>
-            </div>
-            
-            <div className="radio-item">
-              <input
-                type="radio"
-                id="assignment"
-                name="type"
-                value="assignment"
-                checked={formData.type === "assignment"}
-                onChange={handleTypeChange}
-                className="radio-input"
-              />
-              <label htmlFor="assignment" className="radio-label">Assignment</label>
-            </div>
-          </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="courseId">Course</label>
+          <label htmlFor="courseId">Course*</label>
           <select
             id="courseId"
             name="courseId"
-            value={formData.courseId}
-            onChange={handleCourseChange}
-            className="form-select"
+            value={formData.courseId || ""}
+            onChange={handleChange}
+            className={`form-select ${errors.courseId ? "error" : ""}`}
+            disabled={loading}
           >
+            <option value="">Select a course</option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
                 {course.title}
               </option>
             ))}
           </select>
+          {errors.courseId && <div className="error-message">{errors.courseId}</div>}
         </div>
         
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="dueDate">Due Date</label>
-            <input
-              id="dueDate"
-              name="dueDate"
-              type="date"
-              value={formData.dueDate}
-              onChange={handleChange}
-              className={`form-input ${errors.dueDate ? "error" : ""}`}
-            />
-            {errors.dueDate && <div className="error-message">{errors.dueDate}</div>}
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="duration">Duration (minutes)</label>
-            <input
-              id="duration"
-              name="duration"
-              type="number"
-              min="1"
-              value={formData.duration}
-              onChange={handleChange}
-              className={`form-input ${errors.duration ? "error" : ""}`}
-            />
-            {errors.duration && <div className="error-message">{errors.duration}</div>}
-          </div>
-        </div>
+        {/* Quiz-specific fields */}
+        {assessmentType === "quiz" && (
+          <>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="startDate">Start Date</label>
+                <input
+                  id="startDate"
+                  name="startDate"
+                  type="datetime-local"
+                  value={formData.startDate || ""}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="endDate">End Date</label>
+                <input
+                  id="endDate"
+                  name="endDate"
+                  type="datetime-local"
+                  value={formData.endDate || ""}
+                  onChange={handleChange}
+                  className={`form-input ${errors.endDate ? "error" : ""}`}
+                />
+                {errors.endDate && <div className="error-message">{errors.endDate}</div>}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="timeLimit">Time Limit (minutes)*</label>
+                <input
+                  id="timeLimit"
+                  name="timeLimit"
+                  type="number"
+                  min="1"
+                  value={formData.timeLimit || ""}
+                  onChange={handleNumberChange}
+                  className={`form-input ${errors.timeLimit ? "error" : ""}`}
+                />
+                {errors.timeLimit && <div className="error-message">{errors.timeLimit}</div>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="passingScore">Passing Score (%)*</label>
+                <input
+                  id="passingScore"
+                  name="passingScore"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.passingScore || ""}
+                  onChange={handleNumberChange}
+                  className={`form-input ${errors.passingScore ? "error" : ""}`}
+                />
+                {errors.passingScore && <div className="error-message">{errors.passingScore}</div>}
+              </div>
+            </div>
+            
+            <div className="form-check-group">
+              <div className="form-check">
+                <input
+                  id="randomizeQuestions"
+                  name="randomizeQuestions"
+                  type="checkbox"
+                  checked={formData.randomizeQuestions || false}
+                  onChange={handleChange}
+                  className="form-checkbox"
+                />
+                <label htmlFor="randomizeQuestions">Randomize Questions</label>
+              </div>
+            </div>
+          </>
+        )}
         
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="totalPoints">Total Points</label>
-            <input
-              id="totalPoints"
-              name="totalPoints"
-              type="number"
-              min="1"
-              value={formData.totalPoints}
-              onChange={handleChange}
-              className={`form-input ${errors.totalPoints ? "error" : ""}`}
-            />
-            {errors.totalPoints && <div className="error-message">{errors.totalPoints}</div>}
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="passingPoints">Passing Points</label>
-            <input
-              id="passingPoints"
-              name="passingPoints"
-              type="number"
-              min="0"
-              value={formData.passingPoints}
-              onChange={handleChange}
-              className={`form-input ${errors.passingPoints ? "error" : ""}`}
-            />
-            {errors.passingPoints && <div className="error-message">{errors.passingPoints}</div>}
-          </div>
-        </div>
+        {/* Assignment-specific fields */}
+        {assessmentType === "assignment" && (
+          <>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="dueDate">Due Date*</label>
+                <input
+                  id="dueDate"
+                  name="dueDate"
+                  type="datetime-local"
+                  value={formData.dueDate || ""}
+                  onChange={handleChange}
+                  className={`form-input ${errors.dueDate ? "error" : ""}`}
+                />
+                {errors.dueDate && <div className="error-message">{errors.dueDate}</div>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="maxScore">Max Score*</label>
+                <input
+                  id="maxScore"
+                  name="maxScore"
+                  type="number"
+                  min="1"
+                  value={formData.maxScore || ""}
+                  onChange={handleNumberChange}
+                  className={`form-input ${errors.maxScore ? "error" : ""}`}
+                />
+                {errors.maxScore && <div className="error-message">{errors.maxScore}</div>}
+              </div>
+            </div>
+          </>
+        )}
         
-        <div className="form-check">
-          <input
-            type="checkbox"
-            id="isPublished"
-            name="isPublished"
-            checked={formData.isPublished}
-            onChange={handleCheckboxChange}
-            className="form-checkbox"
-          />
-          <label htmlFor="isPublished">Published</label>
+        {/* Common publish checkbox */}
+        <div className="form-check-group">
+          <div className="form-check">
+            <input
+              id="published"
+              name="published"
+              type="checkbox"
+              checked={formData.published || false}
+              onChange={handleChange}
+              className="form-checkbox"
+            />
+            <label htmlFor="published">Published</label>
+          </div>
         </div>
         
         <div className="form-actions">
@@ -286,7 +379,7 @@ const AssessmentDialog = ({ isOpen, onClose, onSave, assessment, title }) => {
             Cancel
           </button>
           <button type="submit" className="submit-button">
-            {assessment ? 'Update' : 'Create'}
+            {assessment ? `Update ${assessmentType.charAt(0).toUpperCase() + assessmentType.slice(1)}` : `Create ${assessmentType.charAt(0).toUpperCase() + assessmentType.slice(1)}`}
           </button>
         </div>
       </form>
