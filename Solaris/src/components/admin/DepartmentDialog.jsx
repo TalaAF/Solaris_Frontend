@@ -18,6 +18,7 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
 
   const [formData, setFormData] = useState(initialFormData);
   const [users, setUsers] = useState([]);
+  const [errors, setErrors] = useState({}); // For form validation errors
 
   // Reset form when dialog opens with new data
   useEffect(() => {
@@ -61,37 +62,74 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
     }
   }, [isOpen]);
 
+  // In the DepartmentDialog component, add validation function
+  const validateCode = (code) => {
+    // Code must be 2-10 uppercase letters or numbers
+    const regex = /^[A-Z0-9]{2,10}$/;
+    return regex.test(code) || !code; // Empty is also valid (validation happens on submit)
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
+    setFormData(prev => ({ ...prev, [name]: newValue }));
+    
+    // Clear previous error when field is changed
+    setErrors(prev => ({ ...prev, [name]: null }));
+    
+    // Validate code field as user types
+    if (name === 'code' && value) {
+      if (!validateCode(value)) {
+        setErrors(prev => ({ 
+          ...prev, 
+          code: "Code must be 2-10 uppercase letters or numbers" 
+        }));
+      }
+    }
   };
 
   // Update the handleSubmit function
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Log for debugging
-    console.log("Form data before submit:", formData);
+    // Validate required fields
+    const newErrors = {};
     
+    if (!formData.name?.trim()) {
+      newErrors.name = "Department name is required";
+    }
+    
+    if (!formData.code?.trim()) {
+      newErrors.code = "Department code is required";
+    } else if (!validateCode(formData.code)) {
+      newErrors.code = "Department code must be 2-10 uppercase letters or numbers";
+    }
+    
+    // If there are validation errors, show them and stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    // Create a department object that matches your backend entity structure
     const departmentDTO = {
       ...(formData.id && { id: formData.id }),
-      name: formData.name,
-      description: formData.description,
-      code: formData.code,
-      specialtyArea: formData.specialtyArea,
-      // Fix how we handle the headOfDepartmentId
-      headOfDepartmentId: formData.headOfDepartmentId ? parseInt(formData.headOfDepartmentId, 10) : null,
-      // Also keep headOfDepartment as string name for backward compatibility
-      headOfDepartment: formData.headOfDepartment || "",
-      contactInformation: formData.contactInformation,
-      isActive: department ? (department.isActive !== undefined ? department.isActive : department.active) : true
+      name: formData.name.trim(),
+      description: formData.description || "",
+      code: formData.code || formData.name.substring(0, 3).toUpperCase(),
+      specialtyArea: formData.specialtyArea || "",
+      contactInformation: formData.contactInformation || "",
+      // Use isActive not active
+      isActive: true
     };
     
-    // Log what we're submitting to API
-    console.log('Submitting department:', departmentDTO);
+    // Handle head of department properly
+    if (formData.headOfDepartmentId && formData.headOfDepartmentId !== "") {
+      departmentDTO.headId = parseInt(formData.headOfDepartmentId, 10);
+    }
+    
+    console.log('Submitting department with data:', departmentDTO);
     onSubmit(departmentDTO);
   };
 
@@ -99,7 +137,7 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={title || "Department"}
     >
       <form onSubmit={handleSubmit} className="department-form">
         <div className="form-group">
@@ -112,18 +150,27 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
             required
             className="form-input"
           />
+          {errors.name && <div className="error-message">{errors.name}</div>}
         </div>
         
         <div className="form-group">
-          <label htmlFor="code">Department Code</label>
+          <label htmlFor="code">
+            Department Code <span className="required">*</span>
+          </label>
           <input
+            type="text"
             id="code"
             name="code"
             value={formData.code}
             onChange={handleChange}
-            required
-            className="form-input"
+            className={`form-input ${errors.code ? 'input-error' : ''}`}
+            placeholder="Department code"
           />
+          {errors.code ? (
+            <div className="error-message">{errors.code}</div>
+          ) : (
+            <div className="helper-text">Code must be 2-10 uppercase letters or numbers</div>
+          )}
         </div>
         
         <div className="form-group">

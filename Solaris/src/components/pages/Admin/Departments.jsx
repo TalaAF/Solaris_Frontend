@@ -51,15 +51,32 @@ const Departments = () => {
   const handleDepartmentAdd = async (departmentData) => {
     try {
       setLoading(true);
-      const response = await AdminDepartmentService.createDepartment(departmentData);
       
-      // Refresh the whole department list to ensure consistency
+      // Ensure we're using isActive not active
+      const fixedData = {
+        ...departmentData,
+        isActive: departmentData.isActive !== undefined ? departmentData.isActive : true
+      };
+      
+      // Remove active if it exists to prevent conflicts
+      if ('active' in fixedData) {
+        delete fixedData.active;
+      }
+      
+      console.log("ADDING DEPARTMENT - REQUEST DATA:", JSON.stringify(fixedData, null, 2));
+      
+      const response = await AdminDepartmentService.createDepartment(fixedData);
+      console.log("Department created successfully:", response.data);
+      
       fetchDepartments(pagination.page, pagination.size);
-      
       toast.success("Department added successfully");
     } catch (err) {
       console.error("Error adding department:", err);
-      toast.error(err.response?.data?.message || "Failed to add department");
+      const statusCode = err.response?.status;
+      const responseData = err.response?.data;
+      console.error(`Error ${statusCode} details:`, responseData);
+      toast.error(responseData?.message || "Failed to add department");
+    } finally {
       setLoading(false);
     }
   };
