@@ -1,11 +1,6 @@
 import api from "./api";
 
 class EnrollmentService {
-  // Helper for mock responses during development
-  async mockDelay(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  
   // Get all enrolled students for a course
   async getEnrollmentsByCourse(courseId) {
     try {

@@ -127,19 +127,19 @@ const Sidebar = ({ isOpen }) => {
         path: "/admin/courses",
         icon: <BookOpen size={20} />,
         iconClass: "icon-book-open",
-      },
-      {
-        name: "Content Management",
-        path: "/admin/content",
-        icon: <FolderOpen size={20} />,
-        iconClass: "icon-folder",
-      },
-      {
-        name: "Assessment Management",
-        path: "/admin/assessments",
-        icon: <FileText size={20} />,
-        iconClass: "icon-file",
-      },
+       },
+      // {
+      //   name: "Content Management",
+      //   path: "/admin/content",
+      //   icon: <FolderOpen size={20} />,
+      //   iconClass: "icon-folder",
+      // },
+      // {
+      //   name: "Assessment Management",
+      //   path: "/admin/assessments",
+      //   icon: <FileText size={20} />,
+      //   iconClass: "icon-file",
+      // },
       {
         name: "Certificate Management",
         path: "/admin/certificates",

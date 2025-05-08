@@ -107,13 +107,11 @@ class CourseService {
     }
     
     try {
-      return await axios.get(`${API_URL}/courses/${id}`);
+      const response = await axios.get(`/api/courses/${id}`);
+      return response;
     } catch (error) {
       console.error(`Error fetching course ${id}:`, error);
-      await this.mockDelay();
-      const course = mockCourses.find(c => c.id == id);
-      if (!course) throw new Error("Course not found");
-      return { data: course };
+      throw error;
     }
   }
 
@@ -303,6 +301,16 @@ class CourseService {
       console.error(`Error verifying completion for student ${studentId} in course ${courseId}:`, error);
       await this.mockDelay();
       return { data: { completed: false, missingRequirements: [1, 2] } };
+    }
+  }
+
+  // Update course enrollment count
+  async updateCourseEnrollmentCount(courseId) {
+    try {
+      return await axios.patch(`/api/courses/${courseId}/enrollment-count`);
+    } catch (error) {
+      console.error(`Error updating enrollment count for course ${courseId}:`, error);
+      throw error;
     }
   }
 }

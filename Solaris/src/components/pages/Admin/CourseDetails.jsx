@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { BookOpen, ChevronLeft, Settings, UserRound } from "lucide-react";
 import "./CourseDetails.css";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Simulating API call to fetch course details
     const fetchCourse = async () => {
       try {
-        // In a real app, this would be an API call
-        // Using mock data from your import
+        // Check if we already have the course data from router state
+        if (location.state?.courseData) {
+          console.log("Using course data from router state:", location.state.courseData);
+          setCourse(location.state.courseData);
+          setLoading(false);
+          return;
+        }
+        
+        // Your existing fetch code
+        console.log("No router state available, fetching course data from API");
         const courseId = parseInt(id);
         
         // Simulate fetch delay
@@ -46,7 +54,7 @@ const CourseDetails = () => {
     };
     
     fetchCourse();
-  }, [id]);
+  }, [id, location.state]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';

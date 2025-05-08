@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Search } from "lucide-react";
 import Dialog from "../common/Dialog";
 import AdminUserService from "../../services/AdminUserService";
 import "./AddStudentDialog.css";
@@ -10,16 +11,16 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Safe check for currentStudents to avoid the filter error
+  // Safe check for currentStudents to avoid filter errors
   const currentStudentIds = Array.isArray(currentStudents) 
-    ? currentStudents.map(student => student.id) 
+    ? currentStudents.map(student => student.userId || (student.user && student.user.id))
     : [];
 
   useEffect(() => {
     if (isOpen) {
       fetchAvailableStudents();
     }
-  }, [isOpen]);
+  }, [isOpen, courseId]);
 
   useEffect(() => {
     // Filter students based on search term
@@ -36,7 +37,7 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
   const fetchAvailableStudents = async () => {
     setLoading(true);
     try {
-      // Get students with STUDENT role who aren't already enrolled
+      // Get all students with STUDENT role
       const response = await AdminUserService.getUsers({ role: "STUDENT" });
       const allStudents = response.data.content || response.data || [];
       
@@ -73,7 +74,7 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
     >
       <div className="search-container">
         <div className="search-wrapper">
-          <span className="search-icon">🔍</span>
+          <Search size={16} className="search-icon" />
           <input
             type="text"
             placeholder="Search students by name or email..."
@@ -95,23 +96,31 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
         ) : filteredStudents.length === 0 ? (
           <div className="no-results">No available students found</div>
         ) : (
-          filteredStudents.map(student => (
-            <div key={student.id} className="student-item">
-              <div className="student-info">
-                <div className="student-name">
-                  {student.firstName} {student.lastName}
+          <div className="student-items-container">
+            {filteredStudents.map(student => (
+              <div key={student.id} className="student-item">
+                <div className="student-info">
+                  <div className="student-name">
+                    {student.firstName} {student.lastName}
+                  </div>
+                  <div className="student-email">{student.email}</div>
                 </div>
-                <div className="student-email">{student.email}</div>
+                <button
+                  className="add-button"
+                  onClick={() => handleSelectStudent(student.id)}
+                >
+                  Add
+                </button>
               </div>
-              <button
-                className="add-button"
-                onClick={() => handleSelectStudent(student.id)}
-              >
-                Add
-              </button>
-            </div>
-          ))
+            ))}
+          </div>
         )}
+      </div>
+      
+      <div className="dialog-footer">
+        <button className="cancel-button" onClick={onClose}>
+          Close
+        </button>
       </div>
     </Dialog>
   );

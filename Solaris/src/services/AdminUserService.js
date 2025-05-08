@@ -1,14 +1,14 @@
-import apiClient from './api';
+import api from "./api";
 
 class AdminUserService {
   // Get users with optional filters (like role)
   getUsers = async (filters = {}) => {
-    return apiClient.get('/api/admin/users', { params: filters });
+    return api.get('/api/admin/users', { params: filters });
   };
   
   // Get a specific user by ID
   getUser = async (userId) => {
-    return apiClient.get(`/api/admin/users/${userId}`);
+    return api.get(`/api/admin/users/${userId}`);
   };
   
   // Create new user
@@ -16,7 +16,7 @@ class AdminUserService {
     // Normalize data before sending to API
     const normalizedData = this.normalizeUserData(userData);
     console.log('Creating user with normalized data:', normalizedData);
-    return apiClient.post('/api/admin/users', normalizedData);
+    return api.post('/api/admin/users', normalizedData);
   };
   
   // Update existing user
@@ -24,22 +24,22 @@ class AdminUserService {
     // Normalize data before sending to API
     const normalizedData = this.normalizeUserData(userData);
     console.log('Updating user with normalized data:', normalizedData);
-    return apiClient.put(`/api/admin/users/${userId}`, normalizedData);
+    return api.put(`/api/admin/users/${userId}`, normalizedData);
   };
   
   // Delete user
   deleteUser = async (userId) => {
-    return apiClient.delete(`/api/admin/users/${userId}`);
+    return api.delete(`/api/admin/users/${userId}`);
   };
   
   // Activate user
   activateUser = async (userId) => {
-    return apiClient.patch(`/api/admin/users/${userId}/activate`);
+    return api.patch(`/api/admin/users/${userId}/activate`);
   };
   
   // Deactivate user
   deactivateUser = async (userId) => {
-    return apiClient.patch(`/api/admin/users/${userId}/deactivate`);
+    return api.patch(`/api/admin/users/${userId}/deactivate`);
   };
   
   // Helper function to normalize user data before sending to API

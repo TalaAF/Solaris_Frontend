@@ -174,11 +174,17 @@ const CourseTable = ({
   };
 
   const handleViewDetails = (course) => {
-    navigate(`/admin/courses/${course.id}`);
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}`, { 
+      state: { courseData: course } 
+    });
   };
 
   const handleManageStudents = (course) => {
-    navigate(`/admin/courses/${course.id}/students`);
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}/students`, { 
+      state: { courseData: course } 
+    });
   };
 
   const handleSettings = (course) => {
