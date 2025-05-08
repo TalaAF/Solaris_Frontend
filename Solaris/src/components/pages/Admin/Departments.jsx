@@ -21,56 +21,27 @@ const Departments = () => {
     fetchDepartments(pagination.page, pagination.size);
   }, []);
 
-  const fetchDepartments = async (page = pagination.page, size = pagination.size) => {
+  const fetchDepartments = async (page = 0, size = 10) => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const response = await AdminDepartmentService.getPaginatedDepartments(activeOnly, page, size);
       
-      // Use paginated API endpoint
-      const response = await AdminDepartmentService.getPaginatedDepartments(
-        activeOnly,
-        page,
-        size
-      );
+      // Debug the response structure
+      console.log("Department API response:", response.data);
+      console.log("First department:", response.data.content?.[0]);
       
-      // Handle response based on its format
-      if (response.data && response.data.content) {
-        // Spring Data JPA format
-        setDepartments(response.data.content);
-        setPagination(prev => ({
-          ...prev,
-          page: response.data.number || 0,
-          size: response.data.size || 10,
-          totalElements: response.data.totalElements || 0,
-          totalPages: response.data.totalPages || 1
-        }));
-      } else if (Array.isArray(response.data)) {
-        // Simple array format
-        setDepartments(response.data);
-        setPagination(prev => ({
-          ...prev,
-          page,
-          size,
-          // If we don't have pagination info, estimate based on array length
-          totalElements: response.data.length,
-          totalPages: Math.ceil(response.data.length / size) || 1
-        }));
-      } else {
-        // Fallback
-        setDepartments([]);
-        setPagination(prev => ({
-          ...prev,
-          page,
-          size,
-          totalElements: 0,
-          totalPages: 0
-        }));
-      }
+      // Update department state with received data
+      setDepartments(response.data.content || []);
       
-      setError(null);
+      setPagination({
+        page: response.data.number,
+        size: response.data.size,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
+      });
     } catch (err) {
-      console.error("Error fetching departments:", err);
-      setError("Failed to load departments. Please try again.");
-      toast.error("Failed to load departments");
+      console.error("Failed to fetch departments:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -81,7 +52,7 @@ const Departments = () => {
       setLoading(true);
       const response = await AdminDepartmentService.createDepartment(departmentData);
       
-      // Refresh departments list after adding
+      // Refresh the whole department list to ensure consistency
       fetchDepartments(pagination.page, pagination.size);
       
       toast.success("Department added successfully");
@@ -95,14 +66,17 @@ const Departments = () => {
   const handleDepartmentUpdate = async (departmentData) => {
     try {
       setLoading(true);
-      const response = await AdminDepartmentService.updateDepartment(departmentData.id, departmentData);
+      console.log("Updating department with data:", departmentData);
       
-      // Update the local state
-      setDepartments(prevDepartments => 
-        prevDepartments.map(dept => 
-          dept.id === departmentData.id ? response.data : dept
-        )
-      );
+      // Make sure the ID is included when calling the API
+      if (!departmentData.id) {
+        throw new Error("Department ID is missing");
+      }
+      
+      await AdminDepartmentService.updateDepartment(departmentData.id, departmentData);
+      
+      // Refresh the whole list instead of trying to update a specific item
+      fetchDepartments(pagination.page, pagination.size);
       
       toast.success("Department updated successfully");
     } catch (err) {

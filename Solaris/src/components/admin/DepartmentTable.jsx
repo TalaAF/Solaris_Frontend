@@ -3,6 +3,8 @@ import { Building2, Edit, MoreHorizontal, Plus, Search } from "lucide-react";
 import DepartmentDialog from "./DepartmentDialog";
 import TablePagination from '../ui/TablePagination';
 import "./DepartmentTable.css";
+import DepartmentService from "../../services/DepartmentService";
+import { toast } from "../../components/ui/toaster";
 
 const DepartmentTable = ({ 
   departments: initialDepartments, 
@@ -46,41 +48,30 @@ const DepartmentTable = ({
     setIsDialogOpen(true);
   };
 
-  const handleToggleStatus = (department) => {
-    const newStatus = !department.isActive;
-    const updatedDepartments = departments.map(d => 
-      d.id === department.id ? { ...d, isActive: newStatus } : d
-    );
-    setDepartments(updatedDepartments);
-    
-    if (onDepartmentToggleStatus) {
-      onDepartmentToggleStatus(department.id, newStatus);
+  const handleToggleStatus = async (department) => {
+    try {
+      const isActive = department.active || department.isActive;
+      await DepartmentService.toggleDepartmentStatus(department.id, !isActive);
+      
+      if (onDepartmentToggleStatus) {
+        onDepartmentToggleStatus(department.id, !isActive);
+      }
+    } catch (error) {
+      console.error("Error toggling department status:", error);
+      toast.error("Failed to update department status");
     }
-    alert(`Department ${newStatus ? "activated" : "deactivated"} successfully`);
   };
 
   const handleSubmitDepartment = (formData) => {
     if (formData.id) {
-      // Update existing department
-      const updatedDepartments = departments.map(d => 
-        d.id === formData.id ? { ...formData } : d
-      );
-      setDepartments(updatedDepartments);
-      
+      // For updates, don't update local state - let parent handle it after API call
       if (onDepartmentUpdate) {
         onDepartmentUpdate(formData);
       }
     } else {
-      // Add new department
-      const newDepartment = {
-        ...formData,
-        id: Math.max(...departments.map(d => d.id), 0) + 1,
-        userCount: 0
-      };
-      setDepartments([...departments, newDepartment]);
-      
+      // For new departments, also let parent handle state after API call
       if (onDepartmentAdd) {
-        onDepartmentAdd(newDepartment);
+        onDepartmentAdd(formData);
       }
     }
     setIsDialogOpen(false);
@@ -154,9 +145,9 @@ const DepartmentTable = ({
                     <td>{department.specialtyArea}</td>
                     <td>{department.headOfDepartment}</td>
                     <td>{department.userCount}</td>
-                    <td>
-                      <span className={`status-badge ${department.isActive ? "active" : "inactive"}`}>
-                        {department.isActive ? "Active" : "Inactive"}
+                    <td className="status-cell">
+                      <span className={`status-badge ${department.active || department.isActive ? 'active' : 'inactive'}`}>
+                        {department.active || department.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="action-cell">
@@ -171,12 +162,19 @@ const DepartmentTable = ({
                             <Edit size={14} />
                             <span>Edit</span>
                           </button>
-                          <button 
-                            className={`dropdown-item ${department.isActive ? "deactivate" : "activate"}`}
-                            onClick={() => handleToggleStatus(department)}
-                          >
-                            <span>{department.isActive ? "Deactivate" : "Activate"}</span>
-                          </button>
+                          <div className="dropdown-item" onClick={() => handleToggleStatus(department)}>
+                            {department.active || department.isActive ? (
+                              <>
+                                <span className="icon-deactivate"></span>
+                                <span>Deactivate</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="icon-activate"></span>
+                                <span>Activate</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>

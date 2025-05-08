@@ -18,7 +18,15 @@ const DepartmentService = {
   
   // Update existing department
   updateDepartment: async (id, departmentData) => {
-    return apiClient.put(`/api/departments/${id}`, departmentData);
+    console.log(`Sending update for department ID ${id}:`, departmentData);
+    
+    // Remove any potential duplicate ID fields to avoid conflicts
+    const cleanData = { ...departmentData };
+    if (cleanData.id === id) {
+      delete cleanData.id; // Some APIs don't want the ID in the body when it's in the URL
+    }
+    
+    return apiClient.put(`/api/departments/${id}`, cleanData);
   },
   
   // Delete department
@@ -77,6 +85,30 @@ const DepartmentService = {
   // Batch creation for importing multiple departments
   batchCreateDepartments: async (departmentsData) => {
     return apiClient.post('/api/departments/batch', departmentsData);
+  },
+  
+  // NEW METHODS for department head management
+  
+  // Assign a head to a department
+  assignDepartmentHead: async (departmentId, userId) => {
+    return apiClient.patch(`/api/departments/${departmentId}/head`, { userId });
+  },
+  
+  // Remove head from department
+  removeDepartmentHead: async (departmentId) => {
+    return apiClient.delete(`/api/departments/${departmentId}/head`);
+  },
+  
+  // Get departments with user counts for admin dashboard
+  getDepartmentsWithUserCounts: async () => {
+    return apiClient.get('/api/departments/with-user-counts');
+  },
+  
+  // Get departments with user counts (paginated)
+  getPaginatedDepartmentsWithCounts: async (activeOnly = false, page = 0, size = 10) => {
+    return apiClient.get('/api/departments/pageable/with-user-counts', {
+      params: { activeOnly, page, size }
+    });
   }
 };
 

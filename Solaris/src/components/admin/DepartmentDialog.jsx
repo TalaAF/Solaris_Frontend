@@ -1,26 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
+import AdminUserService from "../../services/AdminUserService";
 import "./DepartmentDialog.css";
 
 const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
-  const initialFormData = department || {
+  // Update the initialFormData to have all required properties
+  const initialFormData = {
     name: "",
     description: "",
     code: "",
     specialtyArea: "",
-    headOfDepartment: "",
+    headOfDepartmentId: "",
+    headOfDepartment: "",  // Add this for backward compatibility
     contactInformation: "",
     isActive: true,
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [users, setUsers] = useState([]);
 
   // Reset form when dialog opens with new data
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
-      setFormData(department || initialFormData);
+      if (department) {
+        // For editing, preserve the ID and use existing data
+        setFormData({
+          ...initialFormData,
+          ...department,
+          // Make sure to maintain both properties
+          headOfDepartmentId: department.headOfDepartmentId || "",
+          headOfDepartment: department.headOfDepartment || ""
+        });
+      } else {
+        // For new department, use clean initial data
+        setFormData(initialFormData);
+      }
+      
+      console.log("Form initialized with:", department || initialFormData);
     }
   }, [isOpen, department]);
+
+  // Load users when the dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const loadUsers = async () => {
+        try {
+          // Add role filter to only get instructors
+          const response = await AdminUserService.getUsers(0, 100, { 
+            active: true,
+            role: "INSTRUCTOR"  // Add this filter for instructor role
+          });
+          setUsers(response.data.content || []);
+          console.log("Loaded instructors for department head:", response.data.content);
+        } catch (error) {
+          console.error("Failed to load instructors:", error);
+        }
+      };
+      
+      loadUsers();
+    }
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,28 +69,29 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
     });
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: checked,
-    });
-  };
-
+  // Update the handleSubmit function
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Convert form data to match the backend DTO format
+    // Log for debugging
+    console.log("Form data before submit:", formData);
+    
     const departmentDTO = {
+      ...(formData.id && { id: formData.id }),
       name: formData.name,
       description: formData.description,
       code: formData.code,
       specialtyArea: formData.specialtyArea,
-      headOfDepartment: formData.headOfDepartment,
+      // Fix how we handle the headOfDepartmentId
+      headOfDepartmentId: formData.headOfDepartmentId ? parseInt(formData.headOfDepartmentId, 10) : null,
+      // Also keep headOfDepartment as string name for backward compatibility
+      headOfDepartment: formData.headOfDepartment || "",
       contactInformation: formData.contactInformation,
-      isActive: formData.isActive
+      isActive: department ? (department.isActive !== undefined ? department.isActive : department.active) : true
     };
     
+    // Log what we're submitting to API
+    console.log('Submitting department:', departmentDTO);
     onSubmit(departmentDTO);
   };
 
@@ -111,13 +151,20 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
         
         <div className="form-group">
           <label htmlFor="headOfDepartment">Head of Department</label>
-          <input
+          <select
             id="headOfDepartment"
-            name="headOfDepartment"
-            value={formData.headOfDepartment}
+            name="headOfDepartmentId"
+            value={formData.headOfDepartmentId || ""}
             onChange={handleChange}
-            className="form-input"
-          />
+            className="form-select"
+          >
+            <option value="">Select Head of Department</option>
+            {users.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.fullName} ({user.email})
+              </option>
+            ))}
+          </select>
         </div>
         
         <div className="form-group">
@@ -129,18 +176,6 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
             onChange={handleChange}
             className="form-input"
           />
-        </div>
-        
-        <div className="form-check">
-          <input
-            type="checkbox"
-            id="isActive"
-            name="isActive"
-            checked={formData.isActive}
-            onChange={handleCheckboxChange}
-            className="form-checkbox"
-          />
-          <label htmlFor="isActive">Active Department</label>
         </div>
         
         <div className="form-actions">
