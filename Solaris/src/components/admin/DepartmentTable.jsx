@@ -144,7 +144,15 @@ const DepartmentTable = ({
                     <td>{department.code}</td>
                     <td>{department.specialtyArea}</td>
                     <td>{department.headOfDepartment}</td>
-                    <td>{department.userCount}</td>
+                    <td className="user-count-cell">
+                      {/* Handle all possible property names for user count */}
+                      {department.userCount !== undefined ? 
+                        department.userCount : 
+                        (department.users?.length !== undefined ? 
+                          department.users.length : 
+                          0)
+                      }
+                    </td>
                     <td className="status-cell">
                       <span className={`status-badge ${department.active || department.isActive ? 'active' : 'inactive'}`}>
                         {department.active || department.isActive ? 'Active' : 'Inactive'}

@@ -24,13 +24,14 @@ const Departments = () => {
   const fetchDepartments = async (page = 0, size = 10) => {
     setLoading(true);
     try {
-      const response = await AdminDepartmentService.getPaginatedDepartments(activeOnly, page, size);
+      // FIX: Use the method that returns user counts
+      const response = await AdminDepartmentService.getPaginatedDepartmentsWithCounts(activeOnly, page, size);
       
       // Debug the response structure
-      console.log("Department API response:", response.data);
-      console.log("First department:", response.data.content?.[0]);
+      console.log("Department API response with counts:", response.data);
+      console.log("First department with user count:", response.data.content?.[0]);
       
-      // Update department state with received data
+      // Make sure we're updating with the data that includes counts
       setDepartments(response.data.content || []);
       
       setPagination({
@@ -91,25 +92,21 @@ const Departments = () => {
     try {
       setLoading(true);
       
-      // Use the dedicated toggle status endpoint if available
-      const response = await AdminDepartmentService.toggleDepartmentStatus(
+      // Use the dedicated toggle status endpoint
+      await AdminDepartmentService.toggleDepartmentStatus(
         departmentId,
         newStatus
       );
       
-      // Update the local state
-      setDepartments(prevDepartments => 
-        prevDepartments.map(dept => 
-          dept.id === departmentId ? {...dept, isActive: newStatus} : dept
-        )
-      );
+      // FIX: Refresh data from server instead of updating local state
+      // This ensures we get the correct status from the backend
+      fetchDepartments(pagination.page, pagination.size);
       
       toast.success(`Department ${newStatus ? "activated" : "deactivated"} successfully`);
     } catch (err) {
       console.error("Error toggling department status:", err);
       toast.error(err.response?.data?.message || "Failed to update department status");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set loading false on error
     }
   };
 
