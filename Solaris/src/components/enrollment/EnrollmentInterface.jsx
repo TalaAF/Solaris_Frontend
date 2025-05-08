@@ -1,5 +1,5 @@
 // src/components/enrollment/EnrollmentInterface.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   CheckCircle, 
@@ -10,58 +10,96 @@ import {
   Layers,
   AlertCircle
 } from 'lucide-react';
+import EnrollmentService from '../../services/EnrollmentService';
 import './EnrollmentInterface.css';
 
 const EnrollmentInterface = () => {
   // State variables
   const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
-  
-  // Mock data for development
-  const studentData = {
-    id: "2202357",
-    name: "Saja Khaled Amer Alshawawra",
-    term: "Spring-2025",
-    status: "Registered",
-    totalCredits: 16,
-    majorGPA: 3.75,
-    cumulativeGPA: 3.8
-  };
-  
-  const courseData = {
-    completed: [
-      { code: "PHIL350", title: "COMPUTER ETHICS", credits: 3, type: "Major Requirement", status: "completed", term: "Fall 2024" },
-      { code: "RELS300", title: "CULTURAL RELIGIOUS STUDIES", credits: 3, type: "University Requirement", status: "completed", term: "Fall 2024" },
-      { code: "SWER312", title: "SOFTWARE TESTING & QUALITY ASSURANCE", credits: 3, type: "Major Requirement", status: "completed", term: "Fall 2024" },
-      { code: "SWER385", title: "INTELLIGENT SYSTEMS", credits: 3, type: "Major Requirement", status: "completed", term: "Fall 2024" },
-      { code: "SWER401", title: "CAPSTONE PROJECT I", credits: 1, type: "Major Requirement", status: "completed", term: "Fall 2024" }
-    ],
-    registered: [
-      { code: "SWER402", title: "CAPSTONE PROJECT II", credits: 3, type: "Major Requirement", status: "in-progress", term: "Spring 2025" },
-      { code: "SWERGR1", title: "Mobile Application Development", credits: 3, type: "Major Elective", status: "in-progress", term: "Spring 2025" },
-      { code: "ANAT201", title: "Human Anatomy", credits: 4, type: "Medical Requirement", status: "in-progress", term: "Spring 2025" }
-    ],
-    available: [
-      { code: "MED201", title: "Medical Terminology", credits: 2, type: "Medical Requirement", status: "available", term: "Fall 2025" },
-      { code: "PHARM101", title: "Introduction to Pharmacology", credits: 3, type: "Medical Requirement", status: "available", term: "Fall 2025" },
-      { code: "SWER420", title: "AI in Healthcare", credits: 3, type: "Major Elective", status: "available", term: "Fall 2025" }
-    ]
-  };
-  
-  const registrationOpen = true;
-  
+  const [studentData, setStudentData] = useState(null);
+  const [courseData, setCourseData] = useState({
+    completed: [],
+    registered: [],
+    available: []
+  });
+
+  // Fetch student and enrollment data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // First get enrollment data
+        const enrollmentData = await EnrollmentService.getStudentEnrollment();
+        console.log('Raw Enrollment Data:', enrollmentData); // Debug log
+
+        // Check if we have valid enrollment data array
+        if (!Array.isArray(enrollmentData) || enrollmentData.length === 0) {
+          throw new Error('No enrollment data found');
+        }
+
+        // Extract student info from first enrollment
+        const studentInfo = {
+          id: Number(enrollmentData[0].studentId),
+          name: enrollmentData[0].studentName
+        };
+
+        console.log('Extracted Student Info:', studentInfo); // Debug log
+
+        if (!studentInfo.id || isNaN(studentInfo.id)) {
+          throw new Error('Invalid student ID');
+        }
+
+        // Fetch dashboard data with valid student ID
+        const dashboardData = await EnrollmentService.getStudentDashboard(studentInfo.id);
+
+        // Transform enrollments data
+        const transformedEnrollments = enrollmentData.map(enrollment => ({
+          id: enrollment.courseId,
+          code: `COURSE${enrollment.courseId}`,
+          title: enrollment.courseName,
+          credits: 3,
+          type: 'Major Requirement',
+          term: new Date(enrollment.enrollmentDate).toLocaleDateString(),
+          status: enrollment.status,
+          progress: enrollment.progress
+        }));
+
+        // Update states
+        setCourseData({
+          completed: dashboardData?.completedCourses || [],
+          registered: transformedEnrollments,
+          available: [] // Will be populated when available courses endpoint is ready
+        });
+
+        setStudentData({
+          id: studentInfo.id,
+          name: studentInfo.name,
+          term: dashboardData?.currentTerm || "Spring-2025",
+          status: dashboardData?.status || "Registered",
+          totalCredits: 120,
+          majorGPA: dashboardData?.majorGPA || 0,
+          cumulativeGPA: dashboardData?.cumulativeGPA || 0
+        });
+
+      } catch (err) {
+        console.error('Error fetching enrollment data:', err);
+        setError(err.message || 'Failed to load enrollment data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // Calculate total credits
   const calculateTotalCredits = (courses) => {
     return courses.reduce((total, course) => total + course.credits, 0);
-  };
-  
-  // Progress - using 65% to match sample
-  const completedCredits = calculateTotalCredits(courseData.completed);
-  const progress = {
-    completed: 65,
-    total: completedCredits + calculateTotalCredits(courseData.registered),
-    allTotal: 31 // Using 31 from the image
   };
 
   // Handle tab change
@@ -79,17 +117,30 @@ const EnrollmentInterface = () => {
   };
 
   // Handle course registration
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (selectedCourses.length === 0) return;
     
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      alert(`Successfully registered for ${selectedCourses.length} courses!`);
+    try {
+      setLoading(true);
+      
+      await EnrollmentService.registerCourses(studentData.id, selectedCourses);
+      
+      // Refresh the course data after successful registration
+      const enrollmentData = await EnrollmentService.getStudentEnrollment();
+      setCourseData(prevData => ({
+        ...prevData,
+        registered: enrollmentData.enrollments,
+        available: enrollmentData.availableCourses
+      }));
+
       setSelectedCourses([]);
-    }, 1000);
+      alert('Successfully registered for courses!');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      alert('Failed to register for courses. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Get the appropriate icon for course type
@@ -107,6 +158,29 @@ const EnrollmentInterface = () => {
         return <BookOpen size={16} className="course-type-icon" />;
     }
   };
+
+  // Render courses function (removed as it is unused)
+
+  // Show loading state
+  if (loading && !studentData) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading enrollment data...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="error-container">
+        <AlertCircle size={32} />
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="enrollment-container">
@@ -134,11 +208,15 @@ const EnrollmentInterface = () => {
         </div>
         <div className="student-academic-stats">
           <div className="stat-box">
-            <div className="stat-value">{studentData.majorGPA}</div>
+            <div className="stat-value">
+              {isNaN(studentData.majorGPA) ? '0' : studentData.majorGPA.toString()}
+            </div>
             <div className="stat-label">Major GPA</div>
           </div>
           <div className="stat-box">
-            <div className="stat-value">{studentData.cumulativeGPA}</div>
+            <div className="stat-value">
+              {isNaN(studentData.cumulativeGPA) ? '0' : studentData.cumulativeGPA.toString()}
+            </div>
             <div className="stat-label">Cumulative GPA</div>
           </div>
         </div>
@@ -148,26 +226,32 @@ const EnrollmentInterface = () => {
       <div className="progress-dashboard">
         <div className="progress-header">
           <h2>Degree Progress</h2>
-          <div className="progress-percentage-badge">{progress.completed}% Complete</div>
+          <div className="progress-percentage-badge">{Math.round((calculateTotalCredits(courseData.completed) / studentData.totalCredits) * 100)}% Complete</div>
         </div>
         <div className="progress-visualization">
           <div className="progress-bar-container">
             <div 
               className="progress-bar" 
-              style={{ width: `${progress.completed}%` }}
+              style={{ width: `${Math.round((calculateTotalCredits(courseData.completed) / studentData.totalCredits) * 100)}%` }}
             ></div>
           </div>
           <div className="progress-stats">
             <div className="progress-stat">
-              <div className="progress-stat-value">{completedCredits}</div>
+              <div className="stat-value">
+                {isNaN(calculateTotalCredits(courseData.completed)) ? '0' : calculateTotalCredits(courseData.completed).toString()}
+              </div>
               <div className="progress-stat-label">Credits Completed</div>
             </div>
             <div className="progress-stat">
-              <div className="progress-stat-value">{progress.allTotal - completedCredits}</div>
+              <div className="stat-value">
+                {isNaN(studentData.totalCredits - calculateTotalCredits(courseData.completed)) ? '0' : (studentData.totalCredits - calculateTotalCredits(courseData.completed)).toString()}
+              </div>
               <div className="progress-stat-label">Credits Remaining</div>
             </div>
             <div className="progress-stat">
-              <div className="progress-stat-value">{progress.allTotal}</div>
+              <div className="stat-value">
+                {isNaN(studentData.totalCredits) ? '0' : studentData.totalCredits.toString()}
+              </div>
               <div className="progress-stat-label">Total Required</div>
             </div>
           </div>
@@ -216,7 +300,7 @@ const EnrollmentInterface = () => {
                 {courseData.registered.length > 0 ? (
                   <div className="courses-grid">
                     {courseData.registered.map((course) => (
-                      <div className="course-card" key={course.code}>
+                      <div className="course-card" key={`registered-${course.id}`}>
                         <div className="course-card-header">
                           <div className="course-code">{course.code}</div>
                           <div className="course-credits">{course.credits} CR</div>
@@ -260,7 +344,7 @@ const EnrollmentInterface = () => {
                 {courseData.completed.length > 0 ? (
                   <div className="courses-grid">
                     {courseData.completed.map((course) => (
-                      <div className="course-card completed" key={course.code}>
+                      <div className="course-card completed" key={`completed-${course.id}`}>
                         <div className="course-card-header">
                           <div className="course-code">{course.code}</div>
                           <div className="course-credits">{course.credits} CR</div>
@@ -296,16 +380,16 @@ const EnrollmentInterface = () => {
               <div className="tab-content fade-in">
                 <div className="tab-header">
                   <h3>Available Courses</h3>
-                  <div className={`registration-status-badge ${registrationOpen ? 'open' : 'closed'}`}>
-                    Registration {registrationOpen ? 'Open' : 'Closed'}
+                  <div className={`registration-status-badge ${courseData.available.length > 0 ? 'open' : 'closed'}`}>
+                    Registration {courseData.available.length > 0 ? 'Open' : 'Closed'}
                   </div>
                 </div>
                 
                 <div className="registration-info">
                   <AlertCircle size={18} />
                   <p>
-                    Registration for Fall 2025 is currently {registrationOpen ? 'open' : 'closed'}.
-                    {registrationOpen && ' Select courses below to register.'}
+                    Registration for Fall 2025 is currently {courseData.available.length > 0 ? 'open' : 'closed'}.
+                    {courseData.available.length > 0 && ' Select courses below to register.'}
                   </p>
                 </div>
                 
@@ -315,8 +399,8 @@ const EnrollmentInterface = () => {
                       {courseData.available.map((course) => (
                         <div 
                           className={`course-card available ${selectedCourses.includes(course.code) ? 'selected' : ''}`} 
-                          key={course.code}
-                          onClick={() => registrationOpen && handleCourseSelection(course.code)}
+                          key={`available-${course.id}`}
+                          onClick={() => courseData.available.length > 0 && handleCourseSelection(course.code)}
                         >
                           <div className="course-card-header">
                             <div className="course-code">{course.code}</div>
@@ -353,7 +437,7 @@ const EnrollmentInterface = () => {
                         </span>
                       </div>
                       
-                      {registrationOpen && (
+                      {courseData.available.length > 0 && (
                         <button 
                           className="register-button"
                           disabled={selectedCourses.length === 0 || loading}

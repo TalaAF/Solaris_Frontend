@@ -1,7 +1,8 @@
 // Export all API services from this file for easy importing
 import CourseService from "./CourseService";
-import ModuleService from "./ModuleService";
-import ContentService from "./ContentService";
+import EnrollmentService from "./EnrollmentService";
+import UserService from "./UserService";
+import CourseDataMapper from "./CourseDataMapper";
 import {
   transformCourseData,
   transformModuleData,
@@ -15,8 +16,9 @@ import {
 
 export {
   CourseService,
-  ModuleService,
-  ContentService,
+  EnrollmentService,
+  UserService,
+  CourseDataMapper,
   transformCourseData,
   transformModuleData,
   transformContentItem,
