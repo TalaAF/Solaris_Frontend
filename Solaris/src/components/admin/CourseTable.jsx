@@ -174,16 +174,20 @@ const CourseTable = ({
   };
 
   const handleViewDetails = (course) => {
-    // Pass the entire course object as state when navigating
     navigate(`/admin/courses/${course.id}`, { 
-      state: { courseData: course } 
+      state: { 
+        courseData: course
+        // No returnPath needed here since we want to return to the course list
+      } 
     });
   };
 
   const handleManageStudents = (course) => {
-    // Pass the entire course object as state when navigating
     navigate(`/admin/courses/${course.id}/students`, { 
-      state: { courseData: course } 
+      state: { 
+        courseData: course,
+        returnPath: "/admin/courses" // Set return path to course listing
+      } 
     });
   };
 

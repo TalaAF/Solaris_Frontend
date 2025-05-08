@@ -13,13 +13,35 @@ import "./CourseStudents.css";
 const CourseStudents = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const location = useLocation();
+    const location = useLocation(); // Add this to access route state
     const [course, setCourse] = useState(null);
     const [students, setStudents] = useState([]);
     const [availableStudents, setAvailableStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    
+    // Debug logs
+    console.log("CourseStudents - Location State:", location.state);
+    console.log("CourseStudents - Current Course:", course);
+    
+    // Function to handle back button navigation
+    const handleBackNavigation = () => {
+        // Check if we have returnPath in state
+        if (location.state?.returnPath) {
+            console.log("Navigating to return path:", location.state.returnPath);
+            // Before navigating, make sure we're passing the course data back
+            navigate(location.state.returnPath, {
+                state: { courseData: course } // This ensures we maintain the course data
+            });
+        } else {
+            // If no return path, navigate to course details with current course data
+            console.log("No return path specified, returning to course details");
+            navigate(`/admin/courses/${id}`, {
+                state: { courseData: course }
+            });
+        }
+    };
     
     const fetchCourseData = async () => {
         setIsLoading(true);
@@ -61,7 +83,7 @@ const CourseStudents = () => {
     
     useEffect(() => {
         fetchCourseData();
-    }, [id, location.state]);
+    }, [id, location.state]); // Add location.state as a dependency
     
     const handleAddStudent = async (studentId) => {
         try {
@@ -181,9 +203,10 @@ const CourseStudents = () => {
     return (
         <div className="course-students-container">
             <div className="course-header">
-                <Button variant="outline" onClick={() => navigate(`/admin/courses/${id}`)}>
+                {/* Update your back button to use the new navigation handler */}
+                <Button variant="outline" onClick={handleBackNavigation}>
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back to Course Details
+                    {location.state?.returnPath === '/admin/courses' ? 'Back to Course List' : 'Back'}
                 </Button>
                 <h1 className="course-header-title">
                     Students - {course?.title || 'Loading...'}
