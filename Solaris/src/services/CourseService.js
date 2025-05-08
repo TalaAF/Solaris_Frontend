@@ -308,7 +308,10 @@ class CourseService {
   // Update course enrollment count
   async updateCourseEnrollmentCount(courseId) {
     try {
-      return await api.patch(`/api/courses/${courseId}/enrollment-count`);
+      // Call the specific API endpoint for updating enrollment count
+      const response = await api.post(`/api/admin/courses/${courseId}/update-enrollment`);
+      console.log(`Updated enrollment count for course ${courseId}:`, response);
+      return response;
     } catch (error) {
       console.error(`Error updating enrollment count for course ${courseId}:`, error);
       throw error;

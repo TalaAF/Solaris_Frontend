@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Award // Add this import
 } from "lucide-react";
 import CourseDialog from "./CourseDialog";
 import "./CourseTable.css";
@@ -174,25 +175,28 @@ const CourseTable = ({
   };
 
   const handleViewDetails = (course) => {
+    // Pass the entire course object as state when navigating
     navigate(`/admin/courses/${course.id}`, { 
-      state: { 
-        courseData: course
-        // No returnPath needed here since we want to return to the course list
-      } 
+      state: { courseData: course } 
     });
   };
 
   const handleManageStudents = (course) => {
+    // Pass the entire course object as state when navigating
     navigate(`/admin/courses/${course.id}/students`, { 
-      state: { 
-        courseData: course,
-        returnPath: "/admin/courses" // Set return path to course listing
-      } 
+      state: { courseData: course } 
     });
   };
 
   const handleSettings = (course) => {
     navigate(`/admin/courses/${course.id}/settings`);
+  };
+
+  const handleGenerateCertificates = (course) => {
+    // Navigate to certificate generation page with course context
+    navigate(`/admin/courses/${course.id}/certificates`, { 
+      state: { courseData: course } 
+    });
   };
 
   const handleSearchChange = (e) => {
@@ -450,6 +454,10 @@ const CourseTable = ({
                           <button className="dropdown-item" onClick={() => handleManageStudents(course)}>
                             <Users size={14} />
                             <span>Manage Students</span>
+                          </button>
+                          <button className="dropdown-item" onClick={() => handleGenerateCertificates(course)}>
+                            <Award size={14} />
+                            <span>Generate Certificates</span>
                           </button>
                           <button className="dropdown-item" onClick={() => handleSettings(course)}>
                             <Settings size={14} />

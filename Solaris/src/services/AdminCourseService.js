@@ -42,16 +42,63 @@ class AdminCourseService {
   
   // Create course method for admins
   createCourse = async (courseData) => {
-    const normalizedData = this.normalizeCourseData(courseData);
-    console.log('Admin creating course with data:', normalizedData);
-    return apiClient.post('/api/courses', normalizedData);
+    try {
+      const formattedData = {
+        ...courseData,
+        credits: parseInt(courseData.credits || 0, 10),
+        maxCapacity: parseInt(courseData.maxCapacity || 0, 10),
+        
+        // Use published instead of isPublished
+        published: Boolean(courseData.isPublished),
+        
+        // Make sure semester is passed correctly
+        semester: courseData.semester
+      };
+      
+      // Remove isPublished to prevent sending both fields
+      if (formattedData.hasOwnProperty('isPublished')) {
+        delete formattedData.isPublished;
+      }
+      
+      console.log("Creating course with data:", formattedData);
+      const response = await apiClient.post('/api/admin/courses', formattedData);
+      console.log("API response from create:", response);
+      return response;
+    } catch (error) {
+      console.error("Error creating course:", error);
+      throw error;
+    }
   };
   
   // Update course method for admins
   updateCourse = async (courseId, courseData) => {
-    const normalizedData = this.normalizeCourseData(courseData);
-    console.log(`Admin updating course ${courseId} with data:`, normalizedData);
-    return apiClient.put(`/api/courses/${courseId}`, normalizedData);
+    try {
+      // Transform frontend model to match backend DTO expectations
+      const formattedData = {
+        ...courseData,
+        credits: parseInt(courseData.credits || 0, 10),
+        maxCapacity: parseInt(courseData.maxCapacity || 0, 10),
+        
+        // IMPORTANT: Use published instead of isPublished
+        published: Boolean(courseData.isPublished || courseData.published),
+        
+        // Ensure semester is properly set
+        semester: courseData.semester
+      };
+      
+      // Remove isPublished to prevent sending both fields
+      if (formattedData.hasOwnProperty('isPublished')) {
+        delete formattedData.isPublished;
+      }
+      
+      console.log("Updating course with data:", formattedData);
+      const response = await apiClient.put(`/api/admin/courses/${courseId}`, formattedData);
+      console.log("Update response:", response);
+      return response;
+    } catch (error) {
+      console.error(`Error updating course ${courseId}:`, error);
+      throw error;
+    }
   };
   
   // Helper to normalize course data consistently

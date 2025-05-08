@@ -34,22 +34,30 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
   useEffect(() => {
     if (isOpen) {
       if (course) {
-        // Map backend course model to form data
+        // Map backend data to form fields
         setFormData({
-          id: course.id,
-          title: course.title || "",
-          code: course.code || "",
-          description: course.description || "",
-          departmentId: course.departmentId || null,
-          instructorEmail: course.instructorEmail || "",
+          title: course.title || '',
+          description: course.description || '',
+          instructorEmail: course.instructorEmail || '',
+          departmentId: course.departmentId || '',
           maxCapacity: course.maxCapacity || 30,
-          // Use isPublished from backend, not published
-          isPublished: course.isPublished !== undefined ? course.isPublished : true,
-          credits: course.credits || 3,
-          semester: course.semester || "Spring 2025",
+          credits: course.credits || 0,
+          semester: course.semester || course.semesterName || '', // Handle both field names
+          isPublished: course.isPublished || false,
+          // Add any other fields that need mapping
         });
       } else {
-        setFormData(initialFormData);
+        // Reset form data for new course
+        setFormData({
+          title: '',
+          description: '',
+          instructorEmail: '',
+          departmentId: '',
+          maxCapacity: 30,
+          credits: 3,
+          semester: 'Spring 2025', // Set default semester
+          isPublished: true, // Default to published
+        });
       }
       setErrors({});
     }
@@ -162,7 +170,6 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
   };
 
   // Update the handleSubmit function 
-
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -170,31 +177,21 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
       return;
     }
     
-    // Prepare data for API submission - match the backend's expected format
+    // Transform form data to match backend expectations
     const submissionData = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      instructorEmail: formData.instructorEmail,
-      departmentId: formData.departmentId ? parseInt(formData.departmentId, 10) : null,
-      code: formData.code.trim() || undefined,
-      maxCapacity: parseInt(formData.maxCapacity, 10) || 30,
-      credits: parseInt(formData.credits, 10) || 3, // Ensure credits is an integer
-      semester: formData.semester || "Spring 2025", // Provide default semester
-      isPublished: Boolean(formData.isPublished) // Ensure boolean type
+      ...formData,
+      // Explicitly convert types
+      maxCapacity: parseInt(formData.maxCapacity, 10),
+      credits: parseInt(formData.credits, 10),
+      
+      // Use the field name the backend expects
+      published: formData.isPublished === true || formData.isPublished === 'true',
+      
+      // Keep instructorEmail as is
+      instructorEmail: formData.instructorEmail
     };
     
-    if (course?.id) {
-      submissionData.id = course.id;
-    }
-    
-    // Remove any undefined values
-    Object.keys(submissionData).forEach(key => {
-      if (submissionData[key] === undefined) {
-        delete submissionData[key];
-      }
-    });
-    
-    console.log("Admin submitting course data:", submissionData);
+    console.log("Form submitted with data:", submissionData);
     onSubmit(submissionData);
   };
 

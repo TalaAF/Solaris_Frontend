@@ -1,57 +1,52 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { BookOpen, ChevronLeft, Settings, UserRound } from "lucide-react";
 import "./CourseDetails.css";
-import api from "../../../services/api";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  console.log("CourseDetails - Location State:", location.state);
-  console.log("CourseDetails - ID Param:", id);
-
   useEffect(() => {
+    // Simulating API call to fetch course details
     const fetchCourse = async () => {
       try {
-        // Check if we already have the course data from router state
-        if (location.state?.courseData) {
-          console.log("Using course data from router state:", location.state.courseData);
-          setCourse(location.state.courseData);
-          setLoading(false);
-          return;
-        }
-        
-        console.log("No router state available, fetching course data from API");
+        // In a real app, this would be an API call
+        // Using mock data from your import
         const courseId = parseInt(id);
         
-        try {
-          // Make sure your API endpoint is correct
-          const response = await api.get(`/courses/${courseId}`);
-          console.log("API response:", response);
-          if (response.data) {
-            setCourse(response.data);
-          } else {
-            console.error("API returned no data for course:", courseId);
-            // Maybe set an error state here
-          }
-        } catch (error) {
-          console.error("Error fetching course from API:", error);
-          // Consider a more user-friendly error handling approach
-        }
-        
-        setLoading(false);
+        // Simulate fetch delay
+        setTimeout(() => {
+          // Replace this with your actual fetch logic and data source
+          const foundCourse = {
+            id: courseId,
+            title: "Introduction to Computer Science",
+            description: "Foundational course covering algorithms and data structures",
+            instructorEmail: "sarah.johnson@example.com",
+            instructorName: "Sarah Johnson",
+            departmentId: 5, 
+            departmentName: "Computer Science",
+            maxCapacity: 100,
+            enrolledStudents: 76,
+            isActive: true,
+            startDate: "2023-09-01T00:00:00Z",
+            endDate: "2023-12-15T00:00:00Z",
+            prerequisiteCourseIds: []
+          };
+          
+          setCourse(foundCourse);
+          setLoading(false);
+        }, 500);
       } catch (error) {
-        console.error("Error in fetchCourse:", error);
+        console.error("Error fetching course:", error);
         setLoading(false);
       }
     };
     
     fetchCourse();
-  }, [id, location.state]);
+  }, [id]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -60,16 +55,6 @@ const CourseDetails = () => {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
-  const handleManageStudents = () => {
-    // Pass the current course data to the students page
-    navigate(`/admin/courses/${course.id}/students`, {
-      state: { 
-        courseData: course,
-        returnPath: location.pathname // Store the current path to return to
-      }
-    });
-  };
-  
   if (loading) {
     return (
       <div className="course-details-loading">
@@ -113,7 +98,7 @@ const CourseDetails = () => {
         <div className="action-buttons">
           <button 
             className="action-button primary"
-            onClick={handleManageStudents}
+            onClick={() => navigate(`/admin/courses/${course.id}/students`)}
           >
             <UserRound size={18} />
             <span>Manage Students</span>

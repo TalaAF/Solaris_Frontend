@@ -108,6 +108,7 @@ const CourseStudents = () => {
             // Call the API to update the course's enrollment count
             try {
                 await CourseService.updateCourseEnrollmentCount(parseInt(id));
+                console.log("Successfully updated course enrollment count");
             } catch (updateError) {
                 console.error("Failed to update enrollment count:", updateError);
                 // No need to show error to user as the enrollment still worked
@@ -137,6 +138,14 @@ const CourseStudents = () => {
                 ...prevCourse,
                 enrolledStudents: Math.max(0, (prevCourse.enrolledStudents || 1) - 1)
             }));
+            
+            // Call the API to update the course's enrollment count
+            try {
+                await CourseService.updateCourseEnrollmentCount(parseInt(id));
+                console.log("Successfully updated course enrollment count after removal");
+            } catch (updateError) {
+                console.error("Failed to update enrollment count after removal:", updateError);
+            }
             
             toast.success(`Student removed from course`);
         } catch (error) {

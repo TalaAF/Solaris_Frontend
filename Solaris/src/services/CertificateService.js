@@ -432,7 +432,7 @@ class CertificateService {
   }
 
   // Generate batch certificates
-  async generateBatchCertificates(courseId, studentIds) {
+  async generateBatchCertificates(courseId, studentIds, templateId = null) {
     if (USE_MOCK) {
       await this.mockDelay();
       
@@ -448,7 +448,8 @@ class CertificateService {
           verificationId: `cert-${Math.floor(Math.random() * 1000000)}`,
           issuedAt: new Date().toISOString(),
           revoked: false,
-          revocationReason: null
+          revocationReason: null,
+          templateId: templateId || 1
         };
         
         mockCertificates[newId] = certificate;
@@ -459,7 +460,13 @@ class CertificateService {
     }
     
     try {
-      const response = await api.post(`/api/certificates/batch/${courseId}`, studentIds);
+      // Add the templateId to the request body if provided
+      const requestBody = {
+        studentIds,
+        templateId: templateId || null
+      };
+      
+      const response = await api.post(`/api/certificates/batch/${courseId}`, requestBody);
       
       // Handle array response
       if (Array.isArray(response.data)) {
