@@ -23,12 +23,32 @@ import {
   GraduationCap,
 } from "lucide-react";
 import "./Sidebar.css";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = ({ isOpen }) => {
   // Get user role from auth context
   const { currentUser } = useAuth();
-  const userRole = currentUser?.role || "admin"; // Default to admin if no role found
+  const getUserRole = () => {
+    if (!currentUser) return "student";
+
+    // When roles is an array of objects with a name property (from backend)
+    if (Array.isArray(currentUser.roles) && currentUser.roles.length > 0) {
+      // Extract the name property and convert to lowercase for comparison
+      return currentUser.roles[0].name?.toLowerCase() || "student";
+    }
+
+    // Fallback if role is directly on the user object
+    if (currentUser.role) {
+      return currentUser.role.toLowerCase();
+    }
+
+    return "student"; // Default fallback
+  };
+
+  const userRole = getUserRole();
+
+  // Add debug logging to verify the role detection
+  console.log("Sidebar detected user role:", userRole);
 
   // Define navigation items for different roles
   const navigationConfig = {
@@ -220,7 +240,7 @@ const Sidebar = ({ isOpen }) => {
           </NavLink>
         ))}
       </List>
-      
+
       {/* Show help section only if not admin and sidebar is open */}
       {isOpen && !isAdmin && (
         <div className="help-section">

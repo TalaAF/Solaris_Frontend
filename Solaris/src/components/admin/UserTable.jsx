@@ -17,6 +17,8 @@ import UserDialog from "./UserDialog";
 import BulkUserDialog from "./BulkUserDialog";
 import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 import TablePagination from '../ui/TablePagination';
+import DepartmentService from "../../services/DepartmentService";
+import RoleService from "../../services/RoleService";
 import "./UserTable.css";
 
 const UserTable = ({ 
@@ -49,11 +51,28 @@ const UserTable = ({
     status: "",
     department: ""
   });
+  const [departments, setDepartments] = useState([]);
+  const [roleOptions, setRoleOptions] = useState([]);
 
   // Update users when initialUsers prop changes
   useEffect(() => {
     setUsers(initialUsers);
   }, [initialUsers]);
+
+  // Load departments and roles for filters
+  useEffect(() => {
+    Promise.all([
+      DepartmentService.getDepartments(),
+      RoleService.getRoles()
+    ])
+      .then(([deptResponse, rolesResponse]) => {
+        setDepartments(deptResponse.data);
+        setRoleOptions(rolesResponse.data);
+      })
+      .catch(error => {
+        console.error("Error loading filter data:", error);
+      });
+  }, []);
 
   // Client-side filtering for search input
   const filteredUsers = users.filter((user) => 
@@ -171,19 +190,35 @@ const UserTable = ({
     setSelectedUser(null);
   };
 
-  const handleStatusChange = (user) => {
-    if (onStatusChange) {
-      // Just pass the user ID and current status
-      onStatusChange(user.id, user.isActive);
-    } else {
-      // Client-side fallback
+  const handleToggleStatus = async (user) => {
+    try {
+      if (user.isActive) {
+        await AdminUserService.deactivateUser(user.id);
+      } else {
+        await AdminUserService.activateUser(user.id);
+      }
+      
+      // Create a new array with the updated user
       const updatedUsers = users.map(u => {
         if (u.id === user.id) {
           return { ...u, isActive: !u.isActive };
         }
         return u;
       });
+      
+      // Update local state immediately
       setUsers(updatedUsers);
+      
+      // Notify parent component
+      if (onStatusChange) {
+        onStatusChange(user.id, !user.isActive);
+      }
+      
+      // Show success message
+      // If you have a notification system
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+      // Show error message
     }
   };
 
@@ -302,10 +337,11 @@ const UserTable = ({
                 onChange={(e) => setFilters({...filters, department: e.target.value})}
               >
                 <option value="">All Departments</option>
-                <option value="5">Computer Science</option>
-                <option value="3">Physics</option>
-                <option value="2">Mathematics</option>
-                <option value="1">Administration</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="filter-group">
@@ -315,9 +351,11 @@ const UserTable = ({
                 onChange={(e) => setFilters({...filters, role: e.target.value})}
               >
                 <option value="">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="INSTRUCTOR">Instructor</option>
-                <option value="STUDENT">Student</option>
+                {roleOptions.map((role) => (
+                  <option key={role.name} value={role.name}>
+                    {role.displayName || role.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="filter-group">
@@ -385,7 +423,7 @@ const UserTable = ({
                       <td>
                         <span 
                           className={`status-badge ${user.isActive ? "active" : "inactive"}`}
-                          onClick={() => handleStatusChange(user)}
+                          onClick={() => handleToggleStatus(user)}
                         >
                           {user.isActive ? "Active" : "Inactive"}
                         </span>

@@ -1,6 +1,6 @@
 import apiClient from './api';
 
-const AdminDepartmentService = {
+const DepartmentService = {
   // Get all departments (with optional active filter)
   getDepartments: async (activeOnly = false) => {
     return apiClient.get('/api/departments', { params: { activeOnly } });
@@ -80,4 +80,4 @@ const AdminDepartmentService = {
   }
 };
 
-export default AdminDepartmentService;
+export default DepartmentService;

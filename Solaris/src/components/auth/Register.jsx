@@ -5,70 +5,139 @@ import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  
-  const { register, error, isRegistering } = useAuth();
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'student' // Default role
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const { register, error, isRegistering, currentUser } = useAuth();
   const navigate = useNavigate();
   
-  // API URL for OAuth endpoints
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-  
-  // Validate passwords match
+  // If user is already logged in, redirect to dashboard
   useEffect(() => {
-    if (confirmPassword && password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
-    } else {
-      setPasswordError('');
+    if (currentUser) {
+      // Always redirect to the main dashboard
+      navigate('/dashboard', { replace: true });
     }
-  }, [password, confirmPassword]);
-  
+  }, [currentUser, navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    }
+    
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+      }
+    }
+    
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters long';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Update the handleSubmit function to combine firstName and lastName into fullName
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+    if (!validateForm()) {
       return;
     }
     
     try {
-      await register({ name, email, password });
-      navigate('/dashboard');
+      // Combine firstName and lastName into fullName to match backend expectation
+      const userData = {
+        fullName: `${formData.firstName} ${formData.lastName}`, // Combine names
+        email: formData.email,
+        password: formData.password,
+        // Send role as a single string
+        role: formData.role
+      };
+      
+      console.log("Registering with data:", userData);
+      await register(userData);
     } catch (err) {
-      console.error('Registration failed:', err);
+      console.error('Registration error:', err);
     }
-  };
-  
-  const handleGoogleSignIn = () => {
-    // Redirect to the backend OAuth2 endpoint
-    window.location.href = `${API_URL}/oauth2/authorization/google`;
   };
 
   return (
     <div className="auth-container">
-      <div className="auth-card">
+      <div className="auth-card register-card">
         <div className="auth-logo">
           <div className="logo-circle"></div>
           <h2>SOLARIS</h2>
         </div>
-        
-        <h1 className="auth-title">Create your account</h1>
-        <p className="auth-subtitle">Join Solaris to access your medical education content</p>
+
+        <h1 className="auth-title">Create Your Account</h1>
         
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your full name"
-              required
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Enter your first name"
+              />
+              {formErrors.firstName && <div className="field-error">{formErrors.firstName}</div>}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Enter your last name"
+              />
+              {formErrors.lastName && <div className="field-error">{formErrors.lastName}</div>}
+            </div>
           </div>
           
           <div className="form-group">
@@ -76,11 +145,12 @@ const Register = () => {
             <input
               type="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Enter your email"
-              required
             />
+            {formErrors.email && <div className="field-error">{formErrors.email}</div>}
           </div>
           
           <div className="form-group">
@@ -88,15 +158,12 @@ const Register = () => {
             <input
               type="password"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               placeholder="Create a password"
-              required
-              minLength="8"
             />
-            <div className="password-requirements">
-              <small>Must be at least 8 characters with uppercase, lowercase, number, and special character</small>
-            </div>
+            {formErrors.password && <div className="field-error">{formErrors.password}</div>}
           </div>
           
           <div className="form-group">
@@ -104,34 +171,40 @@ const Register = () => {
             <input
               type="password"
               id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
               placeholder="Confirm your password"
-              required
             />
+            {formErrors.confirmPassword && (
+              <div className="field-error">{formErrors.confirmPassword}</div>
+            )}
           </div>
           
-          {passwordError && <div className="auth-error">{passwordError}</div>}
+          <div className="form-group">
+            <label htmlFor="role">I am a</label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+            >
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+            </select>
+          </div>
+          
           {error && <div className="auth-error">{error}</div>}
           
-          <button type="submit" className="auth-button" disabled={isRegistering}>
+          <button 
+            type="submit" 
+            className="auth-button" 
+            disabled={isRegistering}
+          >
             {isRegistering ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-        <div className="oauth-divider">or</div>
-        <button 
-          type="button" 
-          className="google-login-button"
-          onClick={handleGoogleSignIn}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
-            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-          </svg>
-          Continue with Google
-        </button>
+        
         <div className="auth-footer">
           <p>Already have an account? <Link to="/login">Sign in</Link></p>
         </div>

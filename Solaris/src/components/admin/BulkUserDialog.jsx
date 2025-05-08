@@ -1,13 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
-import { departments, roles } from "../../mocks/mockDataAdmin";
+import DepartmentService from "../../services/DepartmentService";
+import RoleService from "../../services/RoleService";
 import "./BulkUserDialog.css";
 
 const BulkUserDialog = ({ isOpen, onClose, onSubmit }) => {
   const [userEmails, setUserEmails] = useState("");
-  const [departmentId, setDepartmentId] = useState(1);
-  const [roleName, setRoleName] = useState("STUDENT");
+  const [departmentId, setDepartmentId] = useState(null);
+  const [roleName, setRoleName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch departments and roles from API
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      
+      Promise.all([
+        DepartmentService.getDepartments(),
+        RoleService.getRoles()
+      ])
+        .then(([deptResponse, rolesResponse]) => {
+          setDepartments(deptResponse.data);
+          setRoles(rolesResponse.data);
+          
+          // Set defaults if data is loaded
+          if (deptResponse.data.length > 0) {
+            setDepartmentId(deptResponse.data[0].id);
+          }
+          
+          if (rolesResponse.data.length > 0) {
+            setRoleName(rolesResponse.data.find(r => r.name === "STUDENT")?.name || rolesResponse.data[0].name);
+          }
+        })
+        .catch(error => {
+          console.error("Error loading form data:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [isOpen]);
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,6 +68,16 @@ const BulkUserDialog = ({ isOpen, onClose, onSubmit }) => {
       return;
     }
 
+    if (!departmentId) {
+      setErrorMessage("Please select a department");
+      return;
+    }
+
+    if (!roleName) {
+      setErrorMessage("Please select a role");
+      return;
+    }
+
     // Create user objects for each email
     const users = emails.map(email => ({
       email: email.trim(),
@@ -46,9 +91,18 @@ const BulkUserDialog = ({ isOpen, onClose, onSubmit }) => {
     
     // Reset form
     setUserEmails("");
-    setDepartmentId(1);
-    setRoleName("STUDENT");
   };
+
+  if (isLoading) {
+    return (
+      <Dialog isOpen={isOpen} onClose={onClose} title="Bulk User Registration">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading form data...</p>
+        </div>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
@@ -85,10 +139,12 @@ const BulkUserDialog = ({ isOpen, onClose, onSubmit }) => {
             <label htmlFor="department">Department</label>
             <select
               id="department"
-              value={departmentId}
+              value={departmentId || ""}
               onChange={(e) => setDepartmentId(parseInt(e.target.value))}
               className="form-select"
+              required
             >
+              <option value="" disabled>Select a department</option>
               {departments && departments.map((department) => (
                 <option key={department.id} value={department.id}>
                   {department.name}
@@ -104,10 +160,12 @@ const BulkUserDialog = ({ isOpen, onClose, onSubmit }) => {
               value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
               className="form-select"
+              required
             >
+              <option value="" disabled>Select a role</option>
               {roles && roles.map((role) => (
-                <option key={role.id} value={role.name}>
-                  {role.name.toLowerCase()}
+                <option key={role.name} value={role.name}>
+                  {role.displayName || role.name}
                 </option>
               ))}
             </select>

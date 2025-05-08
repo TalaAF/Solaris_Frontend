@@ -75,14 +75,18 @@ const Users = () => {
     }
   };
 
-  const handleUserUpdate = async (userId, userData) => {
+  const handleUserUpdate = async (userData) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await AdminUserService.updateUser(userId, userData);
+      console.log("Updating user with data:", userData);
+      await AdminUserService.updateUser(userData.id, userData);
+      
+      // Refresh the user list to get updated data
+      fetchUsers(pagination.page, pagination.size, filters);
+      
       toast.success("User updated successfully");
-      fetchUsers(); // Refresh the list to get updated data
-    } catch (err) {
-      console.error("Error updating user:", err);
+    } catch (error) {
+      console.error("Error updating user:", error.response?.data || error.message);
       toast.error(err.response?.data?.message || "Failed to update user");
     } finally {
       setLoading(false);

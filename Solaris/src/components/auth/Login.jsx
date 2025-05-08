@@ -1,5 +1,5 @@
 // components/auth/Login.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
@@ -7,34 +7,70 @@ import './Auth.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error, isLoggingIn } = useAuth();
+  const [formError, setFormError] = useState('');
+  const { login, error, isLoggingIn, currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   // API URL for OAuth endpoints
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-  // Get redirect path from location state or default to dashboard
+  // Get redirect path from location state or default to appropriate dashboard
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // If user is already logged in, redirect to dashboard
+  useEffect(() => {
+    if (currentUser) {
+      const dashboardPath = 
+        currentUser.role === 'admin' ? '/admin/dashboard' : 
+        currentUser.role === 'instructor' ? '/instructor/dashboard' : 
+        '/dashboard';
+      
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [currentUser, navigate]);
+
+  const validateForm = () => {
+    if (!email.trim()) {
+      setFormError('Email is required');
+      return false;
+    }
+    
+    if (!password) {
+      setFormError('Password is required');
+      return false;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return false;
+    }
+    
+    setFormError('');
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
       await login(email, password);
-      navigate(from, { replace: true });
     } catch (err) {
-      console.error('Login failed:', err);
+      // Error is handled in the auth context
+      console.error('Login error:', err);
     }
   };
   
   const handleGoogleSignIn = () => {
-  // Direct approach - redirect to Spring's OAuth2 authorization endpoint
-  window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-  
-  // This is the standard Spring Security OAuth2 endpoint
-  // It will initiate the OAuth flow with Google
-};
+    // Redirect to backend OAuth endpoint
+    window.location.href = `${API_URL}/oauth2/authorization/google`;
+  };
 
   return (
     <div className="auth-container">
@@ -76,10 +112,16 @@ const Login = () => {
             />
           </div>
           
-          {error && <div className="auth-error">{error}</div>}
+          {(formError || error) && (
+            <div className="auth-error">{formError || error}</div>
+          )}
           
-          <button type="submit" className="auth-button" disabled={isLoggingIn}>
-            Sign In
+          <button 
+            type="submit" 
+            className="auth-button" 
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
         

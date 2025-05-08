@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DepartmentTable from "../../admin/DepartmentTable";
-import AdminDepartmentService from "../../../services/AdminDepartmentService";
+import AdminDepartmentService from "../../../services/DepartmentService";
 import { toast } from "../../../components/ui/toaster";
 import "./Departments.css";
 

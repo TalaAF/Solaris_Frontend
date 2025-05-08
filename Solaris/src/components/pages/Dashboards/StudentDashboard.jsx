@@ -5,8 +5,14 @@ import QuickAccessSection from '../QuickAccessSection';
 import ScheduleSection from '../ScheduleSection';
 import ProgressSection from '../ProgressSection';
 import DeadlinesSection from '../DeadlinesSection';
+import { useAuth } from '../../../context/AuthContext';
 
 const StudentDashboard = () => {
+  const { currentUser, logout } = useAuth();
+  
+  // Add debugging
+  console.log("StudentDashboard rendering for user:", currentUser);
+
   // Today's schedule data
   const scheduleItems = [
     {
@@ -135,6 +141,14 @@ const StudentDashboard = () => {
           <DeadlinesSection deadlines={deadlines} />
         </div>
       </div>
+
+      {/* Logout Button - Positioned at the bottom right */}
+      <button 
+        onClick={logout}
+        className="logout-button"
+      >
+        Logout
+      </button>
     </div>
   );
 };

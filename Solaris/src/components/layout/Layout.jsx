@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./Layout.css";
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const [pageType, setPageType] = useState("default");
+  const { getUserRole } = useAuth();
+  const userRole = getUserRole();
 
   // Determine page type from URL path
   useEffect(() => {
@@ -29,13 +32,15 @@ const Layout = ({ children }) => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  console.log("Layout rendering with role:", userRole);
+
   return (
     <div className={`layout-wrapper page-${pageType}`}>
       <Header />
       <div className="header-spacer"></div>
 
       <div className="layout-container">
-        <Sidebar isOpen={isSidebarOpen} />
+        <Sidebar isOpen={isSidebarOpen} userRole={userRole} />
 
         <main
           className={`layout-main ${!isSidebarOpen ? "sidebar-collapsed" : ""}`}

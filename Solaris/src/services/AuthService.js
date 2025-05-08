@@ -4,11 +4,12 @@ class AuthService {
   // Login with email and password
   async login(email, password) {
     try {
-      // Add /api prefix to the endpoint if your backend expects it
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post("/api/auth/login", { email, password });
       
       if (response.data.token) {
         localStorage.setItem("auth_token", response.data.token);
+        // Set token in axios default headers
+        api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
       }
       
       return response;
@@ -21,10 +22,12 @@ class AuthService {
   // Register a new user
   async register(userData) {
     try {
-      const response = await api.post("/auth/register", userData);
+      const response = await api.post("/api/auth/register", userData);
       
       if (response.data.token) {
         localStorage.setItem("auth_token", response.data.token);
+        // Set token in axios default headers
+        api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
       }
       
       return response;
@@ -36,13 +39,18 @@ class AuthService {
   // Logout user
   async logout() {
     try {
-      await api.post("/auth/logout");
+      const token = localStorage.getItem("auth_token");
+      if (token) {
+        // Set token in header for this request
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        await api.post("/api/auth/logout");
+      }
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Always clear local storage regardless of API success
+      // Always clear local storage and auth header
       localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_data");
+      delete api.defaults.headers.common["Authorization"];
     }
   }
   
@@ -55,41 +63,27 @@ class AuthService {
         return null;
       }
       
-      // Ensure token is set in headers for this request
+      // Set token in header for this request
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
-      try {
-        const response = await api.get("/auth/me");
-        return response; // Return the full response
-      } catch (firstError) {
-        // Check if token expired
-        if (firstError.response && firstError.response.status === 401) {
-          // Try to refresh the token and retry
-          const refreshed = await this.refreshToken();
-          if (refreshed) {
-            // Retry with new token
-            const retryResponse = await api.get("/auth/me");
-            return retryResponse;
-          }
-        }
-        throw firstError; // Re-throw if it wasn't an auth error or refresh failed
-      }
+      const response = await api.get("/api/auth/me");
+      return response;
     } catch (error) {
       console.error("Get current user error:", error);
+      
       // If token is invalid, clear it
-      if (error.response && (error.response.status === 401 || error.response.status === 403 || error.response.status === 500)) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
         localStorage.removeItem("auth_token");
-        localStorage.removeItem("user_data");
-        delete api.defaults.headers.common["Authorization"]; // Also remove from headers
+        delete api.defaults.headers.common["Authorization"];
       }
-      return null;
+      throw error;
     }
   }
   
   // Request password reset
   async requestPasswordReset(email) {
     try {
-      return await api.post("/auth/forgot-password", { email });
+      return await api.post("/api/auth/forgot-password", { email });
     } catch (error) {
       throw this.handleError(error);
     }
@@ -98,13 +92,13 @@ class AuthService {
   // Reset password with token
   async resetPassword(token, password) {
     try {
-      return await api.post("/auth/reset-password", { token, password });
+      return await api.post("/api/auth/reset-password", { token, password });
     } catch (error) {
       throw this.handleError(error);
     }
   }
   
-  // Handle OAuth login with token
+  // Handle OAuth login
   async handleOAuthLogin(token) {
     try {
       if (!token) {
@@ -114,123 +108,42 @@ class AuthService {
       // Store the JWT token
       localStorage.setItem("auth_token", token);
       
-      // Configure API header with the new token
+      // Set token in axios default headers
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
-      try {
-        // Get user info with the token
-        const response = await api.get("/auth/me");
-        
-        // Store user data
-        if (response.data) {
-          localStorage.setItem("user_data", JSON.stringify(response.data));
-        }
-        
-        return { data: { user: response.data, token } };
-      } catch (error) {
-        // Check if token expired immediately (server time mismatch)
-        if (error.response && error.response.status === 401) {
-          // Try to refresh the token
-          const refreshed = await this.refreshToken();
-          if (refreshed) {
-            // Retry with new token
-            const retryResponse = await api.get("/auth/me");
-            if (retryResponse.data) {
-              localStorage.setItem("user_data", JSON.stringify(retryResponse.data));
-            }
-            return { data: { user: retryResponse.data, token: localStorage.getItem("auth_token") } };
-          }
-        }
-        throw error;
-      }
+      // Get user info with the token
+      const response = await api.get("/api/auth/me");
+      
+      return { data: { user: response.data, token } };
     } catch (error) {
       // If OAuth authentication fails, clean up
       localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_data");
-      delete api.defaults.headers.common["Authorization"]; // Clear header if authentication fails
+      delete api.defaults.headers.common["Authorization"];
       console.error("OAuth login error:", error);
       throw this.handleError(error);
     }
   }
-
-  // Validate OAuth token
-  async validateOAuthToken(token) {
-    try {
-      return await api.post("/auth/validate-oauth-token", { token });
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
   
-  // Check if user is authenticated
-  isAuthenticated() {
-    return !!localStorage.getItem("auth_token");
-  }
-
-  // Initialize auth state - call this when your app starts
-  initAuth() {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    }
-    return this.isAuthenticated();
-  }
-  
-  // Add a refresh token method
-  async refreshToken() {
-    try {
-      const token = localStorage.getItem("auth_token");
-      
-      if (!token) {
-        throw new Error("No token available to refresh");
-      }
-      
-      // Set the current token in the request
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
-      // Call refresh token endpoint
-      const response = await api.post("/auth/refresh-token");
-      
-      // Update token in localStorage and API headers
-      if (response.data.token) {
-        localStorage.setItem("auth_token", response.data.token);
-        api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      // If refresh fails, log user out
-      this.logout();
-      return false;
-    }
-  }
-
-  // Add a proper handleError method
+  // Error handler
   handleError(error) {
     let errorMessage = "An unexpected error occurred";
     
     if (error.response) {
-      // Server responded with error
+      // Server responded with error status
       const { status, data } = error.response;
       
       if (status === 401) {
-        errorMessage = data.message || "Invalid credentials";
+        errorMessage = "Invalid credentials";
       } else if (status === 403) {
-        errorMessage = data.message || "Access denied";
+        errorMessage = "Access denied";
       } else if (status === 404) {
-        errorMessage = data.message || "Resource not found";
-      } else if (status === 422 || status === 400) {
-        errorMessage = data.message || "Invalid input data";
-      } else {
-        errorMessage = data.message || `Error: ${status}`;
+        errorMessage = "Resource not found";
+      } else if (data && data.message) {
+        errorMessage = data.message;
       }
     } else if (error.request) {
-      // Request made but no response
+      // Request made but no response received
       errorMessage = "No response from server. Please check your connection.";
-    } else {
-      // Something else happened
-      errorMessage = error.message || errorMessage;
     }
     
     return new Error(errorMessage);
