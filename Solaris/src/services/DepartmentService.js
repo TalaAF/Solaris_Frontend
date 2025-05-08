@@ -13,7 +13,36 @@ const DepartmentService = {
   
   // Create new department
   createDepartment: async (departmentData) => {
-    return apiClient.post('/api/departments', departmentData);
+    // Clean up and format data according to backend requirements
+    const cleanData = {
+      name: departmentData.name,
+      description: departmentData.description || "",
+      code: departmentData.code || "",
+      specialtyArea: departmentData.specialtyArea || "",
+      contactInformation: departmentData.contactInformation || "",
+      // Always use isActive to match Java entity field name
+      isActive: departmentData.isActive !== undefined ? 
+        departmentData.isActive : 
+        (departmentData.active !== undefined ? departmentData.active : true)
+    };
+    
+    // IMPORTANT: Remove any "active" property to prevent it from overriding isActive
+    if ('active' in cleanData) {
+      delete cleanData.active;
+    }
+    
+    // Only include headId if it exists and is not empty
+    if (departmentData.headId) {
+      cleanData.headId = parseInt(departmentData.headId, 10);
+    }
+    // Also check headOfDepartmentId
+    else if (departmentData.headOfDepartmentId) {
+      cleanData.headId = parseInt(departmentData.headOfDepartmentId, 10);
+    }
+
+    console.log("Creating department with FINAL cleaned data:", JSON.stringify(cleanData, null, 2));
+    
+    return apiClient.post('/api/departments', cleanData);
   },
   
   // Update existing department

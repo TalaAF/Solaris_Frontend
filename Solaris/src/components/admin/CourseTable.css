@@ -296,3 +296,14 @@
   padding: 24px;
   color: #64748b;
 }
+
+.course-semester {
+  font-size: 14px;
+  color: #333;
+}
+
+.course-credits {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}

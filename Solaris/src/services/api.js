@@ -46,4 +46,21 @@ api.interceptors.response.use(
   }
 );
 
+// Add request and response interceptors to debug API issues
+api.interceptors.request.use((request) => {
+  console.log("API Request:", request);
+  return request;
+});
+
+api.interceptors.response.use(
+  (response) => {
+    console.log("API Response:", response);
+    return response;
+  },
+  (error) => {
+    console.error("API Error:", error.response || error);
+    return Promise.reject(error);
+  }
+);
+
 export default api;

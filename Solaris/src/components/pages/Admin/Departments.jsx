@@ -24,13 +24,14 @@ const Departments = () => {
   const fetchDepartments = async (page = 0, size = 10) => {
     setLoading(true);
     try {
-      const response = await AdminDepartmentService.getPaginatedDepartments(activeOnly, page, size);
+      // FIX: Use the method that returns user counts
+      const response = await AdminDepartmentService.getPaginatedDepartmentsWithCounts(activeOnly, page, size);
       
       // Debug the response structure
-      console.log("Department API response:", response.data);
-      console.log("First department:", response.data.content?.[0]);
+      console.log("Department API response with counts:", response.data);
+      console.log("First department with user count:", response.data.content?.[0]);
       
-      // Update department state with received data
+      // Make sure we're updating with the data that includes counts
       setDepartments(response.data.content || []);
       
       setPagination({
@@ -50,15 +51,32 @@ const Departments = () => {
   const handleDepartmentAdd = async (departmentData) => {
     try {
       setLoading(true);
-      const response = await AdminDepartmentService.createDepartment(departmentData);
       
-      // Refresh the whole department list to ensure consistency
+      // Ensure we're using isActive not active
+      const fixedData = {
+        ...departmentData,
+        isActive: departmentData.isActive !== undefined ? departmentData.isActive : true
+      };
+      
+      // Remove active if it exists to prevent conflicts
+      if ('active' in fixedData) {
+        delete fixedData.active;
+      }
+      
+      console.log("ADDING DEPARTMENT - REQUEST DATA:", JSON.stringify(fixedData, null, 2));
+      
+      const response = await AdminDepartmentService.createDepartment(fixedData);
+      console.log("Department created successfully:", response.data);
+      
       fetchDepartments(pagination.page, pagination.size);
-      
       toast.success("Department added successfully");
     } catch (err) {
       console.error("Error adding department:", err);
-      toast.error(err.response?.data?.message || "Failed to add department");
+      const statusCode = err.response?.status;
+      const responseData = err.response?.data;
+      console.error(`Error ${statusCode} details:`, responseData);
+      toast.error(responseData?.message || "Failed to add department");
+    } finally {
       setLoading(false);
     }
   };
@@ -91,25 +109,21 @@ const Departments = () => {
     try {
       setLoading(true);
       
-      // Use the dedicated toggle status endpoint if available
-      const response = await AdminDepartmentService.toggleDepartmentStatus(
+      // Use the dedicated toggle status endpoint
+      await AdminDepartmentService.toggleDepartmentStatus(
         departmentId,
         newStatus
       );
       
-      // Update the local state
-      setDepartments(prevDepartments => 
-        prevDepartments.map(dept => 
-          dept.id === departmentId ? {...dept, isActive: newStatus} : dept
-        )
-      );
+      // FIX: Refresh data from server instead of updating local state
+      // This ensures we get the correct status from the backend
+      fetchDepartments(pagination.page, pagination.size);
       
       toast.success(`Department ${newStatus ? "activated" : "deactivated"} successfully`);
     } catch (err) {
       console.error("Error toggling department status:", err);
       toast.error(err.response?.data?.message || "Failed to update department status");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set loading false on error
     }
   };
 

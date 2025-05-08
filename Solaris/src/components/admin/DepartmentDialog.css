@@ -204,3 +204,23 @@
 .submit-button:hover {
   background-color: #6b3fcb;
 }
+
+.helper-text {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.form-input.input-error {
+  border-color: #dc2626;
+}
+
+.required {
+  color: #dc2626;
+}

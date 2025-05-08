@@ -1,7 +1,8 @@
 // CourseService.js
 // Service to handle API calls to the course backend with fallback to mock data
 
-import api from "./api";
+import axios from "axios";
+import api from "./api"; // Import the api service
 
 const API_URL = "http://localhost:8080/api";
 const USE_MOCK = false; // Toggle this when your backend is ready
@@ -89,7 +90,7 @@ class CourseService {
     }
     
     try {
-      return await api.get(`/courses`);
+      return await axios.get(`${API_URL}/courses`);
     } catch (error) {
       console.error("Error fetching courses:", error);
       await this.mockDelay();
@@ -107,13 +108,11 @@ class CourseService {
     }
     
     try {
-      return await api.get(`/courses/${id}`);
+      const response = await api.get(`/api/courses/${id}`);
+      return response;
     } catch (error) {
       console.error(`Error fetching course ${id}:`, error);
-      await this.mockDelay();
-      const course = mockCourses.find(c => c.id == id);
-      if (!course) throw new Error("Course not found");
-      return { data: course };
+      throw error;
     }
   }
 
@@ -303,6 +302,19 @@ class CourseService {
       console.error(`Error verifying completion for student ${studentId} in course ${courseId}:`, error);
       await this.mockDelay();
       return { data: { completed: false, missingRequirements: [1, 2] } };
+    }
+  }
+
+  // Update course enrollment count
+  async updateCourseEnrollmentCount(courseId) {
+    try {
+      // Call the specific API endpoint for updating enrollment count
+      const response = await api.post(`/api/admin/courses/${courseId}/update-enrollment`);
+      console.log(`Updated enrollment count for course ${courseId}:`, response);
+      return response;
+    } catch (error) {
+      console.error(`Error updating enrollment count for course ${courseId}:`, error);
+      throw error;
     }
   }
 }

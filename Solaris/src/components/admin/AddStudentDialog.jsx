@@ -1,116 +1,127 @@
-import React, { useState } from "react";
-import { Search, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Button } from "../ui/button";
+import React, { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import Dialog from "../common/Dialog";
+import AdminUserService from "../../services/AdminUserService";
 import "./AddStudentDialog.css";
 
-const AddStudentDialog = ({ open, onClose, onAddStudents, availableStudents }) => {
-  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  // Filter students based on search query
-  const filteredStudents = availableStudents.filter(student => 
-    student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const handleAddStudent = (studentId) => {
-    if (!selectedStudentIds.includes(studentId.toString())) {
-      setSelectedStudentIds([...selectedStudentIds, studentId.toString()]);
+const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents = [] }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Safe check for currentStudents to avoid filter errors
+  const currentStudentIds = Array.isArray(currentStudents) 
+    ? currentStudents.map(student => student.userId || (student.user && student.user.id))
+    : [];
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAvailableStudents();
+    }
+  }, [isOpen, courseId]);
+
+  useEffect(() => {
+    // Filter students based on search term
+    if (students.length > 0) {
+      const filtered = students.filter(student => 
+        (student.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         student.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         student.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredStudents(filtered);
+    }
+  }, [searchTerm, students]);
+
+  const fetchAvailableStudents = async () => {
+    setLoading(true);
+    try {
+      // Get all students with STUDENT role
+      const response = await AdminUserService.getUsers({ role: "STUDENT" });
+      const allStudents = response.data.content || response.data || [];
+      
+      // Filter out students who are already enrolled in the course
+      const availableStudents = allStudents.filter(
+        student => !currentStudentIds.includes(student.id)
+      );
+      
+      setStudents(availableStudents);
+      setFilteredStudents(availableStudents);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError("Failed to load available students");
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const handleRemoveStudent = (studentId) => {
-    setSelectedStudentIds(selectedStudentIds.filter(id => id !== studentId.toString()));
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
-  
-  const handleSubmit = () => {
-    onAddStudents(selectedStudentIds);
-    resetDialog();
+
+  const handleSelectStudent = (studentId) => {
+    onSubmit(studentId);
   };
-  
-  const handleClose = () => {
-    onClose();
-    resetDialog();
-  };
-  
-  const resetDialog = () => {
-    setSelectedStudentIds([]);
-    setSearchQuery("");
-  };
-  
-  const isStudentSelected = (studentId) => {
-    return selectedStudentIds.includes(studentId.toString());
-  };
-  
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="add-student-dialog">
-        <DialogHeader>
-          <DialogTitle>Add Students to Course</DialogTitle>
-        </DialogHeader>
-        
-        <div className="search-container">
-          <div className="search-wrapper">
-            <Search className="search-icon" />
-            <input
-              type="search"
-              placeholder="Search students..."
-              className="search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add Student to Course"
+      className="add-student-dialog"
+    >
+      <div className="search-container">
+        <div className="search-wrapper">
+          <Search size={16} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search students by name or email..."
+            className="search-input"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </div>
-        
-        <div className="dialog-body">
-          <h4 className="section-title">Available Students</h4>
-          <div className="student-list">
-            {filteredStudents.length > 0 ? (
-              filteredStudents.map(student => (
-                <div key={student.id} className="student-row">
-                  <div className="student-info">
-                    <div className="student-name">{student.fullName}</div>
-                    <div className="student-email">{student.email}</div>
+      </div>
+
+      <div className="student-list">
+        {loading ? (
+          <div className="loading-message">Loading students...</div>
+        ) : error ? (
+          <div className="error-message">
+            <p>{error}</p>
+            <button onClick={fetchAvailableStudents}>Retry</button>
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="no-results">No available students found</div>
+        ) : (
+          <div className="student-items-container">
+            {filteredStudents.map(student => (
+              <div key={student.id} className="student-item">
+                <div className="student-info">
+                  <div className="student-name">
+                    {student.firstName} {student.lastName}
                   </div>
-                  {!isStudentSelected(student.id) ? (
-                    <Button 
-                      onClick={() => handleAddStudent(student.id)}
-                      className="add-student-button"
-                    >
-                      Add
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleRemoveStudent(student.id)}
-                    >
-                      <X size={16} />
-                    </Button>
-                  )}
+                  <div className="student-email">{student.email}</div>
                 </div>
-              ))
-            ) : (
-              <div className="no-students">
-                {searchQuery ? "No students match your search" : "No students available"}
+                <button
+                  className="add-button"
+                  onClick={() => handleSelectStudent(student.id)}
+                >
+                  Add
+                </button>
               </div>
-            )}
+            ))}
           </div>
-        </div>
-        
-        <div className="dialog-footer">
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit}
-            disabled={selectedStudentIds.length === 0}
-            className="add-students-button"
-          >
-            Add {selectedStudentIds.length} Student{selectedStudentIds.length !== 1 ? 's' : ''}
-          </Button>
-        </div>
-      </DialogContent>
+        )}
+      </div>
+      
+      <div className="dialog-footer">
+        <button className="cancel-button" onClick={onClose}>
+          Close
+        </button>
+      </div>
     </Dialog>
   );
 };

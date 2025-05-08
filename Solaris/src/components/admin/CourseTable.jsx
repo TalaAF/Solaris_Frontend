@@ -13,13 +13,15 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Award // Add this import
 } from "lucide-react";
 import CourseDialog from "./CourseDialog";
 import "./CourseTable.css";
 import { formatDate } from "../../utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import TablePagination from '../ui/TablePagination';
+import AdminCourseService from "../../services/AdminCourseService";
 
 const CourseTable = ({ 
   courses: initialCourses, 
@@ -44,18 +46,75 @@ const CourseTable = ({
   const [dialogTitle, setDialogTitle] = useState("Add Course");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    department: "",
-    instructor: "",
-    status: ""
+    departmentId: "",
+    instructorEmail: "",
+    isPublished: "",
+    semester: "" // Add semester to filters
   });
+  
+  const [departments, setDepartments] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [filterLoading, setFilterLoading] = useState(false);
+  
   const navigate = useNavigate();
 
-  // Update courses when initialCourses prop changes
+  useEffect(() => {
+    if (showFilters) {
+      fetchFilterOptions();
+    }
+  }, [showFilters]);
+
+  const fetchFilterOptions = async () => {
+    setFilterLoading(true);
+    try {
+      console.log("Fetching filter options...");
+      
+      const [deptResponse, instructorResponse] = await Promise.all([
+        AdminCourseService.getDepartments(),
+        AdminCourseService.getInstructors()
+      ]);
+      
+      // Log responses for debugging
+      console.log("Department response:", deptResponse);
+      console.log("Raw instructor response:", instructorResponse);
+      
+      // Process departments - handle both direct and paginated responses
+      const deptData = deptResponse?.data?.content || deptResponse?.data || [];
+      setDepartments(Array.isArray(deptData) ? deptData : []);
+      
+      // Process instructors the same way as CourseDialog does
+      const instructorData = instructorResponse?.data?.content || 
+                            instructorResponse?.data || [];
+      
+      console.log("Extracted instructor data:", instructorData);
+      console.log(`Found ${Array.isArray(instructorData) ? instructorData.length : 0} instructors`);
+      
+      // If we have instructors but they're not in the expected format, try to adapt
+      if (Array.isArray(instructorData) && instructorData.length > 0) {
+        // Check if the first item looks like an instructor
+        const firstItem = instructorData[0];
+        console.log("First instructor item:", firstItem);
+        
+        // Check for missing properties that we might need to handle
+        if (firstItem && (!firstItem.firstName || !firstItem.lastName || !firstItem.email)) {
+          console.warn("Instructor data missing expected properties");
+        }
+      }
+      
+      setInstructors(Array.isArray(instructorData) ? instructorData : []);
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+      setDepartments([]);
+      setInstructors([]);
+    } finally {
+      setFilterLoading(false);
+    }
+  };
+
   useEffect(() => {
     setCourses(initialCourses);
   }, [initialCourses]);
 
-  // Client-side filtering for search input
   const filteredCourses = courses.filter((course) => 
     course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.instructorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,10 +135,8 @@ const CourseTable = ({
 
   const handleToggleStatus = (course) => {
     if (onCourseToggleStatus) {
-      // Pass the current status to determine the action
       onCourseToggleStatus(course.id, course.published);
     } else {
-      // Client-side fallback
       const updatedCourses = courses.map(c => 
         c.id === course.id ? { ...c, published: !c.published } : c
       );
@@ -89,22 +146,18 @@ const CourseTable = ({
 
   const handleSubmitCourse = (formData) => {
     if (selectedCourse) {
-      // Update existing course
       if (onCourseUpdate) {
         onCourseUpdate(selectedCourse.id, formData);
       } else {
-        // Client-side fallback
         const updatedCourses = courses.map(c => 
           c.id === selectedCourse.id ? { ...formData, id: selectedCourse.id } : c
         );
         setCourses(updatedCourses);
       }
     } else {
-      // Add new course
       if (onCourseAdd) {
         onCourseAdd(formData);
       } else {
-        // Client-side fallback
         const newCourse = {
           ...formData,
           id: Math.max(...courses.map(c => c.id), 0) + 1,
@@ -116,29 +169,39 @@ const CourseTable = ({
     setIsDialogOpen(false);
   };
 
-  // Calculate enrollment percentage
   const getEnrollmentPercentage = (enrolled, capacity) => {
     if (!capacity) return 0;
     return Math.min((enrolled / capacity) * 100, 100);
   };
 
   const handleViewDetails = (course) => {
-    navigate(`/admin/courses/${course.id}`);
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}`, { 
+      state: { courseData: course } 
+    });
   };
 
   const handleManageStudents = (course) => {
-    navigate(`/admin/courses/${course.id}/students`);
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}/students`, { 
+      state: { courseData: course } 
+    });
   };
 
   const handleSettings = (course) => {
     navigate(`/admin/courses/${course.id}/settings`);
   };
 
-  // Handle search with debounce
+  const handleGenerateCertificates = (course) => {
+    // Navigate to certificate generation page with course context
+    navigate(`/admin/courses/${course.id}/certificates`, { 
+      state: { courseData: course } 
+    });
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
     
-    // If backend search is enabled, update filters after a delay
     if (onFilterChange) {
       const timer = setTimeout(() => {
         onFilterChange({
@@ -151,31 +214,35 @@ const CourseTable = ({
     }
   };
 
-  // Apply filters to backend
   const applyFilters = () => {
     if (onFilterChange) {
-      onFilterChange({
-        ...filters,
-        search: searchQuery
-      });
+      // Only include non-empty filters
+      const activeFilters = {};
+      
+      if (searchQuery) activeFilters.search = searchQuery;
+      if (filters.departmentId) activeFilters.departmentId = filters.departmentId;
+      if (filters.instructorEmail) activeFilters.instructorEmail = filters.instructorEmail;
+      if (filters.isPublished) activeFilters.isPublished = filters.isPublished === 'true';
+      if (filters.semester) activeFilters.semester = filters.semester; // Add semester filter
+      
+      onFilterChange(activeFilters);
     }
   };
 
-  // Reset filters
   const resetFilters = () => {
     setFilters({
-      department: "",
-      instructor: "",
-      status: ""
+      departmentId: "",
+      instructorEmail: "",
+      isPublished: "",
+      semester: "" // Reset semester filter too
     });
+    setSearchQuery("");
     
     if (onFilterChange) {
-      onFilterChange({
-        search: searchQuery
-      });
+      onFilterChange({});
     }
   };
-
+  
   return (
     <div className="course-table-container">
       <div className="course-table-header">
@@ -212,42 +279,87 @@ const CourseTable = ({
           <div className="filter-group">
             <label>Department</label>
             <select 
-              value={filters.department}
-              onChange={(e) => setFilters({...filters, department: e.target.value})}
+              value={filters.departmentId}
+              onChange={(e) => setFilters({...filters, departmentId: e.target.value})}
+              disabled={filterLoading}
             >
               <option value="">All Departments</option>
-              <option value="5">Computer Science</option>
-              <option value="3">Physics</option>
-              <option value="2">Mathematics</option>
-              <option value="1">Administration</option>
+              {Array.isArray(departments) && departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="filter-group">
             <label>Instructor</label>
             <select 
-              value={filters.instructor}
-              onChange={(e) => setFilters({...filters, instructor: e.target.value})}
+              value={filters.instructorEmail}
+              onChange={(e) => setFilters({...filters, instructorEmail: e.target.value})}
+              disabled={filterLoading}
+              className="form-select"
             >
               <option value="">All Instructors</option>
-              <option value="1">John Doe</option>
-              <option value="2">Jane Smith</option>
+              {Array.isArray(instructors) && instructors.length > 0 ? 
+                instructors.map((instructor) => (
+                  <option 
+                    key={instructor.id || `instructor-${Math.random()}`} 
+                    value={instructor.email}
+                  >
+                    {instructor.firstName || ''} {instructor.lastName || ''} 
+                    {instructor.email ? ` (${instructor.email})` : ''}
+                  </option>
+                )) : 
+                <option value="" disabled>No instructors available</option>
+              }
+            </select>
+            {filterLoading && <div className="filter-loading-indicator">Loading...</div>}
+            {!filterLoading && instructors.length === 0 && (
+              <div className="filter-empty-message">No instructors found</div>
+            )}
+          </div>
+          <div className="filter-group">
+            <label>Semester</label>
+            <select
+              value={filters.semester}
+              onChange={(e) => setFilters({...filters, semester: e.target.value})}
+            >
+              <option value="">All Semesters</option>
+              <option value="Fall 2024">Fall 2024</option>
+              <option value="Spring 2025">Spring 2025</option>
+              <option value="Summer 2025">Summer 2025</option>
+              <option value="Fall 2025">Fall 2025</option>
+              <option value="Spring 2026">Spring 2026</option>
             </select>
           </div>
           <div className="filter-group">
             <label>Status</label>
             <select 
-              value={filters.status}
-              onChange={(e) => setFilters({...filters, status: e.target.value})}
+              value={filters.isPublished}
+              onChange={(e) => setFilters({...filters, isPublished: e.target.value})}
             >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
+              <option value="">All Courses</option>
+              <option value="true">Published</option>
+              <option value="false">Draft</option>
             </select>
           </div>
           <div className="filter-actions">
-            <button className="apply-filters" onClick={applyFilters}>Apply Filters</button>
-            <button className="reset-filters" onClick={resetFilters}>Reset</button>
+            <button 
+              className="apply-filters" 
+              onClick={applyFilters}
+              disabled={filterLoading}
+            >
+              Apply Filters
+            </button>
+            <button 
+              className="reset-filters" 
+              onClick={resetFilters}
+              disabled={filterLoading}
+            >
+              Reset
+            </button>
           </div>
+          {filterLoading && <div className="filter-loading">Loading options...</div>}
         </div>
       )}
 
@@ -265,7 +377,8 @@ const CourseTable = ({
                 <th>Department</th>
                 <th>Instructor</th>
                 <th>Enrollment</th>
-                <th>Duration</th>
+                <th>Semester</th>
+                <th>Credits</th>
                 <th>Status</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -308,21 +421,19 @@ const CourseTable = ({
                       </div>
                     </td>
                     <td>
-                      <div className="course-dates">
-                        {course.startDate && course.endDate ? (
-                          <>
-                            <span>{formatDate(course.startDate)}</span> - 
-                            <span>{formatDate(course.endDate)}</span>
-                          </>
-                        ) : (
-                          <span>No dates set</span>
-                        )}
-                      </div>
+                      <span className="course-semester">
+                        {course.semester || "Not specified"}
+                      </span>
                     </td>
                     <td>
-                      <span className={`status-badge ${course.published ? "active" : "inactive"}`}>
-                        {course.published ? "Published" : "Unpublished"}
+                      <span className="course-credits">
+                        {course.credits || 0}
                       </span>
+                    </td>
+                    <td>
+                      <div className={`status-badge ${course.isPublished ? 'published' : 'draft'}`}>
+                        {course.isPublished ? 'Published' : 'Draft'}
+                      </div>
                     </td>
                     <td className="action-cell">
                       <div className="dropdown">
@@ -344,16 +455,13 @@ const CourseTable = ({
                             <Users size={14} />
                             <span>Manage Students</span>
                           </button>
+                          <button className="dropdown-item" onClick={() => handleGenerateCertificates(course)}>
+                            <Award size={14} />
+                            <span>Generate Certificates</span>
+                          </button>
                           <button className="dropdown-item" onClick={() => handleSettings(course)}>
                             <Settings size={14} />
                             <span>Settings</span>
-                          </button>
-                          <div className="dropdown-divider"></div>
-                          <button 
-                            className={`dropdown-item ${course.published ? "deactivate" : "activate"}`}
-                            onClick={() => handleToggleStatus(course)}
-                          >
-                            <span>{course.published ? "Unpublish" : "Publish"}</span>
                           </button>
                         </div>
                       </div>

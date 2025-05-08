@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import CourseTable from "../../admin/CourseTable";
 import AdminCourseService from "../../../services/AdminCourseService";
-import { toast } from "../../../components/ui/toaster";
+import CourseTable from "../../admin/CourseTable";
 import "./CourseManagement.css";
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
     page: 0,
     size: 10,
@@ -15,115 +13,90 @@ const CourseManagement = () => {
     totalPages: 0
   });
   const [filters, setFilters] = useState({});
+  const [notification, setNotification] = useState(null);
 
-  useEffect(() => {
-    fetchCourses();
-  }, [pagination.page, pagination.size, filters]);
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const fetchCourses = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await AdminCourseService.getCourses(
         pagination.page,
         pagination.size,
         filters
       );
       
-      // Adapt the response to match our expected structure
-      // The backend might wrap the data in a content field for pagination
-      if (response.data && response.data.content) {
-        setCourses(response.data.content);
-        setPagination(prev => ({
-          ...prev,
-          totalElements: response.data.totalElements || 0,
-          totalPages: response.data.totalPages || 1
-        }));
-      } else {
-        // If the API returns a simple array without pagination
-        setCourses(Array.isArray(response.data) ? response.data : []);
-      }
+      console.log("Courses response:", response.data);
       
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching courses:", err);
-      setError("Failed to load courses. Please try again.");
-      toast.error("Failed to load courses");
+      if (response.data.content) {
+        setCourses(response.data.content);
+        setPagination({
+          page: response.data.number || 0,
+          size: response.data.size || 10,
+          totalElements: response.data.totalElements || 0,
+          totalPages: response.data.totalPages || 0
+        });
+      } else if (Array.isArray(response.data)) {
+        setCourses(response.data);
+      } else {
+        setCourses([]);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      showNotification("Error loading courses", "error");
+      setCourses([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [pagination.page, pagination.size, filters]);
+
   const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
+    setPagination(prev => ({
+      ...prev,
+      page: newPage
+    }));
   };
 
   const handlePageSizeChange = (newSize) => {
-    setPagination(prev => ({ ...prev, size: newSize, page: 0 }));
+    setPagination(prev => ({
+      ...prev,
+      page: 0,
+      size: newSize
+    }));
   };
 
   const handleFilterChange = (newFilters) => {
+    console.log("Applying filters:", newFilters);
     setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 0 })); // Reset to first page when filters change
-  };
-
-  const handleCourseAdd = async (courseData) => {
-    try {
-      setLoading(true);
-      await AdminCourseService.createCourse(courseData);
-      toast.success("Course created successfully");
-      fetchCourses(); // Refresh the list
-    } catch (err) {
-      console.error("Error adding course:", err);
-      toast.error(err.response?.data?.message || "Failed to add course");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCourseUpdate = async (courseId, courseData) => {
-    try {
-      setLoading(true);
-      await AdminCourseService.updateCourse(courseId, courseData);
-      toast.success("Course updated successfully");
-      fetchCourses(); // Refresh the list
-    } catch (err) {
-      console.error("Error updating course:", err);
-      toast.error(err.response?.data?.message || "Failed to update course");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCourseToggleStatus = async (courseId, isCurrentlyActive) => {
-    try {
-      setLoading(true);
-      if (isCurrentlyActive) {
-        // Currently active, so unpublish it
-        await AdminCourseService.unpublishCourse(courseId);
-        toast.success("Course unpublished successfully");
-      } else {
-        // Currently inactive, so publish it
-        await AdminCourseService.publishCourse(courseId);
-        toast.success("Course published successfully");
-      }
-      fetchCourses(); // Refresh the list
-    } catch (err) {
-      console.error("Error toggling course status:", err);
-      toast.error(err.response?.data?.message || "Failed to update course status");
-    } finally {
-      setLoading(false);
-    }
+    setPagination(prev => ({
+      ...prev,
+      page: 0
+    }));
   };
 
   return (
     <>
+      {notification && (
+        <div className={`notification notification-${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
       <div className="admin-course-page">
         <div className="admin-course-header">
           <h1 className="admin-title">Course Management</h1>
           <p className="admin-subtitle">Manage all courses in the system</p>
         </div>
-
-        {error && <div className="error-message">{error}</div>}
 
         <CourseTable 
           courses={courses}
@@ -132,9 +105,6 @@ const CourseManagement = () => {
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           onFilterChange={handleFilterChange}
-          onCourseAdd={handleCourseAdd} 
-          onCourseUpdate={handleCourseUpdate}
-          onCourseToggleStatus={handleCourseToggleStatus}
         />
       </div>
     </>

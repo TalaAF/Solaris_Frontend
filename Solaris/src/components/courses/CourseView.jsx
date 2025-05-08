@@ -29,7 +29,7 @@ import "./CourseView.css"; // Component-specific CSS
  * 
  * Using mock data for frontend development
  */
-function CourseView() {
+function CourseView({ course }) {
   const { courseId } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [modules, setModules] = useState([]);
