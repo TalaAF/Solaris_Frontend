@@ -43,9 +43,8 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           departmentId: course.departmentId || null,
           instructorEmail: course.instructorEmail || "",
           maxCapacity: course.maxCapacity || 30,
-          // Use published from course, fall back to isPublished if needed
-          published: course.published !== undefined ? course.published : 
-                  (course.isPublished !== undefined ? course.isPublished : true),
+          // Use isPublished from backend, not published
+          isPublished: course.isPublished !== undefined ? course.isPublished : true,
           credits: course.credits || 3,
           semester: course.semester || "Spring 2025",
         });
@@ -108,7 +107,7 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
     console.log("Published checkbox changed to:", checked);
     setFormData(prev => ({
       ...prev,
-      published: checked, // Use published instead of isPublished
+      isPublished: checked // Use isPublished instead of published
     }));
   };
 
@@ -176,12 +175,12 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
       title: formData.title.trim(),
       description: formData.description.trim(),
       instructorEmail: formData.instructorEmail,
-      departmentId: formData.departmentId ? parseInt(formData.departmentId, 10) : undefined,
+      departmentId: formData.departmentId ? parseInt(formData.departmentId, 10) : null,
       code: formData.code.trim() || undefined,
       maxCapacity: parseInt(formData.maxCapacity, 10) || 30,
-      credits: parseInt(formData.credits, 10) || 3,
-      semester: formData.semester,
-      isPublished: formData.published // Rename to isPublished here to match backend
+      credits: parseInt(formData.credits, 10) || 3, // Ensure credits is an integer
+      semester: formData.semester || "Spring 2025", // Provide default semester
+      isPublished: Boolean(formData.isPublished) // Ensure boolean type
     };
     
     if (course?.id) {
@@ -356,13 +355,13 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           <div className="form-check">
             <input
               type="checkbox"
-              id="published"
-              name="published"
-              checked={formData.published}
+              id="isPublished"
+              name="isPublished"
+              checked={formData.isPublished}
               onChange={handleCheckboxChange}
               className="form-checkbox"
             />
-            <label htmlFor="published">Published</label>
+            <label htmlFor="isPublished">Published</label>
           </div>
           
           <div className="form-actions">

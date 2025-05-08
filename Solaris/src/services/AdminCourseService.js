@@ -4,7 +4,14 @@ class AdminCourseService {
   // Core CRUD operations
   getCourses = async (page = 0, size = 10, filters = {}) => {
     // Extract specific filters for better readability
-    const { semester, minCredits, maxCredits, ...otherFilters } = filters;
+    const { 
+      search, 
+      departmentId, 
+      instructorEmail, 
+      isPublished,
+      semester, // Add semester filter
+      ...otherFilters 
+    } = filters;
     
     // Prepare query parameters
     const params = { 
@@ -14,10 +21,13 @@ class AdminCourseService {
     };
     
     // Add specific filters if provided
-    if (semester) params.semester = semester;
-    if (minCredits) params.minCredits = minCredits;
-    if (maxCredits) params.maxCredits = maxCredits;
+    if (search) params.search = search;
+    if (departmentId) params.departmentId = departmentId;
+    if (instructorEmail) params.instructorEmail = instructorEmail;
+    if (isPublished !== undefined) params.isPublished = isPublished;
+    if (semester) params.semester = semester; // Include semester in API request
     
+    console.log("Fetching courses with params:", params);
     return apiClient.get('/api/courses', { params });
   };
   
@@ -122,11 +132,47 @@ class AdminCourseService {
   
   // Status management (using update instead of specific endpoints)
   publishCourse = async (courseId) => {
-    return apiClient.put(`/api/courses/${courseId}`, { published: true });
+    try {
+      // First, get the current course data
+      const currentCourse = await this.getCourse(courseId);
+      if (!currentCourse?.data) {
+        throw new Error(`Course with id ${courseId} not found`);
+      }
+      
+      // Update only the published status while keeping other fields intact
+      const courseData = {
+        ...currentCourse.data,
+        isPublished: true // Use isPublished to match backend expectation
+      };
+      
+      // Send complete course data
+      return this.updateCourse(courseId, courseData);
+    } catch (error) {
+      console.error(`Error publishing course ${courseId}:`, error);
+      throw error;
+    }
   };
   
   unpublishCourse = async (courseId) => {
-    return apiClient.put(`/api/courses/${courseId}`, { published: false });
+    try {
+      // First, get the current course data
+      const currentCourse = await this.getCourse(courseId);
+      if (!currentCourse?.data) {
+        throw new Error(`Course with id ${courseId} not found`);
+      }
+      
+      // Update only the published status while keeping other fields intact
+      const courseData = {
+        ...currentCourse.data,
+        isPublished: false // Use isPublished to match backend expectation
+      };
+      
+      // Send complete course data
+      return this.updateCourse(courseId, courseData);
+    } catch (error) {
+      console.error(`Error unpublishing course ${courseId}:`, error);
+      throw error;
+    }
   };
   
   archiveCourse = async (courseId) => {
