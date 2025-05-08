@@ -189,9 +189,41 @@ class AdminCourseService {
   }
   
   // Get users with instructor role for course assignment
-  getInstructors() {
-    return apiClient.get('/api/admin/users', { params: { role: 'INSTRUCTOR' } });
-  }
+  getInstructors = async () => {
+    try {
+      console.log("Fetching instructors from API...");
+      const response = await apiClient.get('/api/admin/users', { params: { role: 'INSTRUCTOR' } });
+      
+      // Debug response
+      console.log("Raw instructor API response:", response);
+      
+      // Handle different possible response structures
+      let instructorData;
+      if (response.data?.content) {
+        // Paginated response
+        instructorData = response.data.content;
+      } else if (Array.isArray(response.data)) {
+        // Array response
+        instructorData = response.data;
+      } else {
+        // Unknown format, create empty array
+        instructorData = [];
+      }
+      
+      console.log(`Found ${instructorData.length} instructors:`, instructorData);
+      
+      // If no instructors found, add a fallback for testing
+      if (instructorData.length === 0) {
+        console.warn("No instructors found in the system. Consider adding test data.");
+      }
+      
+      return { data: instructorData };
+    } catch (error) {
+      console.error("Error fetching instructors:", error);
+      // Return empty array to prevent UI errors
+      return { data: [] };
+    }
+  };
   
   // Get all students enrolled in a course
   getCourseStudents = async (courseId) => {

@@ -66,29 +66,43 @@ const CourseTable = ({
   const fetchFilterOptions = async () => {
     setFilterLoading(true);
     try {
+      console.log("Fetching filter options...");
+      
       const [deptResponse, instructorResponse] = await Promise.all([
         AdminCourseService.getDepartments(),
         AdminCourseService.getInstructors()
       ]);
       
-      // Log responses to debug
+      // Log responses for debugging
       console.log("Department response:", deptResponse);
-      console.log("Instructor response:", instructorResponse);
+      console.log("Raw instructor response:", instructorResponse);
       
-      // Ensure departments is always an array
-      const deptData = deptResponse?.data?.content || 
-                       deptResponse?.data || [];
+      // Process departments - handle both direct and paginated responses
+      const deptData = deptResponse?.data?.content || deptResponse?.data || [];
       setDepartments(Array.isArray(deptData) ? deptData : []);
       
-      // Ensure instructors is always an array
+      // Process instructors the same way as CourseDialog does
       const instructorData = instructorResponse?.data?.content || 
                             instructorResponse?.data || [];
-      console.log("Extracted instructor data:", instructorData);
-      setInstructors(Array.isArray(instructorData) ? instructorData : []);
       
+      console.log("Extracted instructor data:", instructorData);
+      console.log(`Found ${Array.isArray(instructorData) ? instructorData.length : 0} instructors`);
+      
+      // If we have instructors but they're not in the expected format, try to adapt
+      if (Array.isArray(instructorData) && instructorData.length > 0) {
+        // Check if the first item looks like an instructor
+        const firstItem = instructorData[0];
+        console.log("First instructor item:", firstItem);
+        
+        // Check for missing properties that we might need to handle
+        if (firstItem && (!firstItem.firstName || !firstItem.lastName || !firstItem.email)) {
+          console.warn("Instructor data missing expected properties");
+        }
+      }
+      
+      setInstructors(Array.isArray(instructorData) ? instructorData : []);
     } catch (error) {
       console.error("Error fetching filter options:", error);
-      // Set empty arrays as fallback
       setDepartments([]);
       setInstructors([]);
     } finally {
@@ -269,18 +283,26 @@ const CourseTable = ({
               value={filters.instructorEmail}
               onChange={(e) => setFilters({...filters, instructorEmail: e.target.value})}
               disabled={filterLoading}
+              className="form-select"
             >
               <option value="">All Instructors</option>
-              {Array.isArray(instructors) && instructors.length > 0 ? (
-                instructors.map(instructor => (
-                  <option key={instructor.id} value={instructor.email}>
-                    {instructor.firstName} {instructor.lastName}
+              {Array.isArray(instructors) && instructors.length > 0 ? 
+                instructors.map((instructor) => (
+                  <option 
+                    key={instructor.id || `instructor-${Math.random()}`} 
+                    value={instructor.email}
+                  >
+                    {instructor.firstName || ''} {instructor.lastName || ''} 
+                    {instructor.email ? ` (${instructor.email})` : ''}
                   </option>
-                ))
-              ) : (
+                )) : 
                 <option value="" disabled>No instructors available</option>
-              )}
+              }
             </select>
+            {filterLoading && <div className="filter-loading-indicator">Loading...</div>}
+            {!filterLoading && instructors.length === 0 && (
+              <div className="filter-empty-message">No instructors found</div>
+            )}
           </div>
           <div className="filter-group">
             <label>Semester</label>
