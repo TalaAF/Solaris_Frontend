@@ -21,6 +21,7 @@ import { NotificationProvider } from './components/NotificationContext';
 import InstructorDashboard from './components/pages/instructor/InstructorDashboard.jsx';
 import Students from "./components/pages/instructor/Students";
 import InstructorCourse from "./components/pages/instructor/InstructorCourse";
+import InstructProfilePage from './components/pages/instructor/InstructProfilePage';
 import './App.css';
 
 // Temporarily bypass authentication for development
@@ -94,6 +95,8 @@ function App() {
   {/* Nested Instructor Pages */}
   <Route path="students" element={<Students />} />
   <Route path="Instructorcourse" element={<InstructorCourse />} />
+  <Route path="InstructProfilePage" element={<InstructProfilePage />} />  
+  {/* Add more nested routes as needed */}  
 </Route>
 
 

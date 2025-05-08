@@ -1,0 +1,55 @@
+{
+  "instructor": {
+    "image": "https://via.placeholder.com/150",
+    "fullName": "Dr. Jane Smith",
+    "email": "jane.smith@university.edu",
+    "country": "United States",
+    "timezone": "UTC-5",
+    "universityNumber": "U12345"
+  },
+  "courses": [
+    {
+      "name": "ANATOMY 101",
+      "code": "AN101",
+      "semester": "Spring 2025",
+      "students": 45,
+      "progress": 75
+    },
+    {
+      "name": "PHYSIOLOGY 201",
+      "code": "PH201",
+      "semester": "Fall 2024",
+      "students": 30,
+      "progress": 50
+    }
+  ],
+  "statistics": {
+    "courses": 5,
+    "students": 120,
+    "assessments": 15,
+    "teachingHours": 20
+  },
+  "academicProfile": {
+    "education": [
+      {
+        "institution": "Harvard University",
+        "degree": "Ph.D.",
+        "specialization": "Human Anatomy",
+        "period": "2015–2020"
+      },
+      {
+        "institution": "University of California",
+        "degree": "M.Sc.",
+        "specialization": "Biology",
+        "period": "2012–2014"
+      }
+    ],
+    "certificates": [
+      {
+        "institution": "Online Learning Platform",
+        "name": "Advanced Teaching Methods",
+        "period": "2023"
+      }
+    ]
+  }
+}

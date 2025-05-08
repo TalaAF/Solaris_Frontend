@@ -1,0 +1,10 @@
+{
+    "instructor": {
+      "fullName": "John Doe",
+      "email": "john.doe@university.com",
+      "universityNumber": "U12345",
+      "country": "United States",
+      "timezone": "UTC-5",
+      "image": "path/to/image.jpg",
+      "password": "initialpassword123"
+    }}
