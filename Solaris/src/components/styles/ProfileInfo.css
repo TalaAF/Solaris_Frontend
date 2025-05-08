@@ -1,160 +1,103 @@
+/****** ProfileInfo.css - Iteration 5: Overflow Control & Text Wrapping ******/
+
+/* .profile-info-card is the main container for the content within the Profile Information tab */
 .profile-info-card {
-  background-color: #F0FDFA; /* Pale teal background */
-  border-left: 4px solid #2DD4BF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
-  padding: 28px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.profile-info-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.card-icon {
-  font-size: 24px;
-  color: #2DD4BF;
-}
-
-.section-heading {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2A44;
-  margin: 0;
-}
-
-.section-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: #6B7280;
-  margin: 0 0 20px;
-}
-
-.profile-pic-container {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.profile-pic-wrapper {
-  position: relative;
-}
-
-.profile-pic {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #2DD4BF, #10B981);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  font-weight: 600;
-  color: #FFFFFF;
-  user-select: none;
-}
-
-.profile-pic-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.profile-pic-edit {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 28px;
-  height: 28px;
-  background-color: #2DD4BF;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: #FFFFFF;
-  border: 2px solid #FFFFFF;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.profile-pic-edit:hover {
-  background-color: #26B8A6;
-}
-
-.profile-info {
-  flex: 1;
-}
-
-.profile-name {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2A44;
-  margin: 0;
-}
-
-.profile-role {
-  font-size: 14px;
-  font-weight: 400;
-  color: #6B7280;
-  margin: 4px 0 0;
-}
-
-.info-list {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
 }
 
-.info-item {
+.profile-info-card .card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem; 
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #dddfe2;
+  flex-shrink: 0;
+}
+
+.profile-info-card .card-icon {
+  color: #ff8c00; 
+  font-size: 1.3rem; 
+  margin-right: 0.75rem; 
+  flex-shrink: 0; 
+}
+
+.profile-info-card .section-heading {
+  color: #1c1e21; 
+  font-size: 1.05rem; 
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.profile-info-card .section-subtitle {
+  color: #606770; 
+  font-size: 0.8rem; 
+  margin-top: 0.2rem; 
+  margin-bottom: 1.5rem; 
+  line-height: 1.4;
+  word-break: break-word;
+  flex-shrink: 0;
+}
+
+.profile-info-card .info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; 
+  width: 100%; /* Ensure list takes full width */
+  box-sizing: border-box;
+}
+
+.profile-info-card .info-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #E5E7EB;
+  align-items: flex-start; 
+  padding: 0.5rem 0.1rem;
+  border-bottom: 1px solid #e5e7eb; 
+  font-size: 0.85rem; 
+  line-height: 1.5;
+  width: 100%; /* Ensure item takes full width */
+  box-sizing: border-box;
 }
 
-.label {
-  font-size: 14px;
+.profile-info-card .info-item:last-child {
+  border-bottom: none;
+}
+
+.profile-info-card .label {
+  color: #4b5563;
   font-weight: 500;
-  color: #6B7280;
+  flex: 0 0 30%; /* Assign a flex-basis percentage */
+  min-width: 80px; /* Minimum width for label */
+  margin-right: 1rem;
+  white-space: nowrap; /* Labels themselves shouldn_t wrap if possible */
+  overflow: hidden; /* Hide overflow for label if too long */
+  text-overflow: ellipsis; /* Show ellipsis for very long labels */
 }
 
-.value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1F2A44;
+.profile-info-card .value {
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+  flex-grow: 1; 
+  min-width: 0; /* Allow value to shrink and wrap */
+  word-break: break-word; /* Ensure long values wrap */
+  overflow-wrap: break-word; /* Additional wrapping control */
 }
 
 .edit-profile-container {
-  display: flex;
-  justify-content: flex-end;
+  margin-top: 2rem; 
+  text-align: left; 
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.edit-profile-button {
-  background-color: #2DD4BF;
-  color: #FFFFFF;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+/* Ensure no element within .profile-info-card can cause horizontal overflow */
+.profile-info-card * {
+  /* max-width: 100%; /* This is too aggressive. Rely on flex properties and word wrapping. */
 }
 
-.edit-profile-button:hover {
-  background-color: #26B8A6;
-  transform: scale(1.05);
-}

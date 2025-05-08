@@ -1,45 +1,151 @@
-.course-list-card {
-  background-color: #F0FDF4;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
-  padding: 28px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+/****** CourseList.css - Iteration 5: Robust Overflow Control & Text Wrapping ******/
 
-.course-list-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.section-heading {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2A44;
-  margin: 0 0 8px;
-}
-
-.section-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: #6B7280;
-  margin: 0 0 20px;
-}
-
-.info-list {
+/* .course-list-section is the main container for this tab content */
+.course-list-section {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
-.label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6B7280;
-  margin-right: 8px;
+.course-list-section .card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #dddfe2;
+  flex-shrink: 0;
 }
 
-.value {
-  font-size: 14px;
+.course-list-section .card-icon {
+  color: #ff8c00;
+  font-size: 1.3rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.course-list-section .section-heading {
+  color: #1c1e21;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: #1F2A44;
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.course-list-section .section-subtitle {
+  color: #606770;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  flex-shrink: 0;
+}
+
+.course-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent overflow from child elements */
+}
+
+.course-item {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Contain internal overflow */
+}
+
+.course-item .course-title,
+.course-item .course-details,
+.course-item .course-progress {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.course-item .course-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 0.35rem;
+}
+
+.course-item .course-details {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.course-item .course-progress {
+  font-size: 0.85rem;
+  color: #495057;
+}
+
+/* Styles for the DownloadButton section within CourseList tab */
+.download-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #dddfe2;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.download-section .section-heading,
+.download-section .section-subtitle {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.download-section .section-heading {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.download-section .section-subtitle {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+/* The DownloadButton itself will be styled by Button.css */
+.download-report-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .course-list-section .section-heading {
+    font-size: 0.95rem;
+  }
+  .course-list-section .section-subtitle {
+    font-size: 0.75rem;
+  }
+  .course-item {
+    padding: 0.75rem;
+  }
+  .course-item .course-title {
+    font-size: 0.9rem;
+  }
+  .download-section .section-heading {
+    font-size: 0.9rem;
+  }
 }

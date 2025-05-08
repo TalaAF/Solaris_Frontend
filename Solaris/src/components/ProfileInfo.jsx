@@ -1,37 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { FaUser } from 'react-icons/fa';
 import './styles/ProfileInfo.css';
 
-const ProfileInfo = ({ profile }) => {
-  const navigate = useNavigate();
-  const [profileImage, setProfileImage] = useState(null);
-  const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    const savedImage = localStorage.getItem('profileImage');
-    if (savedImage) {
-      setProfileImage(savedImage);
-    }
-  }, []);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Image = reader.result;
-        setProfileImage(base64Image);
-        localStorage.setItem('profileImage', base64Image);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
-  };
-
+const ProfileInfo = ({ profile, onUpdate, onEdit }) => {
   if (!profile) {
     return <div className="profile-info-card">Loading profile...</div>;
   }
@@ -39,38 +10,20 @@ const ProfileInfo = ({ profile }) => {
   return (
     <div className="profile-info-card">
       <div className="card-header">
-        <FaUser className="card-icon" />
-        <h2 className="section-heading">Profile Information</h2>
-      </div>
-      <p className="section-subtitle">Your personal and academic details</p>
-      <div className="profile-pic-container">
-        <div className="profile-pic-wrapper">
-          {profileImage || profile.profileImage ? (
-            <img
-              src={profileImage || profile.profileImage}
-              alt="Profile"
-              className="profile-pic-image"
-            />
-          ) : (
-            <div className="profile-pic">
-              {profile.firstName?.charAt(0)}
-              {profile.lastName?.charAt(0)}
-            </div>
-          )}
-          <button className="profile-pic-edit" onClick={triggerFileInput}>
-            ✎
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleImageChange}
-          />
-        </div>
-        <div className="profile-info">
-          <p className="profile-name">{profile.name || 'N/A'}</p>
-          <p className="profile-role">{profile.role || 'N/A'}</p>
+        <img
+          src={profile.image || 'https://via.placeholder.com/150'}
+          alt="Profile"
+          style={{
+            maxWidth: '150px',
+            maxHeight: '150px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginBottom: '1rem',
+          }}
+        />
+        <div style={{ marginTop: 'auto' }}>
+          <h2 className="section-heading">Profile Information</h2>
+          <p className="section-subtitle">Your personal and academic details</p>
         </div>
       </div>
       <div className="info-list">
@@ -97,8 +50,31 @@ const ProfileInfo = ({ profile }) => {
       </div>
       <div className="edit-profile-container">
         <button
-          className="edit-profile-button"
-          onClick={() => navigate('/profile/edit')}
+          onClick={onEdit}
+          style={{
+            background: 'linear-gradient(to right, #ff8c00, #ff5500)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            padding: '0.75rem 1.5rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(255, 140, 0, 0.2)',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'linear-gradient(to right, #ff5500, #ff8c00)';
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 4px 8px rgba(255, 140, 0, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'linear-gradient(to right, #ff8c00, #ff5500)';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 4px rgba(255, 140, 0, 0.2)';
+          }}
         >
           Edit Profile
         </button>

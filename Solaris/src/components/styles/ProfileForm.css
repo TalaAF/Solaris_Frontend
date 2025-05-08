@@ -1,55 +1,97 @@
 .profile-form-card {
-  background-color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
-  padding: 32px;
-  max-width: 640px;
-  margin: 32px auto;
-  border-left: 4px solid #2DD4BF;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.profile-form-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 2rem auto;
 }
 
 .section-heading {
-  font-size: 24px;
+  color: #333;
+  
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1F2A44;
-  margin-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+
+}
+
+.section-heading::before {
+  content: '';
+  color: #333;  
+
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 0.75rem;
 }
 
 .section-subtitle {
-  color: #4B5563;
-  margin-bottom: 24px;
-  font-size: 16px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+
 }
 
 .info-stack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 
-.info-stack > div {
-  background-color: #F9FAFB;
-  padding: 16px;
-  border-radius: 8px;
 }
 
 .label {
-  color: #2DD4BF;
+  display: block;
+  color: #333;  
   font-weight: 500;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
 .edit-profile-actions {
-  margin-top: 24px;
   display: flex;
-  justify-content: flex-end;
-  gap: 16px;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  
+}
+
+.bg-mint {
+  background: linear-gradient(to right, #10b981, #059669);
+  color: rgb(18, 18, 18);
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bg-mint:hover {
+  background: linear-gradient(to right, #059669, #10b981);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.bg-red {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bg-red:hover {
+  background: linear-gradient(to right, #dc2626, #ef4444);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 }

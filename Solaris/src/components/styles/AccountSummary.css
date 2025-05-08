@@ -1,65 +1,101 @@
+/****** AccountSummary.css - Styles for Account Summary Card (Targeted Fixes & Typography) ******/
+
+/* .summary-card in Profile.css provides the main card container styling */
+
 .account-summary-card {
-  background-color: #FFFBEB; /* Pale yellow background */
-  border-left: 4px solid #FBBF24;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
-  padding: 28px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.account-summary-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.card-icon {
-  font-size: 24px;
-  color: #FBBF24;
-}
-
-.section-heading {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2A44;
-  margin: 0;
-}
-
-.section-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: #6B7280;
-  margin: 0 0 20px;
-}
-
-.info-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  height: 100%;
 }
 
-.info-item {
+.account-summary-card .card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.account-summary-card .card-icon {
+  color: #ff8c00;
+  font-size: 1.3rem;
+  margin-right: 0.6rem;
+  flex-shrink: 0;
+}
+
+.account-summary-card .section-heading {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.account-summary-card .section-subtitle {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+  margin-bottom: 0.85rem;
+  line-height: 1.4;
+}
+
+.account-summary-card .info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex-grow: 1;
+}
+
+.account-summary-card .info-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #E5E7EB;
+  align-items: flex-start;
+  padding: 0.45rem 0.1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
-.label {
-  font-size: 14px;
+.account-summary-card .info-item:last-child {
+  border-bottom: none;
+}
+
+.account-summary-card .label {
+  color: #4b5563;
   font-weight: 500;
-  color: #6B7280;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1F2A44;
+.account-summary-card .value {
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .account-summary-card .section-heading {
+    font-size: 0.9rem;
+  }
+  .account-summary-card .section-subtitle {
+    font-size: 0.7rem;
+  }
+  .account-summary-card .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.3rem 0;
+  }
+  .account-summary-card .label {
+    margin-bottom: 0.2rem;
+  }
+  .account-summary-card .value {
+    text-align: left;
+  }
 }
