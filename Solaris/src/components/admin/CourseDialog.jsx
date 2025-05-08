@@ -1,29 +1,27 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
+import AdminCourseService from "../../services/AdminCourseService";
 import "./CourseDialog.css";
 
 const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
-  // Initial form state aligned with backend model
+  // Initial form state aligned with backend requirements
   const initialFormData = {
     title: "",
     code: "",
     description: "",
-    department: { id: null },
-    instructor: { id: null },
-    maxCapacity: 50,
-    published: true,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+    departmentId: null,
+    instructorEmail: "",
+    maxCapacity: 30,
+    isPublished: true, // Changed from published to isPublished
     credits: 3,
     semester: "Spring 2025",
-    academicLevel: "Undergraduate",
-    tags: []
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [departments, setDepartments] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Fetch departments and instructors when dialog opens
   useEffect(() => {
@@ -42,48 +40,50 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           title: course.title || "",
           code: course.code || "",
           description: course.description || "",
-          department: {
-            id: course.department?.id || 
-                (typeof course.departmentId === 'number' ? course.departmentId : null)
-          },
-          instructor: {
-            id: course.instructor?.id || 
-                (typeof course.instructorId === 'number' ? course.instructorId : null)
-          },
-          maxCapacity: course.maxCapacity || 50,
-          published: course.published !== undefined ? course.published : true,
-          startDate: course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "",
-          endDate: course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "",
+          departmentId: course.departmentId || null,
+          instructorEmail: course.instructorEmail || "",
+          maxCapacity: course.maxCapacity || 30,
+          // Use published from course, fall back to isPublished if needed
+          published: course.published !== undefined ? course.published : 
+                  (course.isPublished !== undefined ? course.isPublished : true),
           credits: course.credits || 3,
           semester: course.semester || "Spring 2025",
-          academicLevel: course.academicLevel || "Undergraduate",
-          tags: course.tags || []
         });
       } else {
         setFormData(initialFormData);
       }
+      setErrors({});
     }
   }, [isOpen, course]);
 
+  // Update the fetchDepartmentsAndInstructors function to debug instructor data:
   const fetchDepartmentsAndInstructors = async () => {
     setLoading(true);
     try {
-      // In a real implementation, you would fetch these from your API
-      // For now we're using mock data
-      setDepartments([
-        { id: 1, name: "Administration" },
-        { id: 2, name: "Mathematics" },
-        { id: 3, name: "Physics" },
-        { id: 5, name: "Computer Science" }
+      // First, log the instructor fetch call
+      console.log("Fetching instructors...");
+      
+      const [deptResponse, instructorResponse] = await Promise.all([
+        AdminCourseService.getDepartments(),
+        AdminCourseService.getInstructors()
       ]);
       
-      setInstructors([
-        { id: 1, name: "John Smith", email: "john.smith@example.com" },
-        { id: 2, name: "Jane Doe", email: "jane.doe@example.com" },
-        { id: 3, name: "Robert Brown", email: "robert.brown@example.com" }
-      ]);
+      // Log the raw response to see what's coming back
+      console.log("Raw instructor response:", instructorResponse);
+      
+      // Check for different data structures from your API
+      const instructorData = instructorResponse?.data?.content || 
+                            instructorResponse?.data || [];
+      
+      // Log the extracted data
+      console.log("Extracted instructor data:", instructorData);
+      console.log(`Found ${Array.isArray(instructorData) ? instructorData.length : 0} instructors`);
+      
+      setDepartments(deptResponse?.data || []);
+      setInstructors(Array.isArray(instructorData) ? instructorData : []);
     } catch (error) {
-      console.error("Failed to fetch departments or instructors:", error);
+      console.error("Error fetching instructors:", error);
+      setInstructors([]);
     } finally {
       setLoading(false);
     }
@@ -91,45 +91,111 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "number" ? parseInt(value, 10) : value,
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "number" ? parseInt(value, 10) || 0 : value,
+    }));
+    
+    // Clear error for the field when it's changed
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
+  // Make the checkbox handler more explicit
   const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: checked,
-    });
+    const { checked } = e.target;
+    console.log("Published checkbox changed to:", checked);
+    setFormData(prev => ({
+      ...prev,
+      published: checked, // Use published instead of isPublished
+    }));
   };
 
   const handleDepartmentChange = (e) => {
-    const departmentId = parseInt(e.target.value, 10);
-    setFormData({
-      ...formData,
-      department: { id: departmentId }
-    });
+    const departmentId = e.target.value ? parseInt(e.target.value, 10) : null;
+    setFormData(prev => ({
+      ...prev,
+      departmentId
+    }));
   };
 
   const handleInstructorChange = (e) => {
-    const instructorId = parseInt(e.target.value, 10);
-    setFormData({
-      ...formData,
-      instructor: { id: instructorId }
-    });
+    const instructorId = e.target.value;
+    
+    // Add safety check for instructors array
+    const selectedInstructor = Array.isArray(instructors) 
+      ? instructors.find(i => i.id === parseInt(instructorId, 10))
+      : null;
+    
+    setFormData(prev => ({
+      ...prev,
+      instructorEmail: selectedInstructor ? selectedInstructor.email : ""
+    }));
+    
+    // Clear error if present
+    if (errors.instructorEmail) {
+      setErrors(prev => ({ ...prev, instructorEmail: null }));
+    }
   };
+
+  // Update the validateForm function to check description length
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+    
+    const descriptionLength = formData.description.trim().length;
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (descriptionLength < 10 || descriptionLength > 2000) {
+      newErrors.description = "Description must be between 10 and 2000 characters";
+    }
+    
+    if (!formData.instructorEmail) {
+      newErrors.instructorEmail = "Instructor is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Update the handleSubmit function 
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Prepare data for API submission
+    if (!validateForm()) {
+      return;
+    }
+    
+    // Prepare data for API submission - match the backend's expected format
     const submissionData = {
-      ...formData,
-      // Convert any special fields as needed
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      instructorEmail: formData.instructorEmail,
+      departmentId: formData.departmentId ? parseInt(formData.departmentId, 10) : undefined,
+      code: formData.code.trim() || undefined,
+      maxCapacity: parseInt(formData.maxCapacity, 10) || 30,
+      credits: parseInt(formData.credits, 10) || 3,
+      semester: formData.semester,
+      isPublished: formData.published // Rename to isPublished here to match backend
     };
     
+    if (course?.id) {
+      submissionData.id = course.id;
+    }
+    
+    // Remove any undefined values
+    Object.keys(submissionData).forEach(key => {
+      if (submissionData[key] === undefined) {
+        delete submissionData[key];
+      }
+    });
+    
+    console.log("Admin submitting course data:", submissionData);
     onSubmit(submissionData);
   };
 
@@ -137,147 +203,178 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={title || "Course Details"}
     >
-      <form onSubmit={handleSubmit} className="course-form">
-        <div className="form-row">
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading data...</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="course-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="title">Course Title *</label>
+              <input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                className={`form-input ${errors.title ? 'input-error' : ''}`}
+              />
+              {errors.title && <div className="error-message">{errors.title}</div>}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="code">Course Code</label>
+              <input
+                id="code"
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="e.g. CS101"
+              />
+            </div>
+          </div>
+          
+          {/* Add semester and credits form row */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="semester">Semester *</label>
+              <select
+                id="semester"
+                name="semester"
+                value={formData.semester}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                <option value="">Select a semester</option>
+                <option value="Fall 2024">Fall 2024</option>
+                <option value="Spring 2025">Spring 2025</option>
+                <option value="Summer 2025">Summer 2025</option>
+                <option value="Fall 2025">Fall 2025</option>
+                <option value="Spring 2026">Spring 2026</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="credits">Credits *</label>
+              <input
+                id="credits"
+                name="credits"
+                type="number"
+                min="1"
+                max="6"
+                value={formData.credits}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+          </div>
+          
           <div className="form-group">
-            <label htmlFor="title">Course Title</label>
-            <input
-              id="title"
-              name="title"
-              value={formData.title}
+            <label htmlFor="description">Description *</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
               onChange={handleChange}
+              rows={3}
+              className={`form-textarea ${errors.description ? 'input-error' : ''}`}
               required
-              className="form-input"
             />
+            <div className="form-input-meta">
+              <span className={formData.description.length < 10 ? "text-warning" : ""}>
+                {formData.description.length}/2000 characters
+              </span>
+            </div>
+            {errors.description && <div className="error-message">{errors.description}</div>}
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="instructor">Instructor *</label>
+              <select
+                id="instructor"
+                name="instructor"
+                value={
+                  Array.isArray(instructors) && formData.instructorEmail
+                    ? (instructors.find(i => i.email === formData.instructorEmail)?.id || "")
+                    : ""
+                }
+                onChange={handleInstructorChange}
+                className={`form-select ${errors.instructorEmail ? 'input-error' : ''}`}
+                required
+              >
+                <option value="">Select an instructor</option>
+                {Array.isArray(instructors) && instructors.map((instructor) => (
+                  <option key={instructor.id} value={instructor.id}>
+                    {instructor.firstName} {instructor.lastName} ({instructor.email})
+                  </option>
+                ))}
+              </select>
+              {errors.instructorEmail && <div className="error-message">{errors.instructorEmail}</div>}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="department">Department</label>
+              <select
+                id="department"
+                name="department"
+                value={formData.departmentId || ""}
+                onChange={handleDepartmentChange}
+                className="form-select"
+              >
+                <option value="">Select a department</option>
+                {departments.map((department) => (
+                  <option key={department.id} value={department.id}>
+                    {department.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div className="form-group">
-            <label htmlFor="code">Course Code</label>
+            <label htmlFor="maxCapacity">Maximum Capacity</label>
             <input
-              id="code"
-              name="code"
-              value={formData.code}
+              id="maxCapacity"
+              name="maxCapacity"
+              type="number"
+              min="1"
+              value={formData.maxCapacity}
               onChange={handleChange}
               className="form-input"
-              placeholder="e.g. CS101"
-            />
-          </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={3}
-            className="form-textarea"
-          />
-        </div>
-        
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="instructor">Instructor</label>
-            <select
-              id="instructor"
-              name="instructor"
-              value={formData.instructor.id || ""}
-              onChange={handleInstructorChange}
-              className="form-select"
-              disabled={loading}
-            >
-              <option value="">Select an instructor</option>
-              {instructors.map((instructor) => (
-                <option key={instructor.id} value={instructor.id}>
-                  {instructor.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="department">Department</label>
-            <select
-              id="department"
-              name="department"
-              value={formData.department.id || ""}
-              onChange={handleDepartmentChange}
-              className="form-select"
               required
-            >
-              {departments.map((department) => (
-                <option key={department.id} value={department.id}>
-                  {department.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="startDate">Start Date</label>
-            <input
-              id="startDate"
-              name="startDate"
-              type="date"
-              value={formData.startDate}
-              onChange={handleChange}
-              className="form-input"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="endDate">End Date</label>
+          <div className="form-check">
             <input
-              id="endDate"
-              name="endDate"
-              type="date"
-              value={formData.endDate}
-              onChange={handleChange}
-              className="form-input"
+              type="checkbox"
+              id="published"
+              name="published"
+              checked={formData.published}
+              onChange={handleCheckboxChange}
+              className="form-checkbox"
             />
+            <label htmlFor="published">Published</label>
           </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="maxCapacity">Maximum Capacity</label>
-          <input
-            id="maxCapacity"
-            name="maxCapacity"
-            type="number"
-            min="1"
-            value={formData.maxCapacity}
-            onChange={handleChange}
-            className="form-input"
-            required
-          />
-        </div>
-        
-        <div className="form-check">
-          <input
-            type="checkbox"
-            id="published"
-            name="published"
-            checked={formData.published}
-            onChange={handleCheckboxChange}
-            className="form-checkbox"
-          />
-          <label htmlFor="published">Published</label>
-        </div>
-        
-        <div className="form-actions">
-          <button type="button" className="cancel-button" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="submit-button">
-            {course ? 'Update' : 'Create'}
-          </button>
-        </div>
-      </form>
+          
+          <div className="form-actions">
+            <button type="button" className="cancel-button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="submit-button">
+              {course ? 'Update' : 'Create'}
+            </button>
+          </div>
+        </form>
+      )}
     </Dialog>
   );
 };

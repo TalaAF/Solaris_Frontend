@@ -1,7 +1,7 @@
 // CourseService.js
 // Service to handle API calls to the course backend with fallback to mock data
 
-import api from "./api";
+import axios from "axios";
 
 const API_URL = "http://localhost:8080/api";
 const USE_MOCK = false; // Toggle this when your backend is ready
@@ -89,7 +89,7 @@ class CourseService {
     }
     
     try {
-      return await api.get(`/courses`);
+      return await axios.get(`${API_URL}/courses`);
     } catch (error) {
       console.error("Error fetching courses:", error);
       await this.mockDelay();
@@ -107,7 +107,7 @@ class CourseService {
     }
     
     try {
-      return await api.get(`/courses/${id}`);
+      return await axios.get(`${API_URL}/courses/${id}`);
     } catch (error) {
       console.error(`Error fetching course ${id}:`, error);
       await this.mockDelay();

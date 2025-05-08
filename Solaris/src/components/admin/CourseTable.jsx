@@ -265,7 +265,8 @@ const CourseTable = ({
                 <th>Department</th>
                 <th>Instructor</th>
                 <th>Enrollment</th>
-                <th>Duration</th>
+                <th>Semester</th>
+                <th>Credits</th>
                 <th>Status</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -308,16 +309,14 @@ const CourseTable = ({
                       </div>
                     </td>
                     <td>
-                      <div className="course-dates">
-                        {course.startDate && course.endDate ? (
-                          <>
-                            <span>{formatDate(course.startDate)}</span> - 
-                            <span>{formatDate(course.endDate)}</span>
-                          </>
-                        ) : (
-                          <span>No dates set</span>
-                        )}
-                      </div>
+                      <span className="course-semester">
+                        {course.semester || "Not specified"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="course-credits">
+                        {course.credits || 0}
+                      </span>
                     </td>
                     <td>
                       <span className={`status-badge ${course.published ? "active" : "inactive"}`}>
