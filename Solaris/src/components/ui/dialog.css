@@ -1,0 +1,113 @@
+.solaris-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* Base dialog z-index */
+  padding: 1rem;
+}
+
+.solaris-dialog {
+  position: relative;
+  background-color: white;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  animation: dialogFadeIn 0.15s ease-out;
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.solaris-dialog-content {
+  position: relative;
+  padding: 1.5rem;
+}
+
+.solaris-dialog-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+
+.solaris-dialog-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.solaris-dialog-header {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.solaris-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.solaris-dialog-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #111827;
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  .solaris-dialog {
+    max-width: calc(100vw - 2rem);
+    margin: 1rem;
+  }
+  
+  .solaris-dialog-content {
+    padding: 1rem;
+  }
+  
+  .solaris-dialog-header {
+    padding: 1rem 1rem 0;
+  }
+  
+  .solaris-dialog-footer {
+    padding: 0 1rem 1rem;
+  }
+}
+
+/* filepath: c:\Users\tala3\OneDrive\Desktop\Spring 2025\ADVANCED WEB TECHNOLOGIES\Solaris-Project\Solaris1\Solaris\src\components\common\Dialog.css */
+.dialog-overlay {
+  z-index: 1000; /* Match base dialog z-index */
+}
+
+/* filepath: c:\Users\tala3\OneDrive\Desktop\Spring 2025\ADVANCED WEB TECHNOLOGIES\Solaris-Project\Solaris1\Solaris\src\components\admin\AddStudentDialog.css */
+/* Special dialogs can have slightly higher z-index */
+.add-student-dialog {
+  z-index: 1050 !important; /* Higher than base dialogs */
+}

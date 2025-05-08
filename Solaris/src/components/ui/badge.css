@@ -1,0 +1,54 @@
+.solaris-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  padding: 0 0.625rem;
+  height: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Variants */
+.solaris-badge.default {
+  background-color: var(--primary-color, #E5BF03);
+  color: var(--primary-foreground, white);
+  border-color: transparent;
+}
+
+.solaris-badge.default:hover {
+  background-color: var(--primary-hover, #cba902);
+}
+
+.solaris-badge.secondary {
+  background-color: var(--secondary-color, #f3f4f6);
+  color: var(--secondary-foreground, #374151);
+  border-color: transparent;
+}
+
+.solaris-badge.secondary:hover {
+  background-color: var(--secondary-hover, #e5e7eb);
+}
+
+.solaris-badge.destructive {
+  background-color: var(--destructive-color, #ef4444);
+  color: var(--destructive-foreground, white);
+  border-color: transparent;
+}
+
+.solaris-badge.destructive:hover {
+  background-color: var(--destructive-hover, #dc2626);
+}
+
+.solaris-badge.outline {
+  background-color: transparent;
+  color: var(--foreground, #111827);
+  border-color: currentColor;
+}
+
+.solaris-badge:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(229, 191, 3, 0.2);
+}

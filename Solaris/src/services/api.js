@@ -1,23 +1,21 @@
 import axios from "axios";
 
+// Get API URL from environment variables
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 const api = axios.create({
-  baseURL: "/api", // This will be forwarded to your server with a proxy
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add request interceptor to set authentication token
+// Add request interceptor to inject token
 api.interceptors.request.use(
   (config) => {
-    console.log(
-      "API Request:",
-      config.method.toUpperCase(),
-      config.baseURL + config.url
-    );
     const token = localStorage.getItem("auth_token");
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -26,68 +24,25 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle token expiration globally
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  
-  failedQueue = [];
-};
-
+// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    // If error is not 401 or request already tried after refresh, reject
-    if (error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
-    }
-    
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-        .then((token) => {
-          originalRequest.headers["Authorization"] = `Bearer ${token}`;
-          return api(originalRequest);
-        })
-        .catch((err) => {
-          return Promise.reject(err);
-        });
-    }
-    
-    originalRequest._retry = true;
-    isRefreshing = true;
-    
-    try {
-      // Import needed here to avoid circular dependency
-      const AuthService = require("./AuthService").default;
-      const refreshed = await AuthService.refreshToken();
-      
-      if (refreshed) {
-        const newToken = localStorage.getItem("auth_token");
-        processQueue(null, newToken);
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-        return api(originalRequest);
-      } else {
-        processQueue(error, null);
-        return Promise.reject(error);
+  (error) => {
+    // Handle 401 Unauthorized errors globally
+    if (error.response && error.response.status === 401) {
+      // Clear auth token if it's invalid
+      if (localStorage.getItem("auth_token")) {
+        localStorage.removeItem("auth_token");
+        // Redirect to login if token is invalid (except for login/register pages)
+        if (
+          !window.location.href.includes("/login") &&
+          !window.location.href.includes("/register")
+        ) {
+          window.location.href = "/login";
+        }
       }
-    } catch (refreshError) {
-      processQueue(refreshError, null);
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
+    return Promise.reject(error);
   }
 );
 

@@ -1,0 +1,90 @@
+.solaris-table-container {
+    position: relative;
+    width: 100%;
+    overflow: auto;
+  }
+  
+  .solaris-table {
+    width: 100%;
+    caption-side: bottom;
+    font-size: 0.875rem;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  /* Header styles */
+  .solaris-table-header tr {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .solaris-table-head {
+    height: 48px;
+    padding: 0 1rem;
+    text-align: left;
+    vertical-align: middle;
+    font-weight: 500;
+    color: #64748b;
+    border-bottom: 2px solid #E5BF03; /* Solaris yellow theme */
+  }
+  
+  /* Body styles */
+  .solaris-table-body tr:last-child {
+    border-bottom: none;
+  }
+  
+  /* Footer styles */
+  .solaris-table-footer {
+    border-top: 1px solid #e2e8f0;
+    background-color: rgba(241, 245, 249, 0.5);
+    font-weight: 500;
+  }
+  
+  .solaris-table-footer > tr:last-child {
+    border-bottom: 0;
+  }
+  
+  /* Row styles */
+  .solaris-table-row {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+  }
+  
+  .solaris-table-row:hover {
+    background-color: rgba(229, 191, 3, 0.05); /* Very light yellow */
+  }
+  
+  .solaris-table-row[data-state="selected"] {
+    background-color: rgba(229, 191, 3, 0.1); /* Light yellow */
+  }
+  
+  /* Cell styles */
+  .solaris-table-cell {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  
+  .solaris-table-cell:has([role="checkbox"]) {
+    padding-right: 0;
+  }
+  
+  /* Caption styles */
+  .solaris-table-caption {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+  
+  /* Sorting indicators for table headers, if needed */
+  .solaris-table-head[aria-sort="ascending"]::after {
+    content: "▲";
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    color: #E5BF03;
+  }
+  
+  .solaris-table-head[aria-sort="descending"]::after {
+    content: "▼";
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    color: #E5BF03;
+  }

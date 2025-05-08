@@ -38,7 +38,7 @@
 .header-spacer {
   width: 100%;
   height: var(--header-height); /* Should match your header height */
-  z-index: 1000;
+  
 }
 
 /* Make the header fixed at the top */
@@ -47,8 +47,8 @@
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 2;
   height: 91px; /* Your header height */
-  z-index: 1100; /* High z-index to stay on top */
   background: white;
 }
 
