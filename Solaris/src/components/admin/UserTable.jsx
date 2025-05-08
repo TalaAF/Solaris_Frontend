@@ -19,6 +19,7 @@ import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 import TablePagination from '../ui/TablePagination';
 import DepartmentService from "../../services/DepartmentService";
 import RoleService from "../../services/RoleService";
+import AdminUserService from "../../services/AdminUserService";
 import "./UserTable.css";
 
 const UserTable = ({ 
@@ -53,6 +54,7 @@ const UserTable = ({
   });
   const [departments, setDepartments] = useState([]);
   const [roleOptions, setRoleOptions] = useState([]);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
 
   // Update users when initialUsers prop changes
   useEffect(() => {
@@ -147,7 +149,12 @@ const UserTable = ({
     if (!selectedUser) return;
 
     if (onUserUpdate) {
-      onUserUpdate(selectedUser.id, user);
+      // Make sure ID is included in the user object before sending to parent
+      const updatedUserData = {
+        ...user,
+        id: selectedUser.id // Add ID to the user object
+      };
+      onUserUpdate(updatedUserData); // Pass as a single object
     } else {
       // Client-side fallback
       const updatedUsers = users.map(u => {
@@ -191,39 +198,45 @@ const UserTable = ({
   };
 
   const handleToggleStatus = async (user) => {
+    // Determine current status regardless of property name
+    const isCurrentlyActive = user.isActive === true || user.active === true || user.status === 'ACTIVE';
+    
     try {
-      if (user.isActive) {
+      if (isCurrentlyActive) {
         await AdminUserService.deactivateUser(user.id);
       } else {
         await AdminUserService.activateUser(user.id);
       }
       
-      // Create a new array with the updated user
-      const updatedUsers = users.map(u => {
-        if (u.id === user.id) {
-          return { ...u, isActive: !u.isActive };
-        }
-        return u;
-      });
-      
-      // Update local state immediately
-      setUsers(updatedUsers);
-      
-      // Notify parent component
+      // Call the parent's handler
       if (onStatusChange) {
-        onStatusChange(user.id, !user.isActive);
+        onStatusChange(user.id, !isCurrentlyActive);
       }
       
-      // Show success message
-      // If you have a notification system
     } catch (error) {
       console.error("Error toggling user status:", error);
-      // Show error message
     }
   };
 
+  // Add this function to normalize user objects before passing to dialog
+  const normalizeUserForEdit = (user) => {
+    return {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      departmentId: user.departmentId,
+      roleNames: user.roleNames || [],
+      // Normalize active property
+      isActive: user.isActive === undefined ? user.active : user.isActive,
+      profilePicture: user.profilePicture || ""
+    };
+  };
+
+  // Update openEditDialog function
   const openEditDialog = (user) => {
-    setSelectedUser(user);
+    const normalizedUser = normalizeUserForEdit(user);
+    console.log("Opening edit dialog with normalized user:", normalizedUser);
+    setSelectedUser(normalizedUser);
     setIsEditDialogOpen(true);
   };
 
@@ -289,6 +302,41 @@ const UserTable = ({
       });
     }
   };
+
+  const getStatusClass = (user) => {
+    // Check all possible properties and formats
+    if (user.isActive === true || user.active === true || user.status === 'ACTIVE') {
+      return 'status-active';
+    }
+    return 'status-inactive';
+  };
+
+  const getStatusText = (user) => {
+    // Check all possible properties and formats
+    if (user.isActive === true || user.active === true || user.status === 'ACTIVE') {
+      return 'Active';
+    }
+    return 'Inactive';
+  };
+
+  // Add a click handler to open/close dropdown
+  const toggleDropdown = (userId, e) => {
+    e.stopPropagation(); // Prevent clicks from bubbling up
+    setOpenDropdownId(openDropdownId === userId ? null : userId);
+  };
+
+  // Add a click handler to close all dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdownId(null);
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -420,36 +468,56 @@ const UserTable = ({
                           </span>
                         ))}
                       </td>
-                      <td>
-                        <span 
-                          className={`status-badge ${user.isActive ? "active" : "inactive"}`}
-                          onClick={() => handleToggleStatus(user)}
-                        >
-                          {user.isActive ? "Active" : "Inactive"}
-                        </span>
+                      <td className="user-status-cell">
+                        <div className={`status-badge ${getStatusClass(user)}`}>
+                          {getStatusText(user)}
+                        </div>
                       </td>
                       <td>{user.createdAt ? formatTimeAgo(user.createdAt) : 'N/A'}</td>
                       <td className="action-cell">
                         <div className="dropdown">
-                          <button className="dropdown-trigger">
+                          <button className="dropdown-trigger" onClick={(e) => toggleDropdown(user.id, e)}>
                             <MoreHorizontal size={16} />
                           </button>
-                          <div className="dropdown-menu">
-                            <div className="dropdown-header">Actions</div>
-                            <div className="dropdown-divider"></div>
-                            <button className="dropdown-item" onClick={() => openEditDialog(user)}>
-                              <Edit size={14} />
-                              <span>Edit</span>
-                            </button>
-                            <Link to={`/admin/users/${user.id}`} className="dropdown-item">
-                              <span>View Details</span>
-                            </Link>
-                            <div className="dropdown-divider"></div>
-                            <button className="dropdown-item delete" onClick={() => openDeleteDialog(user)}>
-                              <Trash2 size={14} />
-                              <span>Delete</span>
-                            </button>
-                          </div>
+                          {openDropdownId === user.id && (
+                            <div className="dropdown-menu">
+                              <div className="dropdown-header">Actions</div>
+                              <div className="dropdown-divider"></div>
+                              <button className="dropdown-item" onClick={() => openEditDialog(user)}>
+                                <Edit size={14} />
+                                <span>Edit</span>
+                              </button>
+                              <Link to={`/admin/users/${user.id}`} className="dropdown-item">
+                                <span>View Details</span>
+                              </Link>
+                              <div className="dropdown-divider"></div>
+                              <button 
+                                className="dropdown-item" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleStatus(user);
+                                  setOpenDropdownId(null);
+                                }}
+                              >
+                                {user.isActive || user.active ? (
+                                  <>
+                                    <span className="status-icon inactive"></span>
+                                    <span>Deactivate</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="status-icon active"></span>
+                                    <span>Activate</span>
+                                  </>
+                                )}
+                              </button>
+                              <div className="dropdown-divider"></div>
+                              <button className="dropdown-item delete" onClick={() => openDeleteDialog(user)}>
+                                <Trash2 size={14} />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>

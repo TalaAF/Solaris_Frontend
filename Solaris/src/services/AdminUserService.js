@@ -14,12 +14,18 @@ const AdminUserService = {
   
   // Create new user
   createUser: async (userData) => {
-    return apiClient.post('/api/admin/users', userData);
+    // Normalize data before sending to API
+    const normalizedData = normalizeUserData(userData);
+    console.log('Creating user with normalized data:', normalizedData);
+    return apiClient.post('/api/admin/users', normalizedData);
   },
   
   // Update existing user
   updateUser: async (userId, userData) => {
-    return apiClient.put(`/api/admin/users/${userId}`, userData);
+    // Normalize data before sending to API
+    const normalizedData = normalizeUserData(userData);
+    console.log('Updating user with normalized data:', normalizedData);
+    return apiClient.put(`/api/admin/users/${userId}`, normalizedData);
   },
   
   // Delete user
@@ -37,5 +43,28 @@ const AdminUserService = {
     return apiClient.patch(`/api/admin/users/${userId}/deactivate`);
   }
 };
+
+// Helper function to normalize user data before sending to API
+function normalizeUserData(userData) {
+  const normalizedData = { ...userData };
+  
+  // Handle active status field naming - backend expects "isActive" not "active"
+  if (normalizedData.active !== undefined) {
+    normalizedData.isActive = normalizedData.active;
+    delete normalizedData.active;
+  }
+  
+  // Ensure departmentId is a number
+  if (normalizedData.departmentId) {
+    normalizedData.departmentId = parseInt(normalizedData.departmentId, 10);
+  }
+  
+  // Ensure roleNames is an array
+  if (normalizedData.roleNames && !Array.isArray(normalizedData.roleNames)) {
+    normalizedData.roleNames = [normalizedData.roleNames];
+  }
+  
+  return normalizedData;
+}
 
 export default AdminUserService;

@@ -31,6 +31,8 @@ const Users = () => {
         filters
       );
       
+      console.log("User data from API:", response.data.content[0]); // Log first user to see structure
+      
       // Assuming the API returns { content: [...users], totalElements, totalPages }
       setUsers(response.data.content);
       setPagination(prev => ({
@@ -79,6 +81,10 @@ const Users = () => {
     setLoading(true);
     try {
       console.log("Updating user with data:", userData);
+      // Verify ID exists before calling API
+      if (!userData.id) {
+        throw new Error("User ID is missing");
+      }
       await AdminUserService.updateUser(userData.id, userData);
       
       // Refresh the user list to get updated data
@@ -87,7 +93,7 @@ const Users = () => {
       toast.success("User updated successfully");
     } catch (error) {
       console.error("Error updating user:", error.response?.data || error.message);
-      toast.error(err.response?.data?.message || "Failed to update user");
+      toast.error(error.response?.data?.message || "Failed to update user");
     } finally {
       setLoading(false);
     }
