@@ -50,11 +50,12 @@ function App() {
       <NotificationProvider>
         <Router>
           <Routes>
-            {/* Auth routes - outside the main layout */}
+            {/* Auth routes without layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+
             <Route path="/oauth2/success" element={<OAuthHandler />} />
             
             {/* Protected routes - with layout */}
@@ -98,11 +99,26 @@ function App() {
   <Route path="InstructProfilePage" element={<InstructProfilePage />} />  
   {/* Add more nested routes as needed */}  
 </Route>
+            <Route path="/oauth" element={<OAuthHandler />} />
 
 
+            {/* Instructor routes */}
+            <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+            <Route path="/instructor/students" element={<Students />} />
+            <Route path="/InstructorCourse" element={<InstructorCourse />} />
 
-            </Route>
-            
+            {/* Other routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:courseId" element={<CourseView />} />
+            <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/assessments" element={<Assessments />} />
+            <Route path="/collaboration" element={<Collaboration />} />
+            <Route path="/clinical-skills" element={<ClinicalSkills />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/community" element={<Community />} />
+
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
