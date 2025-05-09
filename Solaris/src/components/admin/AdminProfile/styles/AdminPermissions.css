@@ -1,0 +1,26 @@
+.admin-permissions-card {
+    padding: 1.5rem;
+  }
+  
+  .permissions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .permissions-table th,
+  .permissions-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .permissions-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .permissions-table td {
+    color: #1f2937;
+  }

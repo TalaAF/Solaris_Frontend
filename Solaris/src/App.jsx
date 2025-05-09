@@ -33,6 +33,8 @@ import CertificateManagement from './components/pages/Admin/CertificateManagemen
 import CourseManagement from './components/pages/Admin/CourseManagement';
 import AssessmentManagement from './components/pages/Admin/AssessmentManagement';
 import SecurityManage from './components/pages/Admin/Security';
+import AdminProfile from './components/admin/AdminProfile/AdminProfile';
+
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
@@ -118,6 +120,8 @@ function App() {
                 <Route path="/admin/assessments" element={<AssessmentManagement />} />
                 <Route path="/admin/certificates" element={<CertificateManagement />} />
                 <Route path="/admin/security" element={<SecurityManage />} />
+                <Route path="/admin/profile" element={<AdminProfile />} />
+                {/* Add more admin routes as you implement them */}
               </Route>
               
               {/* Instructor routes - protected by instructor role */}

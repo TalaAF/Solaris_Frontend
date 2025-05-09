@@ -1,0 +1,50 @@
+.admin-basic-info-card {
+    padding: 1.5rem;
+  }
+  
+  .section-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+  
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .label {
+    font-weight: 500;
+    color: #4b5563;
+  }
+  
+  .value {
+    color: #1f2937;
+  }
+  
+  .edit-profile-container {
+    margin-top: 1.5rem;
+    text-align: right;
+  }
+  
+  .edit-profile-container button {
+    transition: all 0.2s ease;
+  }
+  
+  .edit-profile-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
+  }
