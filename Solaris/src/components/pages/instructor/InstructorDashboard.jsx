@@ -1,3 +1,5 @@
+// Remove any other layout or sidebar imports
+import Layout from "../../../components/layout/Layout";
 import React, { useEffect, useRef, useState } from "react";
 import { 
   BookOpen, 
@@ -17,7 +19,6 @@ import {
   Loader,
   X
 } from "lucide-react";
-import InstructorLayout from "../../layout/InstructorLayout";
 import { Chart, LinearScale, CategoryScale, BarController, BarElement, PieController, ArcElement, Legend, Title, Tooltip, LineElement, PointElement, LineController } from "chart.js";
 import "./InstructorDashboard.css";
 
@@ -500,17 +501,17 @@ const InstructorDashboard = () => {
 
   if (isLoading) {
     return (
-      <InstructorLayout>
+      <Layout>
         <div className="loading-container">
           <Loader size={40} className="loading-spinner" />
           <p>Loading your dashboard...</p>
         </div>
-      </InstructorLayout>
+      </Layout>
     );
   }
 
   return (
-    <InstructorLayout>
+    <Layout>
       <div className="dashboard-wrapper">
         {/* Dashboard Header */}
         <div className="dashboard-header">
@@ -836,7 +837,7 @@ const InstructorDashboard = () => {
           </div>
         </div>
       </div>
-    </InstructorLayout>
+    </Layout>
   );
 };
 

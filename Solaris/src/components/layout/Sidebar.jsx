@@ -18,13 +18,13 @@ const Sidebar = ({ isOpen }) => {
   const navigationItems = [
     {
       name: "Dashboard",
-      path: "/dashboard",
+      path: "/pages/instructor/instructorDashboard",
       icon: <Home size={20} />,
       iconClass: "icon-home",
     },
     {
-      name: "Courses",
-      path: "/courses",
+      name: "Instructor Courses",
+      path: "/InstructorCourse",
       icon: <Book size={20} />,
       iconClass: "icon-book",
     },

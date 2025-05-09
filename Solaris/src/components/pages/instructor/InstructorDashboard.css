@@ -15,9 +15,18 @@
 
 /* Dashboard Wrapper */
 .dashboard-wrapper {
-  padding: 1rem;
+  padding-top: 80px; /* Adjust this value based on your header height */
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f9fafb;
   max-width: 1600px;
   margin: 0 auto;
+}
+
+.dashboard-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 /* Loading State */
@@ -45,25 +54,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
+  padding: 0 2rem;
+}
+
+.header-welcome {
+  margin-bottom: 1.5rem;
 }
 
 .header-welcome h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-  color: var(--text-primary);
-  background: linear-gradient(90deg, #e6b400, #ffce39);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
 }
 
 .header-welcome p {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+  color: #6b7280;
+  font-size: 1rem;
 }
 
 .dashboard-actions {
@@ -409,7 +419,7 @@ select::-ms-expand {
 
 /* Dashboard Sections */
 .dashboard-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .dashboard-grid-top {
