@@ -21,15 +21,12 @@ const DepartmentService = {
       specialtyArea: departmentData.specialtyArea || "",
       contactInformation: departmentData.contactInformation || "",
       // Always use isActive to match Java entity field name
-      isActive: departmentData.isActive !== undefined ? 
+      active: departmentData.isActive !== undefined ? 
         departmentData.isActive : 
         (departmentData.active !== undefined ? departmentData.active : true)
     };
     
-    // IMPORTANT: Remove any "active" property to prevent it from overriding isActive
-    if ('active' in cleanData) {
-      delete cleanData.active;
-    }
+    
     
     // Only include headId if it exists and is not empty
     if (departmentData.headId) {

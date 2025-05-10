@@ -9,6 +9,9 @@ class AuthService {
       if (response.data.token) {
         localStorage.setItem("auth_token", response.data.token);
         // Set token in axios default headers
+        if (response.data.refreshToken) {
+        localStorage.setItem("refresh_token", response.data.refreshToken);
+      }
         api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
       }
       
@@ -26,6 +29,10 @@ class AuthService {
       
       if (response.data.token) {
         localStorage.setItem("auth_token", response.data.token);
+
+         if (response.data.refreshToken) {
+        localStorage.setItem("refresh_token", response.data.refreshToken);
+      }
         // Set token in axios default headers
         api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
       }
@@ -40,19 +47,59 @@ class AuthService {
   async logout() {
     try {
       const token = localStorage.getItem("auth_token");
-      if (token) {
-        // Set token in header for this request
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        await api.post("/api/auth/logout");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Always clear local storage and auth header
-      localStorage.removeItem("auth_token");
-      delete api.defaults.headers.common["Authorization"];
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (token && refreshToken) {
+      // Set token in header for this request
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      // Send the refresh token in the request body
+      await api.post("/api/auth/logout", { refreshToken });
+    } else {
+      console.warn("Missing tokens for server-side logout");
     }
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    // Always clear local storage and auth header
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("refresh_token");
+    delete api.defaults.headers.common["Authorization"];
   }
+}
+
+
+// Add a method to refresh the access token
+async refreshToken() {
+  try {
+    const refreshToken = localStorage.getItem("refresh_token");
+    
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+    
+    const response = await api.post("/api/auth/refresh-token", { refreshToken });
+    
+    if (response.data.token) {
+      localStorage.setItem("auth_token", response.data.token);
+      
+      // Update the refresh token if a new one is provided
+      if (response.data.refreshToken) {
+        localStorage.setItem("refresh_token", response.data.refreshToken);
+      }
+      
+      // Update the Authorization header
+      api.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
+    }
+    
+    return response;
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    
+    // If refresh fails, log the user out
+    this.logout();
+    throw error;
+  }
+}
   
   // Get current user info
   async getCurrentUser() {

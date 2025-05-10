@@ -55,11 +55,19 @@ const UserTable = ({
   const [departments, setDepartments] = useState([]);
   const [roleOptions, setRoleOptions] = useState([]);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(pagination.page);
+  const [pageSize, setPageSize] = useState(pagination.size);
 
   // Update users when initialUsers prop changes
   useEffect(() => {
     setUsers(initialUsers);
   }, [initialUsers]);
+
+  // Update pagination state when props change
+  useEffect(() => {
+    setCurrentPage(pagination.page);
+    setPageSize(pagination.size);
+  }, [pagination.page, pagination.size]);
 
   // Load departments and roles for filters
   useEffect(() => {
@@ -76,12 +84,31 @@ const UserTable = ({
       });
   }, []);
 
-  // Client-side filtering for search input
-  const filteredUsers = users.filter((user) => 
-    user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.departmentName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Client-side filtering for all criteria
+  const filteredUsers = users.filter((user) => {
+    // Search query filtering
+    const matchesSearch = searchQuery === "" || 
+      user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.departmentName?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Department filtering
+    const matchesDepartment = filters.department === "" || 
+      user.departmentId?.toString() === filters.department;
+    
+    // Role filtering
+    const matchesRole = filters.role === "" || 
+      (user.roleNames && 
+       user.roleNames.some(role => role.toLowerCase() === filters.role.toLowerCase()));
+    
+    // Status filtering
+    const isActive = user.isActive === true || user.active === true || user.status === 'ACTIVE';
+    const matchesStatus = filters.status === "" || 
+      (filters.status === "true" && isActive) || 
+      (filters.status === "false" && !isActive);
+    
+    return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
+  });
 
   const handleAddUser = (user) => {
     if (onUserAdd) {
@@ -288,16 +315,39 @@ const UserTable = ({
     }
   };
 
+  // Update a single filter value
+  const handleFilterChange = (field, value) => {
+    const updatedFilters = { ...filters, [field]: value };
+    setFilters(updatedFilters);
+    
+    // Reset to first page when filtering
+    setCurrentPage(0);
+    
+    // Apply client-side filtering immediately
+    // For server-side filtering, wait for the Apply button click
+    if (onFilterChange && !document.querySelector('.apply-filters')) {
+      // If there's no Apply button, apply filters immediately
+      onFilterChange({
+        ...updatedFilters,
+        search: searchQuery
+      });
+    }
+  };
+
   // Reset filters
   const resetFilters = () => {
-    setFilters({
+    const emptyFilters = {
       role: "",
       status: "",
       department: ""
-    });
+    };
+    
+    setFilters(emptyFilters);
+    setCurrentPage(0); // Reset to first page
     
     if (onFilterChange) {
       onFilterChange({
+        ...emptyFilters,
         search: searchQuery
       });
     }
@@ -382,11 +432,11 @@ const UserTable = ({
               <label>Department</label>
               <select 
                 value={filters.department}
-                onChange={(e) => setFilters({...filters, department: e.target.value})}
+                onChange={(e) => handleFilterChange('department', e.target.value)}
               >
                 <option value="">All Departments</option>
                 {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
+                  <option key={dept.id} value={dept.id.toString()}>
                     {dept.name}
                   </option>
                 ))}
@@ -396,11 +446,11 @@ const UserTable = ({
               <label>Role</label>
               <select 
                 value={filters.role}
-                onChange={(e) => setFilters({...filters, role: e.target.value})}
+                onChange={(e) => handleFilterChange('role', e.target.value)}
               >
                 <option value="">All Roles</option>
                 {roleOptions.map((role) => (
-                  <option key={role.name} value={role.name}>
+                  <option key={role.name} value={role.name.toLowerCase()}>
                     {role.displayName || role.name}
                   </option>
                 ))}
@@ -410,7 +460,7 @@ const UserTable = ({
               <label>Status</label>
               <select 
                 value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
               >
                 <option value="">All Status</option>
                 <option value="true">Active</option>
@@ -418,7 +468,9 @@ const UserTable = ({
               </select>
             </div>
             <div className="filter-actions">
-              <button className="apply-filters" onClick={applyFilters}>Apply Filters</button>
+              {onFilterChange && (
+                <button className="apply-filters" onClick={applyFilters}>Apply Filters</button>
+              )}
               <button className="reset-filters" onClick={resetFilters}>Reset</button>
             </div>
           </div>
@@ -450,7 +502,10 @@ const UserTable = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((user) => (
+                  // Apply pagination to filteredUsers
+                  filteredUsers
+                    .slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+                    .map((user) => (
                     <tr key={user.id}>
                       <td>
                         <div className="user-info">
@@ -491,25 +546,8 @@ const UserTable = ({
                                 <span>View Details</span>
                               </Link>
                               <div className="dropdown-divider"></div>
-                              <button 
-                                className="dropdown-item" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleStatus(user);
-                                  setOpenDropdownId(null);
-                                }}
-                              >
-                                {user.isActive || user.active ? (
-                                  <>
-                                    <span className="status-icon inactive"></span>
-                                    <span>Deactivate</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span className="status-icon active"></span>
-                                    <span>Activate</span>
-                                  </>
-                                )}
+                              <button className="dropdown-item" onClick={() => handleToggleStatus(user)}>
+                                <span>{getStatusText(user) === 'Active' ? 'Deactivate' : 'Activate'}</span>
                               </button>
                               <div className="dropdown-divider"></div>
                               <button className="dropdown-item delete" onClick={() => openDeleteDialog(user)}>
@@ -531,12 +569,25 @@ const UserTable = ({
         {/* Pagination controls */}
         {!loading && (
           <TablePagination
-            totalItems={pagination.totalElements}
-            currentPage={pagination.page}
-            pageSize={pagination.size}
+            totalItems={onFilterChange ? pagination.totalElements : filteredUsers.length}
+            currentPage={currentPage}
+            pageSize={pageSize}
             itemName="users"
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
+            onPageChange={(newPage) => {
+              setCurrentPage(newPage);
+              // If server-side pagination is enabled, call the parent handler
+              if (onPageChange) {
+                onPageChange(newPage);
+              }
+            }}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(0); // Reset to first page when changing page size
+              // If server-side pagination is enabled, call the parent handler
+              if (onPageSizeChange) {
+                onPageSizeChange(newSize);
+              }
+            }}
           />
         )}
       </div>

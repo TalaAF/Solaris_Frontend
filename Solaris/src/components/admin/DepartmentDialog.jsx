@@ -10,28 +10,34 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
     description: "",
     code: "",
     specialtyArea: "",
-    headOfDepartmentId: "",
-    headOfDepartment: "",  // Add this for backward compatibility
+    headId: "", // Add this for backward compatibility
     contactInformation: "",
-    isActive: true,
+    active: true,
   };
 
   const [formData, setFormData] = useState(initialFormData);
-  const [users, setUsers] = useState([]);
+  const [instructors, setInstructors] = useState([]); 
   const [errors, setErrors] = useState({}); // For form validation errors
-
+  const [loading, setLoading] = useState(false);
   // Reset form when dialog opens with new data
   useEffect(() => {
     if (isOpen) {
       if (department) {
         // For editing, preserve the ID and use existing data
-        setFormData({
-          ...initialFormData,
-          ...department,
-          // Make sure to maintain both properties
-          headOfDepartmentId: department.headOfDepartmentId || "",
-          headOfDepartment: department.headOfDepartment || ""
-        });
+         const mappedData = {
+          id: department.id,
+          name: department.name || "",
+          description: department.description || "",
+          code: department.code || "",
+          specialtyArea: department.specialtyArea || "",
+          contactInformation: department.contactInformation || "",
+          active: department.active || department.isActive || true,
+          // Handle head data
+          headId: department.head?.id || department.headId || "", 
+        };
+
+        setFormData(mappedData);
+        console.log("Form initialized with:", mappedData);
       } else {
         // For new department, use clean initial data
         setFormData(initialFormData);
@@ -44,23 +50,29 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
   // Load users when the dialog opens
   useEffect(() => {
     if (isOpen) {
-      const loadUsers = async () => {
+      const loadInstructors = async () => {
         try {
-          // Add role filter to only get instructors
-          const response = await AdminUserService.getUsers(0, 100, { 
-            active: true,
-            role: "INSTRUCTOR"  // Add this filter for instructor role
+          setLoading(true);
+          // Only get active instructors
+          const response = await AdminUserService.getUsers({
+            role: "INSTRUCTOR",
+            active: true
           });
-          setUsers(response.data.content || []);
-          console.log("Loaded instructors for department head:", response.data.content);
+          
+          const instructorsList = response.data.content || response.data || [];
+          setInstructors(instructorsList);
+          console.log("Loaded instructors for department head:", instructorsList);
         } catch (error) {
           console.error("Failed to load instructors:", error);
+        } finally {
+          setLoading(false);
         }
       };
       
-      loadUsers();
+      loadInstructors();
     }
   }, [isOpen]);
+
 
   // In the DepartmentDialog component, add validation function
   const validateCode = (code) => {
@@ -113,22 +125,20 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
     }
     
     // Create a department object that matches your backend entity structure
-    const departmentDTO = {
+     const departmentDTO = {
       ...(formData.id && { id: formData.id }),
       name: formData.name.trim(),
       description: formData.description || "",
-      code: formData.code || formData.name.substring(0, 3).toUpperCase(),
+      code: formData.code.toUpperCase(), // Ensure code is uppercase
       specialtyArea: formData.specialtyArea || "",
       contactInformation: formData.contactInformation || "",
-      // Use isActive not active
-      isActive: true
+      active: formData.active // Use active to be consistent with frontend components
     };
     
-    // Handle head of department properly
-    if (formData.headOfDepartmentId && formData.headOfDepartmentId !== "") {
-      departmentDTO.headId = parseInt(formData.headOfDepartmentId, 10);
+    // Handle head of department properly using headId
+    if (formData.headId && formData.headId !== "") {
+      departmentDTO.headId = parseInt(formData.headId, 10);
     }
-    
     console.log('Submitting department with data:', departmentDTO);
     onSubmit(departmentDTO);
   };
@@ -196,22 +206,24 @@ const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
           />
         </div>
         
-        <div className="form-group">
-          <label htmlFor="headOfDepartment">Head of Department</label>
+       <div className="form-group">
+          <label htmlFor="headId">Head of Department</label>
           <select
-            id="headOfDepartment"
-            name="headOfDepartmentId"
-            value={formData.headOfDepartmentId || ""}
+            id="headId"
+            name="headId"
+            value={formData.headId || ""}
             onChange={handleChange}
             className="form-select"
+            disabled={loading}
           >
             <option value="">Select Head of Department</option>
-            {users.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.fullName} ({user.email})
+            {instructors.map(instructor => (
+              <option key={instructor.id} value={instructor.id}>
+                {instructor.fullName} ({instructor.email})
               </option>
             ))}
           </select>
+          {loading && <div className="helper-text">Loading instructors...</div>}
         </div>
         
         <div className="form-group">

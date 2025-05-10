@@ -143,7 +143,7 @@ const DepartmentTable = ({
                     </td>
                     <td>{department.code}</td>
                     <td>{department.specialtyArea}</td>
-                    <td>{department.headOfDepartment}</td>
+                    <td>{department.head ? department.head.fullName : '-'}</td>
                     <td className="user-count-cell">
                       {/* Handle all possible property names for user count */}
                       {department.userCount !== undefined ? 

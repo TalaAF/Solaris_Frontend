@@ -90,8 +90,7 @@ const Register = () => {
         fullName: `${formData.firstName} ${formData.lastName}`, // Combine names
         email: formData.email,
         password: formData.password,
-        // Send role as a single string
-        role: formData.role
+        roleNames: [formData.role.toUpperCase()] 
       };
       
       console.log("Registering with data:", userData);

@@ -262,14 +262,7 @@ const Sidebar = ({ isOpen }) => {
         <span className="nav-label">Logout</span>
       </button>
     </div>
-      {/* Show help section only if not admin and sidebar is open */}
-      {isOpen && !isAdmin && (
-        <div className="help-section">
-          <h3>Need Help?</h3>
-          <p>Access our support center or contact technical support.</p>
-          <button className="support-button">Get Support →</button>
-        </div>
-      )}
+  
     </div>
   );
 };
