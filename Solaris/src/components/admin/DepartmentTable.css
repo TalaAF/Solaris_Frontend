@@ -43,6 +43,8 @@
 
 .search-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-icon {
@@ -271,6 +273,94 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Add filter button styles */
+.filter-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 4px;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+.filter-button:hover {
+  background-color: #f1f5f9;
+  color: var(--primary-color, #E5BF03);
+}
+
+/* Add filter panel styles if not already defined */
+.filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.filter-group label {
+  font-size: 0.825rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #64748b;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  font-size: 0.875rem;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.apply-filters,
+.reset-filters {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-filters {
+  background-color: var(--primary-color, #E5BF03);
+  color: white;
+  border: none;
+}
+
+.apply-filters:hover {
+  background-color: var(--primary-hover-color, #d1ae02);
+}
+
+.reset-filters {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.reset-filters:hover {
+  background-color: #f8fafc;
 }
 
 

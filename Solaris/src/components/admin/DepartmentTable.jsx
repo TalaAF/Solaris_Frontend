@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Building2, Edit, MoreHorizontal, Plus, Search } from "lucide-react";
+import { Building2, Edit, MoreHorizontal, Plus, Search, Filter } from "lucide-react";
 import DepartmentDialog from "./DepartmentDialog";
 import TablePagination from '../ui/TablePagination';
 import "./DepartmentTable.css";
@@ -9,7 +9,7 @@ import AdminUserService from "../../services/AdminUserService";
 
 const DepartmentTable = ({ 
   departments: initialDepartments, 
-  loading = false, // Add loading prop
+  loading = false,
   onDepartmentAdd, 
   onDepartmentUpdate, 
   onDepartmentToggleStatus,
@@ -185,7 +185,7 @@ const DepartmentTable = ({
       <div className="department-table-header">
         <h2>Departments</h2>
         <div className="department-table-actions">
-          {/* Add search box */}
+          {/* Add search box with filter button */}
           <div className="search-container">
             <Search size={20} className="search-icon" />
             <input
@@ -194,7 +194,15 @@ const DepartmentTable = ({
               className="search-input"
               value={searchQuery}
               onChange={handleSearchChange}
+              onKeyUp={(e) => e.key === 'Enter' && applyFilters()}
             />
+            <button 
+              className="filter-button"
+              onClick={() => setShowFilters(!showFilters)}
+              aria-label="Toggle filters"
+            >
+              <Filter size={18} />
+            </button>
           </div>
           
           <button className="add-button" onClick={handleOpenAddDialog}>
@@ -204,7 +212,7 @@ const DepartmentTable = ({
         </div>
       </div>
       
-       {/* Filter Panel */}
+      {/* Filter Panel */}
       {showFilters && (
         <div className="filter-panel">
           <div className="filter-group">
