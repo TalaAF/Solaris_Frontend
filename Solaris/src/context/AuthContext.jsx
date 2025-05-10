@@ -169,10 +169,6 @@ export const AuthProvider = ({ children }) => {
       return currentUser.roles[0]; // Fallback
     }
     
-    // Check for direct role property
-    if (currentUser.role) {
-      return currentUser.role;
-    }
     
     return 'STUDENT'; // Default fallback
   };

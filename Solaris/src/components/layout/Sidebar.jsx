@@ -21,13 +21,14 @@ import {
   Presentation,
   Clipboard,
   GraduationCap,
+  LogOut,
 } from "lucide-react";
 import "./Sidebar.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = ({ isOpen }) => {
   // Get user role from auth context
-  const { currentUser } = useAuth();
+  const { currentUser,logout  } = useAuth();
   const getUserRole = () => {
     if (!currentUser) return "student";
 
@@ -45,6 +46,15 @@ const Sidebar = ({ isOpen }) => {
     return "student"; // Default fallback
   };
 
+   const handleLogout = async () => {
+    try {
+      await logout();
+      // Navigate to login page or homepage after logout
+      // If you're using useNavigate from react-router-dom you would add that here
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
   const userRole = getUserRole();
 
   // Add debug logging to verify the role detection
@@ -241,6 +251,17 @@ const Sidebar = ({ isOpen }) => {
         ))}
       </List>
 
+ <div className="logout-container">
+      <button 
+        className="nav-item logout-button" 
+        onClick={handleLogout}
+      >
+        <div className="nav-icon icon-logout">
+          <LogOut size={20} />
+        </div>
+        <span className="nav-label">Logout</span>
+      </button>
+    </div>
       {/* Show help section only if not admin and sidebar is open */}
       {isOpen && !isAdmin && (
         <div className="help-section">
