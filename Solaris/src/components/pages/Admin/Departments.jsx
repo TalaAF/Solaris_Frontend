@@ -8,7 +8,11 @@ const Departments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeOnly, setActiveOnly] = useState(false);
+  const [filters, setFilters] = useState({
+    search: "",
+    specialtyArea: "",
+    status: ""
+  });
   // Add pagination state
   const [pagination, setPagination] = useState({
     page: 0,
@@ -24,8 +28,27 @@ const Departments = () => {
   const fetchDepartments = async (page = 0, size = 10) => {
     setLoading(true);
     try {
+      // Build the params object for API request
+      const params = {
+        page,
+        size
+      };
+      
+      // Add filters if they exist
+      if (filters.search) {
+        params.keyword = filters.search;
+      }
+      
+      if (filters.status === "true" || filters.status === "false") {
+        params.activeOnly = filters.status === "true";
+      }
+      
+      if (filters.specialtyArea) {
+        params.specialtyArea = filters.specialtyArea;
+      }
+      
       // FIX: Use the method that returns user counts
-      const response = await AdminDepartmentService.getPaginatedDepartmentsWithCounts(activeOnly, page, size);
+      const response = await AdminDepartmentService.getPaginatedDepartmentsWithCounts(params);
       
       // Debug the response structure
       console.log("Department API response with counts:", response.data);
@@ -136,8 +159,10 @@ const Departments = () => {
     fetchDepartments(0, newSize); // Reset to first page when size changes
   };
 
+  // Updated filter handler
   const handleFilterChange = (newFilters) => {
-    setActiveOnly(newFilters.activeOnly === true);
+    console.log("Filter change:", newFilters);
+    setFilters(newFilters);
     fetchDepartments(0, pagination.size); // Reset to first page when filters change
   };
 

@@ -84,17 +84,13 @@ const DepartmentService = {
   },
   
   // Enhanced methods for pagination and search
-  getPaginatedDepartments: async (activeOnly = false, page = 0, size = 10) => {
-    return apiClient.get('/api/departments/pageable', { 
-      params: { activeOnly, page, size } 
-    });
-  },
+  getPaginatedDepartments: async (params = {}) => {
+  return apiClient.get('/api/departments/pageable', { params });
+},
   
-  searchDepartments: async (keyword, activeOnly = false, page = 0, size = 10) => {
-    return apiClient.get('/api/departments/search', { 
-      params: { keyword, activeOnly, page, size } 
-    });
-  },
+  searchDepartments: async (params = {}) => {
+  return apiClient.get('/api/departments/search', { params });
+},
   
   // Direct status toggle (more efficient than full update)
   toggleDepartmentStatus: async (id, active) => {
@@ -131,11 +127,9 @@ const DepartmentService = {
   },
   
   // Get departments with user counts (paginated)
-  getPaginatedDepartmentsWithCounts: async (activeOnly = false, page = 0, size = 10) => {
-    return apiClient.get('/api/departments/pageable/with-user-counts', {
-      params: { activeOnly, page, size }
-    });
-  }
+  getPaginatedDepartmentsWithCounts: async (params = {}) => {
+  return apiClient.get('/api/departments/pageable/with-user-counts', { params });
+}
 };
 
 export default DepartmentService;

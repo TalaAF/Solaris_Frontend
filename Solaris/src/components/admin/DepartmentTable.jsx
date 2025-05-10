@@ -5,6 +5,7 @@ import TablePagination from '../ui/TablePagination';
 import "./DepartmentTable.css";
 import DepartmentService from "../../services/DepartmentService";
 import { toast } from "../../components/ui/toaster";
+import AdminUserService from "../../services/AdminUserService";
 
 const DepartmentTable = ({ 
   departments: initialDepartments, 
@@ -14,26 +15,69 @@ const DepartmentTable = ({
   onDepartmentToggleStatus,
   pagination,
   onPageChange,
-  onPageSizeChange 
+  onPageSizeChange,
+  onFilterChange
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [departments, setDepartments] = useState(initialDepartments || []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("Add Department");
+   const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    specialtyArea: "",
+    status: ""
+  });
+  const [specialtyAreas, setSpecialtyAreas] = useState([]);
+  const [instructors, setInstructors] = useState([]);
 
   // Update local state when props change
   useEffect(() => {
     setDepartments(initialDepartments || []);
   }, [initialDepartments]);
-  
+
+   useEffect(() => {
+    // Extract unique specialty areas from departments
+    if (initialDepartments && initialDepartments.length > 0) {
+      const areas = [...new Set(initialDepartments
+        .filter(dept => dept.specialtyArea)
+        .map(dept => dept.specialtyArea))]
+        .sort();
+      setSpecialtyAreas(areas);
+    }
+       // Load instructors for head filter
+    const fetchInstructors = async () => {
+      try {
+        const response = await AdminUserService.getUsers({ role: 'INSTRUCTOR' });
+        setInstructors(response.data.content || response.data || []);
+      } catch (error) {
+        console.error("Error fetching instructors:", error);
+      }
+    };
+    
+    fetchInstructors();
+  }, [initialDepartments]);
   // Filter departments based on search query
-  const filteredDepartments = searchQuery 
-    ? departments.filter(dept => 
-        dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dept.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dept.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+   const filteredDepartments = searchQuery || filters.specialtyArea || filters.status !== "" 
+    ? departments.filter(dept => {
+        // Search filter
+        const matchesSearch = searchQuery === "" ||
+          dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          dept.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          dept.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        // Specialty area filter
+        const matchesSpecialty = filters.specialtyArea === "" ||
+          dept.specialtyArea === filters.specialtyArea;
+        
+        // Status filter
+        const isActive = dept.active || dept.isActive;
+        const matchesStatus = filters.status === "" ||
+          (filters.status === "true" && isActive) ||
+          (filters.status === "false" && !isActive);
+        
+        return matchesSearch && matchesSpecialty && matchesStatus;
+      })
     : departments;
 
   const handleOpenAddDialog = () => {
@@ -77,9 +121,63 @@ const DepartmentTable = ({
     setIsDialogOpen(false);
   };
 
-  // Handle search input change
+   // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    
+    // If backend search is enabled, update filters after a delay
+    if (onFilterChange) {
+      const timer = setTimeout(() => {
+        onFilterChange({
+          ...filters,
+          search: e.target.value
+        });
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  };
+
+  // Apply filters to backend
+  const applyFilters = () => {
+    if (onFilterChange) {
+      onFilterChange({
+        ...filters,
+        search: searchQuery
+      });
+    }
+  };
+
+  // Update a single filter value
+  const handleFilterChange = (field, value) => {
+    const updatedFilters = { ...filters, [field]: value };
+    setFilters(updatedFilters);
+    
+    // For server-side filtering, wait for the Apply button click
+    if (onFilterChange && !document.querySelector('.apply-filters')) {
+      // If there's no Apply button, apply filters immediately
+      onFilterChange({
+        ...updatedFilters,
+        search: searchQuery
+      });
+    }
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    const emptyFilters = {
+      specialtyArea: "",
+      status: ""
+    };
+    
+    setFilters(emptyFilters);
+    
+    if (onFilterChange) {
+      onFilterChange({
+        ...emptyFilters,
+        search: searchQuery
+      });
+    }
   };
 
   return (
@@ -106,6 +204,43 @@ const DepartmentTable = ({
         </div>
       </div>
       
+       {/* Filter Panel */}
+      {showFilters && (
+        <div className="filter-panel">
+          <div className="filter-group">
+            <label>Specialty Area</label>
+            <select 
+              value={filters.specialtyArea}
+              onChange={(e) => handleFilterChange('specialtyArea', e.target.value)}
+            >
+              <option value="">All Specialty Areas</option>
+              {specialtyAreas.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="filter-group">
+            <label>Status</label>
+            <select 
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+          <div className="filter-actions">
+            {onFilterChange && (
+              <button className="apply-filters" onClick={applyFilters}>Apply Filters</button>
+            )}
+            <button className="reset-filters" onClick={resetFilters}>Reset</button>
+          </div>
+        </div>
+      )}
+
       <div className="department-table-wrapper">
         {loading ? (
           <div className="loading-container">
@@ -146,11 +281,7 @@ const DepartmentTable = ({
                     <td>{department.head ? department.head.fullName : '-'}</td>
                     <td className="user-count-cell">
                       {/* Handle all possible property names for user count */}
-                      {department.userCount !== undefined ? 
-                        department.userCount : 
-                        (department.users?.length !== undefined ? 
-                          department.users.length : 
-                          0)
+                      {department.userCount !== undefined ? department.userCount : 0
                       }
                     </td>
                     <td className="status-cell">
@@ -191,8 +322,8 @@ const DepartmentTable = ({
               ) : (
                 <tr>
                   <td colSpan="7" className="empty-state">
-                    {searchQuery 
-                      ? "No departments match your search" 
+                    {searchQuery || filters.specialtyArea || filters.status !== ""
+                      ? "No departments match your filters" 
                       : "No departments found"}
                   </td>
                 </tr>
