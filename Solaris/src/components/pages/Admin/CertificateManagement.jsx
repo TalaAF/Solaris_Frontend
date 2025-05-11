@@ -8,31 +8,67 @@ const CertificateManagement = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 10,
+    totalElements: 0,
+    totalPages: 0
+  });
+  
+  // Function to fetch certificate templates with pagination
+  const fetchCertificateTemplates = async (page = 0, size = 10, filters = {}) => {
+    try {
+      setLoading(true);
+      const response = await CertificateService.getAllCertificateTemplates(page, size, filters);
+      
+      // Check if we got paginated data or array
+      if (response.pagination) {
+        setCertificates(Array.isArray(response.data) ? response.data : []);
+        setPagination({
+          page: response.pagination.number,
+          size: response.pagination.size,
+          totalElements: response.pagination.totalElements,
+          totalPages: response.pagination.totalPages
+        });
+      } else {
+        // Handle simple array response
+        setCertificates(Array.isArray(response.data) ? response.data : []);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching certificate templates:", error);
+      setError("Failed to load certificate templates");
+      setLoading(false);
+      toast.error("Failed to load certificate templates");
+    }
+  };
 
   useEffect(() => {
-    const fetchCertificateTemplates = async () => {
-      try {
-        setLoading(true);
-        const response = await CertificateService.getAllCertificateTemplates();
-        // Make sure we're getting an array of certificates
-        setCertificates(Array.isArray(response.data) ? response.data : []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching certificate templates:", error);
-        setError("Failed to load certificate templates");
-        setLoading(false);
-        toast.error("Failed to load certificate templates");
-      }
-    };
-
     fetchCertificateTemplates();
   }, []);
 
+  const handlePageChange = (newPage) => {
+    fetchCertificateTemplates(newPage, pagination.size);
+  };
+
   const handleCertificateAdd = async (certificateData) => {
     try {
-      const response = await CertificateService.createCertificateTemplate(certificateData);
+      // Prepare data for the backend according to expected structure
+      const templateData = {
+        name: certificateData.name || "New Certificate Template",
+      description: certificateData.description || "",
+      semesterName: certificateData.semesterName || null,
+      // Map 'template' field to 'templateContent' as expected by backend
+      templateContent: certificateData.template || "",
+      isActive: true
+      };
+      
+      const response = await CertificateService.createCertificateTemplate(templateData);
       setCertificates([...certificates, response.data]);
       toast.success("Certificate template added successfully");
+      // Refresh the list to ensure we have the latest data
+      fetchCertificateTemplates(pagination.page, pagination.size);
     } catch (error) {
       console.error("Error adding certificate template:", error);
       toast.error("Failed to add certificate template");
@@ -41,10 +77,23 @@ const CertificateManagement = () => {
 
   const handleCertificateUpdate = async (certificateData) => {
     try {
-      const response = await CertificateService.updateCertificateTemplate(certificateData.id, certificateData);
+      // Prepare data for the backend according to expected structure
+      const templateData = {
+            name: certificateData.name,
+      description: certificateData.description || "",
+      semesterName: certificateData.semesterName || null,
+      // Map 'template' field to 'templateContent' as expected by backend
+      templateContent: certificateData.template || "",
+      isActive: certificateData.isActive !== undefined ? certificateData.isActive : true
+      };
+      
+      const response = await CertificateService.updateCertificateTemplate(certificateData.id, templateData);
+      
+      // Update the certificates state with the updated certificate
       const updatedCertificates = certificates.map(item => 
         item.id === certificateData.id ? response.data : item
       );
+      
       setCertificates(updatedCertificates);
       toast.success("Certificate template updated successfully");
     } catch (error) {
@@ -56,13 +105,24 @@ const CertificateManagement = () => {
   const handleCertificateDelete = async (certificateId) => {
     try {
       await CertificateService.deleteCertificateTemplate(certificateId);
+      
+      // Remove the deleted certificate from the state
       const updatedCertificates = certificates.filter(item => item.id !== certificateId);
       setCertificates(updatedCertificates);
+      
       toast.success("Certificate template deleted successfully");
     } catch (error) {
       console.error("Error deleting certificate template:", error);
       toast.error("Failed to delete certificate template");
     }
+  };
+
+  const handleSearch = (searchText) => {
+    fetchCertificateTemplates(0, pagination.size, { search: searchText });
+  };
+
+  const handleFilterChange = (filters) => {
+    fetchCertificateTemplates(0, pagination.size, filters);
   };
 
   if (loading) {
@@ -86,6 +146,10 @@ const CertificateManagement = () => {
           onCertificateAdd={handleCertificateAdd} 
           onCertificateUpdate={handleCertificateUpdate}
           onCertificateDelete={handleCertificateDelete}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onSearch={handleSearch}
+          onFilterChange={handleFilterChange}
         />
       </div>
     </>

@@ -1,7 +1,7 @@
 import api from "./api";
 import { formatDate } from "../utils/dateUtils";
 
-const USE_MOCK = true; // Set to true until backend endpoint is ready
+const USE_MOCK = false; // Set to false to use the real backend API
 
 // Mock data for fallback/testing
 const mockCertificates = {
@@ -43,10 +43,7 @@ const mockCertificateTemplates = {
     id: 1,
     name: "Standard Certificate",
     description: "Basic completion certificate template",
-    courseId: 1,
-    courseName: "Human Anatomy",
-    departmentId: 1,
-    departmentName: "Medical Sciences",
+    semesterName: "Fall 2024",
     template: "Standard Certificate",
     isActive: true,
     issuedCount: 15,
@@ -57,25 +54,18 @@ const mockCertificateTemplates = {
     id: 2,
     name: "Honors Certificate",
     description: "Premium certificate for high-achieving students",
-    courseId: 2,
-    courseName: "Advanced Biology",
-    departmentId: 1,
-    departmentName: "Medical Sciences",
+    semesterName: "Spring 2025",
     template: "Honors Certificate",
     isActive: true,
     issuedCount: 5,
     dateCreated: "2025-03-15T09:00:00Z",
     lastModified: "2025-03-15T09:00:00Z"
   },
-  // Add a new general certificate template not tied to a course
   3: {
     id: 3,
     name: "General Achievement Certificate",
-    description: "Generic certificate of achievement that can be issued without a specific course",
-    courseId: null,
-    courseName: null,
-    departmentId: 1,
-    departmentName: "Academic Affairs",
+    description: "Generic certificate of achievement that can be issued without a specific semester",
+    semesterName: null,
     template: "Generic Certificate",
     isActive: true,
     issuedCount: 3,
@@ -92,6 +82,9 @@ class CertificateService {
 
   // Helper to adapt certificate data from backend format to frontend format
   adaptCertificate(certificate) {
+    // Handle nulls
+    if (!certificate) return null;
+    
     return {
       ...certificate,
       // Add missing fields with defaults
@@ -99,16 +92,31 @@ class CertificateService {
       courseName: certificate.courseName || "Unknown Course",
       departmentId: certificate.departmentId || null,
       departmentName: certificate.departmentName || null,
-      template: certificate.template || "Default Template",
+      template: certificate.template || certificate.templateContent || "Default Template",
+      revoked: certificate.revoked !== undefined ? certificate.revoked : false,
+      revocationReason: certificate.revocationReason || null,
       formattedIssuedDate: formatDate(certificate.issuedAt)
     };
   }
 
   // Helper to adapt certificate template data for frontend
   adaptCertificateTemplate(template) {
+    // Handle nulls
+    if (!template) return null;
+    
     return {
       ...template,
-      // Add any field adaptations needed
+      // Map backend to frontend field names
+      id: template.id,
+      name: template.name,
+      description: template.description || "", // Map courseId to semesterId for backward
+      // Handle the difference between templateContent and template fields
+      template: template.templateContent || template.template || "Default Template",
+      isActive: template.isActive !== undefined ? template.isActive : true,
+      issuedCount: template.issuedCount || 0,
+      dateCreated: template.dateCreated,
+      lastModified: template.lastModified,
+      // Add formatted dates
       formattedCreatedDate: formatDate(template.dateCreated),
       formattedModifiedDate: formatDate(template.lastModified)
     };
@@ -170,21 +178,31 @@ class CertificateService {
     }
     
     try {
-      let url = `/api/certificates`;
+      // Build query params for filtering
+      let url = `/api/certificates?page=${page}&size=${size}`;
       
-      // Add query parameters for filtering
-      const queryParams = [];
-      if (filters.courseId) queryParams.push(`courseId=${filters.courseId}`);
-      if (filters.studentId) queryParams.push(`studentId=${filters.studentId}`);
-      if (filters.search) queryParams.push(`search=${encodeURIComponent(filters.search)}`);
-      
-      if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`;
-      }
+      if (filters.courseId) url += `&courseId=${filters.courseId}`;
+      if (filters.studentId) url += `&studentId=${filters.studentId}`;
+      if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
+      if (filters.sortBy) url += `&sort=${filters.sortBy},${filters.sortDir || 'desc'}`;
       
       const response = await api.get(url);
       
-      // Handle non-paginated array response
+      // Handle paginated response
+      if (response.data && response.data.content) {
+        return { 
+          data: {
+            content: response.data.content.map(this.adaptCertificate),
+            totalElements: response.data.totalElements,
+            totalPages: response.data.totalPages,
+            size: response.data.size,
+            number: response.data.number,
+            last: response.data.last
+          }
+        };
+      }
+      
+      // Handle array response
       if (Array.isArray(response.data)) {
         const certificates = response.data;
         const total = certificates.length;
@@ -201,11 +219,6 @@ class CertificateService {
             last: end >= total
           }
         };
-      }
-      
-      // If the backend does return paginated data
-      if (response.data && response.data.content) {
-        response.data.content = response.data.content.map(this.adaptCertificate);
       }
       
       return response;
@@ -486,9 +499,39 @@ class CertificateService {
   
   // Get all certificate templates
   async getAllCertificateTemplates(page = 0, size = 10, filters = {}) {
-    // Always use mock data until backend implements templates
-    await this.mockDelay();
-    return { data: Object.values(mockCertificateTemplates) };
+    if (USE_MOCK) {
+      await this.mockDelay();
+      return { data: Object.values(mockCertificateTemplates) };
+    }
+    
+    try {
+      // Build query params for filters  
+    let url = `/api/certificate-templates?page=${page}&size=${size}`;
+    if (filters.isActive !== undefined) url += `&isActive=${filters.isActive}`;
+    if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
+      
+      const response = await api.get(url);
+      
+      // Handle paginated response
+      if (response.data && response.data.content) {
+        return { 
+          data: response.data.content.map(this.adaptCertificateTemplate),
+          pagination: {
+            totalElements: response.data.totalElements,
+            totalPages: response.data.totalPages,
+            size: response.data.size,
+            number: response.data.number,
+            last: response.data.last
+          }
+        };
+      }
+      
+      // Handle array response
+      return { data: Array.isArray(response.data) ? response.data.map(this.adaptCertificateTemplate) : [] };
+    } catch (error) {
+      console.error('Error fetching certificate templates:', error);
+      throw error;
+    }
   }
 
   // Get certificate template by ID
@@ -501,7 +544,7 @@ class CertificateService {
     }
     
     try {
-      const response = await api.get(`/certificate-templates/${id}`);
+      const response = await api.get(`/api/certificate-templates/${id}`);
       return { data: this.adaptCertificateTemplate(response.data) };
     } catch (error) {
       console.error(`Error fetching certificate template ${id}:`, error);
@@ -517,10 +560,14 @@ class CertificateService {
       const newId = Object.keys(mockCertificateTemplates).length + 1;
       const newTemplate = {
         id: newId,
-        ...templateData,
-        issuedCount: 0,
-        dateCreated: new Date().toISOString(),
-        lastModified: new Date().toISOString()
+      name: templateData.name,
+      description: templateData.description,
+      semesterName: templateData.semesterName,
+      template: templateData.template || templateData.templateContent,
+      isActive: templateData.isActive !== undefined ? templateData.isActive : true,
+      issuedCount: 0,
+      dateCreated: new Date().toISOString(),
+      lastModified: new Date().toISOString()
       };
       
       mockCertificateTemplates[newId] = newTemplate;
@@ -528,7 +575,16 @@ class CertificateService {
     }
     
     try {
-      const response = await api.post(`/certificate-templates`, templateData);
+      // Prepare data for the backend
+      const backendTemplateData = {
+          name: templateData.name,
+      description: templateData.description,
+      semesterName: templateData.semesterName || null,
+      templateContent: templateData.template || templateData.templateContent, // Map template to templateContent
+      isActive: templateData.isActive !== undefined ? templateData.isActive : true
+      };
+      
+      const response = await api.post(`/api/certificate-templates`, backendTemplateData);
       return { data: this.adaptCertificateTemplate(response.data) };
     } catch (error) {
       console.error('Error creating certificate template:', error);
@@ -543,17 +599,30 @@ class CertificateService {
       
       if (!mockCertificateTemplates[id]) throw new Error("Certificate template not found");
       
-      mockCertificateTemplates[id] = {
-        ...mockCertificateTemplates[id],
-        ...templateData,
-        lastModified: new Date().toISOString()
-      };
+        mockCertificateTemplates[id] = {
+      ...mockCertificateTemplates[id],
+      name: templateData.name,
+      description: templateData.description,
+      semesterName: templateData.semesterName,
+      template: templateData.template || templateData.templateContent,
+      isActive: templateData.isActive !== undefined ? templateData.isActive : true,
+      lastModified: new Date().toISOString()
+    };
       
       return { data: this.adaptCertificateTemplate(mockCertificateTemplates[id]) };
     }
     
     try {
-      const response = await api.put(`/certificate-templates/${id}`, templateData);
+      // Prepare data for the backend
+       const backendTemplateData = {
+      name: templateData.name,
+      description: templateData.description,
+      semesterName: templateData.semesterName || null,
+      templateContent: templateData.template || templateData.templateContent, // Map template to templateContent
+      isActive: templateData.isActive !== undefined ? templateData.isActive : true
+      };
+      
+      const response = await api.put(`/api/certificate-templates/${id}`, backendTemplateData);
       return { data: this.adaptCertificateTemplate(response.data) };
     } catch (error) {
       console.error(`Error updating certificate template ${id}:`, error);
@@ -575,7 +644,7 @@ class CertificateService {
     }
     
     try {
-      return await api.delete(`/certificate-templates/${id}`);
+      return await api.delete(`/api/certificate-templates/${id}`);
     } catch (error) {
       console.error(`Error deleting certificate template ${id}:`, error);
       throw error;

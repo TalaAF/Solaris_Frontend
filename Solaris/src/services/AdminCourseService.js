@@ -24,7 +24,13 @@ class AdminCourseService {
     if (search) params.search = search;
     if (departmentId) params.departmentId = departmentId;
     if (instructorEmail) params.instructorEmail = instructorEmail;
-    if (isPublished !== undefined) params.isPublished = isPublished;
+    
+    // Handle published status with proper conversion
+    if (isPublished !== undefined) {
+      // Convert to boolean string for backend compatibility
+      params.published = String(isPublished);
+    }
+    
     if (semester) params.semester = semester; // Include semester in API request
     
     console.log("Fetching courses with params:", params);
@@ -41,58 +47,81 @@ class AdminCourseService {
   };
   
   // Create course method for admins
-  createCourse = async (courseData) => {
-    try {
-      const formattedData = {
-        ...courseData,
-        credits: parseInt(courseData.credits || 0, 10),
-        maxCapacity: parseInt(courseData.maxCapacity || 0, 10),
-        
-        // Use published instead of isPublished
-        published: Boolean(courseData.isPublished),
-        
-        // Make sure semester is passed correctly
-        semester: courseData.semester
-      };
+// In AdminCourseService.js - Update createCourse method
+
+createCourse = async (courseData) => {
+  try {
+    // Create a clean data object with only the required fields in the correct format
+    const cleanData = {
+      title: courseData.title,
+      description: courseData.description,
+      instructorEmail: courseData.instructorEmail,
       
-      // Remove isPublished to prevent sending both fields
-      if (formattedData.hasOwnProperty('isPublished')) {
-        delete formattedData.isPublished;
-      }
+      // Convert numeric fields to numbers
+      departmentId: courseData.departmentId ? parseInt(courseData.departmentId, 10) : null,
+      maxCapacity: courseData.maxCapacity ? parseInt(courseData.maxCapacity, 10) : 30,
+      credits: courseData.credits ? parseInt(courseData.credits, 10) : 3,
       
-      console.log("Creating course with data:", formattedData);
-      const response = await apiClient.post('/api/admin/courses', formattedData);
-      console.log("API response from create:", response);
-      return response;
-    } catch (error) {
-      console.error("Error creating course:", error);
-      throw error;
-    }
-  };
+      // Handle status flags - set both fields for compatibility
+      isPublished: Boolean(courseData.isPublished),
+      published: Boolean(courseData.isPublished),
+      
+      // Handle semester fields - set both fields for compatibility
+      semester: courseData.semester || courseData.semesterName || "Spring 2025",
+      semesterName: courseData.semester || courseData.semesterName || "Spring 2025",
+      
+      // Include code if present
+      ...(courseData.code && { code: courseData.code })
+    };
+    
+    console.log("Creating course with clean data:", cleanData);
+    return apiClient.post('/api/courses', cleanData);
+  } catch (error) {
+    console.error("Error creating course:", error);
+    throw error;
+  }
+};
   
   // Update course method for admins
   updateCourse = async (courseId, courseData) => {
     try {
-      // Transform frontend model to match backend DTO expectations
+      // Create a deep copy to avoid modifying the original
       const formattedData = {
-        ...courseData,
-        credits: parseInt(courseData.credits || 0, 10),
-        maxCapacity: parseInt(courseData.maxCapacity || 0, 10),
-        
-        // IMPORTANT: Use published instead of isPublished
-        published: Boolean(courseData.isPublished || courseData.published),
-        
-        // Ensure semester is properly set
-        semester: courseData.semester
+        ...JSON.parse(JSON.stringify(courseData))
       };
       
-      // Remove isPublished to prevent sending both fields
-      if (formattedData.hasOwnProperty('isPublished')) {
-        delete formattedData.isPublished;
+      // Ensure numeric values are properly parsed
+      if (formattedData.credits !== undefined) {
+        formattedData.credits = parseInt(formattedData.credits || 0, 10);
+      }
+      
+      if (formattedData.maxCapacity !== undefined) {
+        formattedData.maxCapacity = parseInt(formattedData.maxCapacity || 0, 10);
+      }
+      
+      if (formattedData.departmentId !== undefined) {
+        formattedData.departmentId = parseInt(formattedData.departmentId || 0, 10);
+      }
+      
+      // Handle the isPublished/published mismatch - keep both for compatibility
+      if (formattedData.isPublished !== undefined) {
+        formattedData.published = Boolean(formattedData.isPublished);
+      } else if (formattedData.published !== undefined) {
+        formattedData.isPublished = Boolean(formattedData.published);
+      }
+      
+      // Ensure consistent semester handling
+      if (formattedData.semester) {
+        formattedData.semesterName = formattedData.semester;
+      } else if (formattedData.semesterName) {
+        formattedData.semester = formattedData.semesterName;
       }
       
       console.log("Updating course with data:", formattedData);
-      const response = await apiClient.put(`/api/admin/courses/${courseId}`, formattedData);
+      
+      // Use the correct API endpoint - this might need to be adjusted
+      const response = await apiClient.put(`/api/courses/${courseId}`, formattedData);
+      
       console.log("Update response:", response);
       return response;
     } catch (error) {
@@ -103,12 +132,14 @@ class AdminCourseService {
   
   // Helper to normalize course data consistently
   normalizeCourseData(courseData) {
-    const normalized = { ...courseData };
+    // Create a deep copy to avoid side effects
+    const normalized = JSON.parse(JSON.stringify(courseData));
     
-    // The backend expects isPublished, not published
-    if (normalized.published !== undefined) {
+    // Handle published/isPublished properly in both directions
+    if (normalized.published !== undefined && normalized.isPublished === undefined) {
       normalized.isPublished = normalized.published;
-      delete normalized.published;
+    } else if (normalized.isPublished !== undefined && normalized.published === undefined) {
+      normalized.published = normalized.isPublished;
     }
     
     // Ensure numeric values are proper numbers, not strings
@@ -125,6 +156,13 @@ class AdminCourseService {
     
     if (normalized.maxCapacity !== undefined) {
       normalized.maxCapacity = parseInt(normalized.maxCapacity, 10) || 30;
+    }
+    
+    // Handle semester consistently
+    if (normalized.semester && !normalized.semesterName) {
+      normalized.semesterName = normalized.semester;
+    } else if (normalized.semesterName && !normalized.semester) {
+      normalized.semester = normalized.semesterName;
     }
     
     // Ensure required fields have values
@@ -189,7 +227,8 @@ class AdminCourseService {
       // Update only the published status while keeping other fields intact
       const courseData = {
         ...currentCourse.data,
-        isPublished: true // Use isPublished to match backend expectation
+        isPublished: true,
+        published: true // Make sure both fields are set for compatibility
       };
       
       // Send complete course data
@@ -211,7 +250,8 @@ class AdminCourseService {
       // Update only the published status while keeping other fields intact
       const courseData = {
         ...currentCourse.data,
-        isPublished: false // Use isPublished to match backend expectation
+        isPublished: false,
+        published: false // Make sure both fields are set for compatibility
       };
       
       // Send complete course data
@@ -223,11 +263,11 @@ class AdminCourseService {
   };
   
   archiveCourse = async (courseId) => {
-    return apiClient.put(`/api/courses/${courseId}`, { archived: true });
+    return apiClient.put(`/api/courses/${courseId}`, { archived: true, isArchived: true });
   };
   
   unarchiveCourse = async (courseId) => {
-    return apiClient.put(`/api/courses/${courseId}`, { archived: false });
+    return apiClient.put(`/api/courses/${courseId}`, { archived: false, isArchived: false });
   };
   
   // Get all departments

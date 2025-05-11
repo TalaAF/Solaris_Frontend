@@ -12,7 +12,7 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
     departmentId: null,
     instructorEmail: "",
     maxCapacity: 30,
-    isPublished: true, // Changed from published to isPublished
+    isPublished: true, // Using isPublished for consistency
     credits: 3,
     semester: "Spring 2025",
   };
@@ -34,17 +34,31 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
   useEffect(() => {
     if (isOpen) {
       if (course) {
-        // Map backend data to form fields
+        // Create a normalized course object to handle both field naming conventions
+        const normalizedCourse = { ...course };
+        
+        // Handle published/isPublished field
+        if (normalizedCourse.published !== undefined && normalizedCourse.isPublished === undefined) {
+          normalizedCourse.isPublished = normalizedCourse.published;
+        } else if (normalizedCourse.isPublished === undefined) {
+          // Default to false if neither field is present
+          normalizedCourse.isPublished = false;
+        }
+        
+        // Handle semester/semesterName field
+        const semesterValue = normalizedCourse.semester || normalizedCourse.semesterName || '';
+        
+        // Map normalized data to form fields
         setFormData({
-          title: course.title || '',
-          description: course.description || '',
-          instructorEmail: course.instructorEmail || '',
-          departmentId: course.departmentId || '',
-          maxCapacity: course.maxCapacity || 30,
-          credits: course.credits || 0,
-          semester: course.semester || course.semesterName || '', // Handle both field names
-          isPublished: course.isPublished || false,
-          // Add any other fields that need mapping
+          title: normalizedCourse.title || '',
+          description: normalizedCourse.description || '',
+          instructorEmail: normalizedCourse.instructorEmail || '',
+          departmentId: normalizedCourse.departmentId || '',
+          maxCapacity: normalizedCourse.maxCapacity || 30,
+          credits: normalizedCourse.credits || 0,
+          semester: semesterValue,
+          isPublished: normalizedCourse.isPublished,
+          code: normalizedCourse.code || '',
         });
       } else {
         // Reset form data for new course
@@ -57,18 +71,17 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           credits: 3,
           semester: 'Spring 2025', // Set default semester
           isPublished: true, // Default to published
+          code: '',
         });
       }
       setErrors({});
     }
   }, [isOpen, course]);
 
-  // Update the fetchDepartmentsAndInstructors function to debug instructor data:
   const fetchDepartmentsAndInstructors = async () => {
     setLoading(true);
     try {
-      // First, log the instructor fetch call
-      console.log("Fetching instructors...");
+      console.log("Fetching instructors and departments...");
       
       const [deptResponse, instructorResponse] = await Promise.all([
         AdminCourseService.getDepartments(),
@@ -109,13 +122,12 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
     }
   };
 
-  // Make the checkbox handler more explicit
   const handleCheckboxChange = (e) => {
     const { checked } = e.target;
     console.log("Published checkbox changed to:", checked);
     setFormData(prev => ({
       ...prev,
-      isPublished: checked // Use isPublished instead of published
+      isPublished: checked
     }));
   };
 
@@ -146,7 +158,6 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
     }
   };
 
-  // Update the validateForm function to check description length
   const validateForm = () => {
     const newErrors = {};
     
@@ -165,11 +176,22 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
       newErrors.instructorEmail = "Instructor is required";
     }
     
+    if (!formData.semester) {
+      newErrors.semester = "Semester is required";
+    }
+    
+    if (formData.credits <= 0) {
+      newErrors.credits = "Credits must be greater than 0";
+    }
+    
+    if (formData.maxCapacity <= 0) {
+      newErrors.maxCapacity = "Maximum capacity must be greater than 0";
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Update the handleSubmit function 
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -177,23 +199,30 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
       return;
     }
     
-    // Transform form data to match backend expectations
-    const submissionData = {
-      ...formData,
-      // Explicitly convert types
-      maxCapacity: parseInt(formData.maxCapacity, 10),
-      credits: parseInt(formData.credits, 10),
-      
-      // Use the field name the backend expects
-      published: formData.isPublished === true || formData.isPublished === 'true',
-      
-      // Keep instructorEmail as is
-      instructorEmail: formData.instructorEmail
-    };
+   // Create a clean submission object with the exact fields the API expects
+  const submissionData = {
+    title: formData.title.trim(),
+    description: formData.description.trim(),
+    instructorEmail: formData.instructorEmail,
+    departmentId: formData.departmentId ? parseInt(formData.departmentId, 10) : null,
+    maxCapacity: parseInt(formData.maxCapacity, 10) || 30,
+    credits: parseInt(formData.credits, 10) || 3,
     
-    console.log("Form submitted with data:", submissionData);
-    onSubmit(submissionData);
+    // Set both published field variations
+    isPublished: formData.isPublished,
+    published: formData.isPublished,
+    
+    // Set both semester field variations
+    semester: formData.semester,
+    semesterName: formData.semester,
+    
+    // Include code only if it exists
+    ...(formData.code && { code: formData.code.trim() })
   };
+  
+  console.log("Submitting course data:", submissionData);
+  onSubmit(submissionData);
+};
 
   return (
     <Dialog
@@ -235,7 +264,6 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
             </div>
           </div>
           
-          {/* Add semester and credits form row */}
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="semester">Semester *</label>
@@ -244,7 +272,7 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
                 name="semester"
                 value={formData.semester}
                 onChange={handleChange}
-                className="form-select"
+                className={`form-select ${errors.semester ? 'input-error' : ''}`}
                 required
               >
                 <option value="">Select a semester</option>
@@ -254,6 +282,7 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
                 <option value="Fall 2025">Fall 2025</option>
                 <option value="Spring 2026">Spring 2026</option>
               </select>
+              {errors.semester && <div className="error-message">{errors.semester}</div>}
             </div>
             
             <div className="form-group">
@@ -266,9 +295,10 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
                 max="6"
                 value={formData.credits}
                 onChange={handleChange}
-                className="form-input"
+                className={`form-input ${errors.credits ? 'input-error' : ''}`}
                 required
               />
+              {errors.credits && <div className="error-message">{errors.credits}</div>}
             </div>
           </div>
           
@@ -344,9 +374,10 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
               min="1"
               value={formData.maxCapacity}
               onChange={handleChange}
-              className="form-input"
+              className={`form-input ${errors.maxCapacity ? 'input-error' : ''}`}
               required
             />
+            {errors.maxCapacity && <div className="error-message">{errors.maxCapacity}</div>}
           </div>
           
           <div className="form-check">
@@ -359,6 +390,9 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
               className="form-checkbox"
             />
             <label htmlFor="isPublished">Published</label>
+            <span className="form-check-description">
+              When published, students can view and enroll in this course.
+            </span>
           </div>
           
           <div className="form-actions">

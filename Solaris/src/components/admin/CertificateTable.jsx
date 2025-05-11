@@ -20,7 +20,16 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
-const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUpdate, onCertificateDelete }) => {
+const CertificateTable = ({ 
+  certificates = [], 
+  onCertificateAdd, 
+  onCertificateUpdate, 
+  onCertificateDelete,
+  pagination,
+  onPageChange,
+  onSearch,
+  onFilterChange
+}) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -36,12 +45,31 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
     return <div>Error: Invalid certificate data</div>;
   }
 
-  // Filter certificates based on search query
-  const filteredCertificates = searchQuery
+  // When the search query changes, trigger a callback to the parent component
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    // If there's a debounce timer, clear it
+    if (window.searchTimeout) {
+      clearTimeout(window.searchTimeout);
+    }
+    
+    // Set a debounce timer
+    window.searchTimeout = setTimeout(() => {
+      if (onSearch) {
+        onSearch(query);
+      }
+    }, 500); // Wait 500ms after user stops typing to trigger search
+  };
+
+  // Filter certificates based on search query (for local filtering)
+  // Note: This is a fallback to the API-based search
+  const filteredCertificates = searchQuery && !onSearch
     ? certificates.filter(cert => 
         cert.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         cert.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cert.courseName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.semesterName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         cert.departmentName?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : certificates;
@@ -88,22 +116,8 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
   };
 
   const handleAddCertificate = (formData) => {
-    // Simulate fetching course and department names
-    const courseName = "Course Name"; // In a real app would be fetched
-    const departmentName = "Department Name"; // In a real app would be fetched
-    
-    const newCertificate = {
-      ...formData,
-      id: Math.max(0, ...certificates.map(c => c.id || 0), 0) + 1,
-      courseName,
-      departmentName,
-      issuedCount: 0,
-      dateCreated: new Date().toISOString(),
-      lastModified: new Date().toISOString()
-    };
-    
     if (onCertificateAdd) {
-      onCertificateAdd(newCertificate);
+      onCertificateAdd(formData);
     }
     
     setIsAddDialogOpen(false);
@@ -112,8 +126,14 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
   const handleUpdateCertificate = (formData) => {
     if (!selectedCertificate) return;
     
+    // Ensure id is included in the formData
+    const updateData = {
+      ...formData,
+      id: selectedCertificate.id
+    };
+    
     if (onCertificateUpdate) {
-      onCertificateUpdate(formData);
+      onCertificateUpdate(updateData);
     }
     
     setIsEditDialogOpen(false);
@@ -143,7 +163,7 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
               className="search-input"
               placeholder="Search templates..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           <button className="add-button" onClick={handleOpenAddDialog}>
@@ -158,8 +178,8 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
           <thead>
             <tr>
               <th>Certificate Template</th>
-              <th>Course</th>
-              <th>Department</th>
+              <th>Semester</th>
+              
               <th>Issued</th>
               <th>Created</th>
               <th>Status</th>
@@ -181,10 +201,10 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
                       </div>
                     </div>
                   </td>
-                  <td>{certificate.courseName}</td>
-                  <td>{certificate.departmentName}</td>
+                  <td>{certificate.semesterName || "General"}</td>
+                  <td>{certificate.departmentName || "General"}</td>
                   <td>{certificate.issuedCount || 0} students</td>
-                  <td>{formatDate(certificate.dateCreated)}</td>
+                  <td>{formatDate(certificate.dateCreated) || formatDate(certificate.formattedCreatedDate)}</td>
                   <td>
                     <span className={`status-badge ${certificate.isActive ? "published" : "draft"}`}>
                       {certificate.isActive ? "Active" : "Inactive"}
@@ -240,6 +260,29 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
         </table>
       </div>
 
+      {/* Pagination controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            className="pagination-button"
+            onClick={() => onPageChange(pagination.page - 1)}
+            disabled={pagination.page === 0}
+          >
+            Previous
+          </button>
+          <span className="pagination-info">
+            Page {pagination.page + 1} of {pagination.totalPages}
+          </span>
+          <button 
+            className="pagination-button"
+            onClick={() => onPageChange(pagination.page + 1)}
+            disabled={pagination.page >= pagination.totalPages - 1}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {/* Add Certificate Dialog */}
       {isAddDialogOpen && (
         <CertificateDialog 
@@ -273,7 +316,7 @@ const CertificateTable = ({ certificates = [], onCertificateAdd, onCertificateUp
             setIsPreviewDialogOpen(false);
             setSelectedCertificate(null);
           }}
-          template={selectedCertificate.template}
+          template={selectedCertificate.template || selectedCertificate.templateContent}
           certificateName={selectedCertificate.name}
         />
       )}

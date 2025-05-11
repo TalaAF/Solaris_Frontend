@@ -1,52 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { BookOpen, ChevronLeft, Settings, UserRound } from "lucide-react";
+import AdminCourseService from "../../../services/AdminCourseService";
 import "./CourseDetails.css";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
-    // Simulating API call to fetch course details
-    const fetchCourse = async () => {
-      try {
-        // In a real app, this would be an API call
-        // Using mock data from your import
-        const courseId = parseInt(id);
-        
-        // Simulate fetch delay
-        setTimeout(() => {
-          // Replace this with your actual fetch logic and data source
-          const foundCourse = {
-            id: courseId,
-            title: "Introduction to Computer Science",
-            description: "Foundational course covering algorithms and data structures",
-            instructorEmail: "sarah.johnson@example.com",
-            instructorName: "Sarah Johnson",
-            departmentId: 5, 
-            departmentName: "Computer Science",
-            maxCapacity: 100,
-            enrolledStudents: 76,
-            isActive: true,
-            startDate: "2023-09-01T00:00:00Z",
-            endDate: "2023-12-15T00:00:00Z",
-            prerequisiteCourseIds: []
-          };
-          
-          setCourse(foundCourse);
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Error fetching course:", error);
-        setLoading(false);
-      }
-    };
+    // First check if we have course data from navigation state
+    if (location.state?.courseData) {
+      console.log("Using course data from navigation state");
+      setCourse(location.state.courseData);
+      setLoading(false);
+      return;
+    }
     
-    fetchCourse();
-  }, [id]);
+    // If no state data, fetch course from API
+    fetchCourseFromAPI();
+  }, [id, location.state]);
+
+  const fetchCourseFromAPI = async () => {
+    setLoading(true);
+    try {
+      const courseId = parseInt(id);
+      const response = await AdminCourseService.getCourse(courseId);
+      
+      if (response && response.data) {
+        console.log("Course fetched from API:", response.data);
+        setCourse(response.data);
+      } else {
+        setError("Failed to load course data");
+      }
+    } catch (error) {
+      console.error("Error fetching course:", error);
+      setError("Failed to load course details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -64,15 +61,20 @@ const CourseDetails = () => {
     );
   }
   
-  if (!course) {
+  if (error || !course) {
     return (
       <div className="course-not-found">
         <div className="not-found-container">
-          <h2>Course Not Found</h2>
+          <h2>{error || "Course Not Found"}</h2>
           <p>The course you're looking for doesn't exist or has been removed.</p>
           <button className="back-button" onClick={() => navigate('/admin/courses')}>
             Return to Course List
           </button>
+          {error && (
+            <button className="retry-button" onClick={fetchCourseFromAPI}>
+              Try Again
+            </button>
+          )}
         </div>
       </div>
     );
@@ -89,8 +91,8 @@ const CourseDetails = () => {
           
           <h1 className="course-title">
             {course.title}
-            <span className={`status-badge ${course.isActive ? "active" : "inactive"}`}>
-              {course.isActive ? "Active" : "Inactive"}
+            <span className={`status-badge ${(course.isActive || course.published) ? "active" : "inactive"}`}>
+              {(course.isActive || course.published) ? "Active" : "Inactive"}
             </span>
           </h1>
         </div>
@@ -98,14 +100,18 @@ const CourseDetails = () => {
         <div className="action-buttons">
           <button 
             className="action-button primary"
-            onClick={() => navigate(`/admin/courses/${course.id}/students`)}
+            onClick={() => navigate(`/admin/courses/${course.id}/students`, {
+              state: { courseData: course, returnPath: "/admin/courses" }
+            })}
           >
             <UserRound size={18} />
             <span>Manage Students</span>
           </button>
           <button 
             className="action-button"
-            onClick={() => navigate(`/admin/courses/${course.id}/settings`)}
+            onClick={() => navigate(`/admin/courses/${course.id}/settings`, {
+              state: { courseData: course }
+            })}
           >
             <Settings size={18} />
             <span>Settings</span>
@@ -123,11 +129,11 @@ const CourseDetails = () => {
             <div className="details-column">
               <div className="detail-item">
                 <h3 className="detail-label">Department</h3>
-                <p className="detail-value">{course.departmentName}</p>
+                <p className="detail-value">{course.departmentName || 'Not specified'}</p>
               </div>
               <div className="detail-item">
                 <h3 className="detail-label">Instructor</h3>
-                <p className="detail-value">{course.instructorName}</p>
+                <p className="detail-value">{course.instructorName || 'Not assigned'}</p>
               </div>
               <div className="detail-item">
                 <h3 className="detail-label">Duration</h3>
@@ -139,7 +145,10 @@ const CourseDetails = () => {
             <div className="details-column">
               <div className="detail-item">
                 <h3 className="detail-label">Enrollment</h3>
-                <p className="detail-value">{course.enrolledStudents}/{course.maxCapacity} students</p>
+                <p className="detail-value">
+                  {course.enrolledStudents || course.currentEnrollment || 0}/
+                  {course.maxCapacity || 0} students
+                </p>
               </div>
               <div className="detail-item">
                 <h3 className="detail-label">Prerequisites</h3>

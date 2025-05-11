@@ -1,80 +1,106 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
-import { courses ,departments} from "../../mocks/mockDataAdmin";
 import "./CertificateDialog.css";
 
-const CertificateDialog = ({ isOpen, onClose, onSave, certificate, title }) => {
-  const initialFormData = certificate || {
+// Semesters - in a real app these could come from an API or be a free-form text field
+const semesters = [
+  { name: "Fall 2024" },
+  { name: "Spring 2025" },
+  { name: "Summer 2025" },
+  { name: "Fall 2025" }
+];
+
+const CertificateDialog = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  certificate, 
+  title
+}) => {
+  // Define initialFormData outside of the component state
+  const defaultFormData = {
     name: "",
     description: "",
-    courseId: courses[0]?.id || 1,
-    courseName: "",
-    departmentId: departments[0]?.id || 1,
-    departmentName: "",
-    template: "Standard Certificate",
+    semesterName: "",
     isActive: true,
   };
 
-  const [formData, setFormData] = useState(initialFormData);
+  // Initialize state with a function to prevent re-evaluation on every render
+  const [formData, setFormData] = useState(() => ({
+    ...defaultFormData,
+    ...(certificate || {})
+  }));
+  
   const [errors, setErrors] = useState({});
+  const [customSemester, setCustomSemester] = useState(() => 
+    certificate && certificate.semesterName ? 
+    !semesters.some(s => s.name === certificate.semesterName) : 
+    false
+  );
 
   // Reset form when dialog opens with new data
   useEffect(() => {
     if (isOpen) {
-      setFormData(certificate || initialFormData);
+      // Only update when dialog opens
+      const updatedData = certificate ? {
+        ...defaultFormData,
+        ...certificate
+      } : defaultFormData;
+      
+      setFormData(updatedData);
+      setCustomSemester(
+        updatedData.semesterName ? 
+        !semesters.some(s => s.name === updatedData.semesterName) : 
+        false
+      );
       setErrors({});
     }
-  }, [isOpen, certificate]);
+  }, [isOpen, certificate]); // Remove initialFormData from dependencies
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prevData => ({
+      ...prevData,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
 
     // Clear error when field is edited
     if (errors[name]) {
-      setErrors({
-        ...errors,
+      setErrors(prevErrors => ({
+        ...prevErrors,
         [name]: null
-      });
+      }));
     }
   };
 
-  const handleCourseChange = (e) => {
-    const courseId = parseInt(e.target.value, 10);
-    const selectedCourse = courses.find((course) => course.id === courseId);
+  const handleSemesterChange = (e) => {
+    const value = e.target.value;
     
-    setFormData({
-      ...formData,
-      courseId,
-      courseName: selectedCourse ? selectedCourse.title : "",
-    });
+    // If "Custom" is selected, don't update the semesterName yet
+    if (value === "custom") {
+      setCustomSemester(true);
+      return;
+    }
+    
+    // Otherwise, update the semester name
+    setCustomSemester(false);
+    setFormData(prevData => ({
+      ...prevData,
+      semesterName: value,
+    }));
   };
 
-  const handleDepartmentChange = (e) => {
-    const departmentId = parseInt(e.target.value, 10);
-    const selectedDepartment = departments.find((dept) => dept.id === departmentId);
-    
-    setFormData({
-      ...formData,
-      departmentId,
-      departmentName: selectedDepartment ? selectedDepartment.name : "",
-    });
-  };
-
-  const handleTemplateChange = (e) => {
-    setFormData({
-      ...formData,
-      template: e.target.value,
-    });
+  const handleCustomSemesterChange = (e) => {
+    setFormData(prevData => ({
+      ...prevData,
+      semesterName: e.target.value,
+    }));
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       newErrors.name = "Certificate name is required";
     }
 
@@ -89,18 +115,14 @@ const CertificateDialog = ({ isOpen, onClose, onSave, certificate, title }) => {
       return;
     }
     
-    // Ensure courseName and departmentName are set
-    if (!formData.courseName) {
-      const selectedCourse = courses.find((course) => course.id === formData.courseId);
-      formData.courseName = selectedCourse ? selectedCourse.title : "Unknown Course";
-    }
+    // Prepare data for backend
+    const submissionData = {
+      ...formData,
+      // Include a placeholder if semesterName is empty
+      semesterName: formData.semesterName || "General"
+    };
     
-    if (!formData.departmentName) {
-      const selectedDepartment = departments.find((dept) => dept.id === formData.departmentId);
-      formData.departmentName = selectedDepartment ? selectedDepartment.name : "Unknown Department";
-    }
-    
-    onSave(formData);
+    onSave(submissionData);
   };
 
   return (
@@ -115,7 +137,7 @@ const CertificateDialog = ({ isOpen, onClose, onSave, certificate, title }) => {
           <input
             id="name"
             name="name"
-            value={formData.name}
+            value={formData.name || ""}
             onChange={handleChange}
             className={`form-input ${errors.name ? "error" : ""}`}
           />
@@ -127,7 +149,7 @@ const CertificateDialog = ({ isOpen, onClose, onSave, certificate, title }) => {
           <textarea
             id="description"
             name="description"
-            value={formData.description}
+            value={formData.description || ""}
             onChange={handleChange}
             className="form-textarea"
             rows="3"
@@ -135,61 +157,44 @@ const CertificateDialog = ({ isOpen, onClose, onSave, certificate, title }) => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="courseId">Course</label>
+          <label htmlFor="semesterName">Semester</label>
           <select
-            id="courseId"
-            name="courseId"
-            value={formData.courseId}
-            onChange={handleCourseChange}
+            id="semesterSelect"
+            name="semesterSelect"
+            value={customSemester ? "custom" : formData.semesterName || ""}
+            onChange={handleSemesterChange}
             className="form-select"
           >
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
+            <option value="">General (No specific semester)</option>
+            {semesters.map((semester, index) => (
+              <option key={index} value={semester.name}>
+                {semester.name}
               </option>
             ))}
+            <option value="custom">Custom Semester...</option>
           </select>
         </div>
         
-        <div className="form-group">
-          <label htmlFor="departmentId">Department</label>
-          <select
-            id="departmentId"
-            name="departmentId"
-            value={formData.departmentId}
-            onChange={handleDepartmentChange}
-            className="form-select"
-          >
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="template">Certificate Template</label>
-          <select
-            id="template"
-            name="template"
-            value={formData.template}
-            onChange={handleTemplateChange}
-            className="form-select"
-          >
-            <option value="Standard Certificate">Standard Certificate</option>
-            <option value="Honors Certificate">Honors Certificate</option>
-            <option value="Completion Certificate">Completion Certificate</option>
-            <option value="Achievement Certificate">Achievement Certificate</option>
-          </select>
-        </div>
+        {customSemester && (
+          <div className="form-group">
+            <label htmlFor="customSemester">Custom Semester Name</label>
+            <input
+              id="customSemester"
+              name="customSemester"
+              value={formData.semesterName || ""}
+              onChange={handleCustomSemesterChange}
+              className="form-input"
+              placeholder="Enter semester name"
+            />
+          </div>
+        )}
         
         <div className="form-check">
           <input
             type="checkbox"
             id="isActive"
             name="isActive"
-            checked={formData.isActive}
+            checked={formData.isActive !== undefined ? formData.isActive : true}
             onChange={handleChange}
             className="form-checkbox"
           />
