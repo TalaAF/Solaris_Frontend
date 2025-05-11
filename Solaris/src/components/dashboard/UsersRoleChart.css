@@ -1,33 +1,148 @@
 .users-role-chart {
-  background-color: #fff;
+  background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  padding: 16px;
 }
 
 .chart-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chart-header h2 {
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #333;
   margin: 0;
 }
 
 .chart-content {
-  flex: 1;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  min-height: 300px;
 }
 
 .chart-container {
-  flex: 1;
-  min-height: 300px;
+  margin-bottom: 16px;
+}
+
+.chart-summary {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.summary-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.chart-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  color: #718096;
+  text-align: center;
+  height: 300px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.chart-error svg {
+  margin-bottom: 16px;
+  color: #e53e3e;
+}
+
+.chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  color: #718096;
+  text-align: center;
+  height: 300px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.chart-loading .spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(229, 191, 3, 0.2);
+  border-radius: 50%;
+  border-top-color: #e5bf03;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.chart-refresh-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #718096;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.chart-refresh-button:hover {
+  background-color: #f7fafc;
+  color: #2d3748;
+}
+
+.chart-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chart-refresh-button .refreshing {
+  animation: spin 2s linear infinite;
+}
+
+.try-again-button {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #e5bf03;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.try-again-button:hover {
+  background-color: #ccaa01;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

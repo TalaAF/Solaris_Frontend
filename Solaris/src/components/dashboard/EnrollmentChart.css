@@ -68,3 +68,21 @@
   font-weight: 600;
   color: #E5BF03;
 }
+
+.chart-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  color: #718096;
+  text-align: center;
+  height: 300px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.chart-error svg {
+  margin-bottom: 16px;
+  color: #e53e3e;
+}

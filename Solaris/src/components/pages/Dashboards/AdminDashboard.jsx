@@ -31,17 +31,25 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [chartErrors, setChartErrors] = useState({
+    usersByRole: null,
+    courseEnrollments: null
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError(null);
+        setChartErrors({
+          usersByRole: null,
+          courseEnrollments: null
+        });
         
         // Fetch users count data
         const usersResponse = await AdminUserService.getUsers({
           page: 0,
-          size: 1, // We only need the total count from pagination
+          size: 1,
         });
         
         const totalUsers = usersResponse.data.totalElements || 0;
@@ -60,7 +68,7 @@ const AdminDashboard = () => {
         const newUsersResponse = await AdminUserService.getUsers({
           page: 0,
           size: 1,
-          createdAfter: firstDayOfMonth.toISOString()
+          createdAfter: firstDayOfMonth.toISOString().split('T')[0]
         });
         const newUsersThisMonth = newUsersResponse.data.totalElements || 0;
         
@@ -70,13 +78,36 @@ const AdminDashboard = () => {
         
         // Fetch departments
         const departmentsResponse = await DepartmentService.getDepartments();
-        const totalDepartments = departmentsResponse.data.length;
+        const totalDepartments = Array.isArray(departmentsResponse.data) 
+          ? departmentsResponse.data.length 
+          : (departmentsResponse.data.content?.length || 0);
         
-        // Fetch user roles for pie chart
-        const rolesResponse = await fetchUsersByRole();
+        // Fetch user roles and course enrollments in parallel
+        const [usersByRoleData, courseEnrollmentsData] = await Promise.allSettled([
+          fetchUsersByRole(),
+          fetchTopCourseEnrollments()
+        ]);
         
-        // Fetch course enrollments for bar chart
-        const enrollmentsResponse = await fetchTopCourseEnrollments();
+        // Handle possible errors in chart data
+        const newChartErrors = { ...chartErrors };
+        
+        let usersByRole = [];
+        if (usersByRoleData.status === 'fulfilled') {
+          usersByRole = usersByRoleData.value;
+        } else {
+          console.error("Error fetching users by role:", usersByRoleData.reason);
+          newChartErrors.usersByRole = "Could not load role distribution";
+        }
+        
+        let courseEnrollments = [];
+        if (courseEnrollmentsData.status === 'fulfilled') {
+          courseEnrollments = courseEnrollmentsData.value;
+        } else {
+          console.error("Error fetching course enrollments:", courseEnrollmentsData.reason);
+          newChartErrors.courseEnrollments = "Could not load enrollment data";
+        }
+        
+        setChartErrors(newChartErrors);
         
         setDashboardData({
           totalUsers,
@@ -84,8 +115,8 @@ const AdminDashboard = () => {
           totalCourses,
           totalDepartments,
           newUsersThisMonth,
-          usersByRole: rolesResponse,
-          courseEnrollments: enrollmentsResponse
+          usersByRole,
+          courseEnrollments
         });
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -99,54 +130,137 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
   
-  // Helper function to fetch users by role for pie chart
+  // Helper function to fetch users by role for pie chart - UPDATED
   const fetchUsersByRole = async () => {
     try {
-      // This endpoint might not exist, so we'll simulate it
-      // In a real app, you'd have a dedicated endpoint
-      const roles = ["ADMIN", "INSTRUCTOR", "STUDENT"];
-      const roleData = [];
-      
-      // Fetch count for each role
-      for (const role of roles) {
-        try {
-          const response = await AdminUserService.getUsers({
-            page: 0,
-            size: 1,
-            role: role
-          });
-          
-          roleData.push({
-            name: role.charAt(0) + role.slice(1).toLowerCase(),
-            value: response.data.totalElements || 0
-          });
-        } catch (err) {
-          console.warn(`Error fetching users with role ${role}:`, err);
+      // First try to fetch from a dedicated endpoint if available
+      try {
+        const response = await fetch('/api/analytics/users-by-role');
+        if (response.ok) {
+          const data = await response.json();
+          // Format data if needed
+          return data.map(item => ({
+            name: item.role.charAt(0).toUpperCase() + item.role.slice(1).toLowerCase(),
+            value: item.count
+          }));
         }
+      } catch (err) {
+        console.warn("No dedicated users-by-role endpoint, falling back to manual counting");
+      }
+    
+      // If no dedicated endpoint, fetch all users and count roles manually
+      const allUsersResponse = await AdminUserService.getUsers({ size: 1000 });
+      let users = [];
+      
+      if (allUsersResponse.data.content) {
+        users = allUsersResponse.data.content;
+      } else if (Array.isArray(allUsersResponse.data)) {
+        users = allUsersResponse.data;
       }
       
-      return roleData;
+      // Count users by role
+      const roleCountMap = {};
+      
+      users.forEach(user => {
+        if (user.roles && Array.isArray(user.roles)) {
+          user.roles.forEach(role => {
+            // Handle if role is an object or string
+            const roleName = typeof role === 'string' ? role : role.name;
+            
+            if (!roleName) return;
+            
+            const formattedRole = roleName.toLowerCase();
+            roleCountMap[formattedRole] = (roleCountMap[formattedRole] || 0) + 1;
+          });
+        } else if (user.role) {
+          // Handle if role is a string or object
+          const roleName = typeof user.role === 'string' ? user.role : user.role.name;
+          
+          if (!roleName) return;
+          
+          const formattedRole = roleName.toLowerCase();
+          roleCountMap[formattedRole] = (roleCountMap[formattedRole] || 0) + 1;
+        }
+      });
+      
+      // Convert to chart format
+      return Object.entries(roleCountMap).map(([role, count]) => ({
+        name: role.charAt(0).toUpperCase() + role.slice(1),
+        value: count
+      }));
     } catch (err) {
       console.error("Error fetching user roles:", err);
-      return [];
+      throw err;
     }
   };
   
-  // Helper function to fetch top courses by enrollment
+  // Helper function to fetch top courses by enrollment - UPDATED
   const fetchTopCourseEnrollments = async () => {
     try {
-      // In a real app, you'd have a dedicated endpoint for this
-      // For now, we'll fetch a few courses and simulate enrollment data
-      const coursesResponse = await AdminCourseService.getCourses(0, 5);
-      const courses = coursesResponse.data.content || [];
+      // First try to fetch from a dedicated endpoint if available
+      try {
+        const response = await fetch('/api/analytics/course-enrollments');
+        if (response.ok) {
+          const data = await response.json();
+          // Get top 5 courses
+          return data.slice(0, 5).map(item => ({
+            name: item.courseName || item.title,
+            value: item.enrollmentCount
+          }));
+        }
+      } catch (err) {
+        console.warn("No dedicated course-enrollments endpoint, falling back to alternative method");
+      }
       
-      return courses.map(course => ({
-        name: course.title || "Unknown Course",
-        value: Math.floor(Math.random() * 50) + 10 // Simulate enrollment numbers
-      }));
+      // If no dedicated endpoint, try to get courses with their enrollment counts
+      const coursesResponse = await AdminCourseService.getCourses(0, 100, { sort: "enrollmentCount,desc" });
+      
+      let courses = [];
+      if (coursesResponse.data.content) {
+        courses = coursesResponse.data.content;
+      } else if (Array.isArray(coursesResponse.data)) {
+        courses = coursesResponse.data;
+      }
+      
+      // Take the top 5 courses
+      const topCourses = courses.slice(0, 5);
+      
+      // If courses have enrollmentCount property, use it
+      if (topCourses.length > 0 && (topCourses[0].enrollmentCount !== undefined || topCourses[0].studentCount !== undefined)) {
+        return topCourses.map(course => ({
+          name: course.title || "Unknown Course",
+          value: course.enrollmentCount || course.studentCount || 0
+        }));
+      }
+      
+      // If no enrollment counts are available, fetch them individually
+      const courseEnrollmentPromises = topCourses.map(async course => {
+        try {
+          const enrollmentsResponse = await fetch(`/api/courses/${course.id}/enrollments/count`);
+          if (enrollmentsResponse.ok) {
+            const count = await enrollmentsResponse.json();
+            return {
+              name: course.title || "Unknown Course",
+              value: count
+            };
+          }
+          return {
+            name: course.title || "Unknown Course",
+            value: 0
+          };
+        } catch (err) {
+          console.warn(`Error fetching enrollments for course ${course.id}:`, err);
+          return {
+            name: course.title || "Unknown Course",
+            value: 0
+          };
+        }
+      });
+      
+      return await Promise.all(courseEnrollmentPromises);
     } catch (err) {
       console.error("Error fetching course enrollments:", err);
-      return [];
+      throw err;
     }
   };
 
@@ -231,8 +345,14 @@ const AdminDashboard = () => {
       </div>
 
       <div className="charts-grid">
-        <EnrollmentChart data={dashboardData.courseEnrollments} />
-        <UsersRoleChart data={dashboardData.usersByRole} />
+        <EnrollmentChart 
+          data={dashboardData.courseEnrollments}
+          error={chartErrors.courseEnrollments}
+        />
+        <UsersRoleChart 
+          data={dashboardData.usersByRole}
+          error={chartErrors.usersByRole}
+        />
       </div>
 
       <div className="activity-section">
