@@ -75,7 +75,7 @@ const recentSubmissions = [
 
 const InstructorDashboard = () => {
   return (
-    <Layout>
+    <>
       <div className="instructor-dashboard">
         <div className="instructor-dashboard-header">
           <h1 className="instructor-title">Instructor Dashboard</h1>
@@ -201,7 +201,7 @@ const InstructorDashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

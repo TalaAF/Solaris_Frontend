@@ -340,6 +340,33 @@ createCourse = async (courseData) => {
       ];
     }
   };
+  
+  // Get the current enrollment count for a course
+  getEnrollmentCount = async (courseId, activeOnly = true) => {
+    return apiClient.get(`/api/enrollments/courses/${courseId}/count`, {
+      params: { activeOnly }
+    });
+  };
+
+  // Refresh course data with current enrollment count
+  refreshCourseWithEnrollment = async (courseId) => {
+    try {
+      // Get the course data
+      const courseResponse = await this.getCourse(courseId);
+      
+      // Get the enrollment count
+      const enrollmentResponse = await this.getEnrollmentCount(courseId);
+      
+      // Combine the data
+      const courseData = courseResponse.data;
+      courseData.enrolledStudents = enrollmentResponse.data.enrollmentCount;
+      
+      return { data: courseData };
+    } catch (error) {
+      console.error("Error refreshing course with enrollment:", error);
+      throw error;
+    }
+  };
 }
 
 export default new AdminCourseService();

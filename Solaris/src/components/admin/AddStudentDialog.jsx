@@ -13,7 +13,7 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
 
   // Safe check for currentStudents to avoid filter errors
   const currentStudentIds = Array.isArray(currentStudents) 
-    ? currentStudents.map(student => student.userId || (student.user && student.user.id))
+    ? currentStudents.map(student => student.studentId || (student.user && student.user.id))
     : [];
 
   useEffect(() => {
@@ -37,14 +37,9 @@ const AddStudentDialog = ({ isOpen, onClose, onSubmit, courseId, currentStudents
   const fetchAvailableStudents = async () => {
     setLoading(true);
     try {
-      // Get all students with STUDENT role
-      const response = await AdminUserService.getUsers({ role: "STUDENT" });
-      const allStudents = response.data.content || response.data || [];
-      
-      // Filter out students who are already enrolled in the course
-      const availableStudents = allStudents.filter(
-        student => !currentStudentIds.includes(student.id)
-      );
+      // Use the client-side filtering method to get available students
+      const response = await AdminUserService.getAvailableStudentsForCourse(courseId);
+      const availableStudents = response.data.content || response.data || [];
       
       setStudents(availableStudents);
       setFilteredStudents(availableStudents);

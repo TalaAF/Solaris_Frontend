@@ -1,7 +1,7 @@
 .instructor-dashboard {
   padding: 24px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin-top: 66px;
 }
 
 .instructor-dashboard-header {
@@ -21,7 +21,7 @@
 }
 
 .instructor-title {
-  font-size: 28px;
+  font-size: 28px !important;
   font-weight: 700;
   color: #333;
   margin-bottom: 8px;

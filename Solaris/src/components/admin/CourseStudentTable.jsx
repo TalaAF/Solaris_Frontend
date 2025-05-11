@@ -17,8 +17,71 @@ const CourseStudentTable = ({
     student.user?.email?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
   
+  // Enhanced status badge class function to handle all possible enrollment statuses
   const getStatusBadgeClass = (status) => {
-    return status === "active" ? "status-badge active" : "status-badge inactive";
+    if (!status) return "status-badge inactive";
+    
+    // Handle both string status values and enum values
+    if (typeof status === 'string' && (status === 'active' || status === 'inactive')) {
+      return status === "active" ? "status-badge active" : "status-badge inactive";
+    }
+    
+    // Handle enum values from backend
+    switch(status) {
+      case "APPROVED":
+      case "IN_PROGRESS":
+        return "status-badge active";
+      case "COMPLETED":
+        return "status-badge completed";
+      case "PENDING":
+        return "status-badge pending";
+      case "REJECTED":
+        return "status-badge rejected";
+      case "EXPIRED":
+        return "status-badge expired";
+      case "CANCELLED":
+        return "status-badge inactive";
+      default:
+        return "status-badge inactive";
+    }
+  };
+  
+  // Function to get user-friendly status text
+  const getStatusText = (status) => {
+    if (!status) return "Inactive";
+    
+    // Handle string status values
+    if (typeof status === 'string' && (status === 'active' || status === 'inactive')) {
+      return status === "active" ? "Active" : "Inactive";
+    }
+    
+    // Handle enum values
+    switch(status) {
+      case "APPROVED":
+        return "Active";
+      case "IN_PROGRESS":
+        return "In Progress";
+      case "COMPLETED":
+        return "Completed";
+      case "PENDING":
+        return "Pending";
+      case "REJECTED":
+        return "Rejected";
+      case "EXPIRED":
+        return "Expired";
+      case "CANCELLED":
+        return "Inactive";
+      default:
+        return status || "Unknown";
+    }
+  };
+  
+  // Check if a status can be toggled
+  const canToggleStatus = (status) => {
+    if (!status) return true;
+    
+    // These statuses should not be toggled
+    return !["COMPLETED", "REJECTED", "EXPIRED"].includes(status);
   };
   
   return (
@@ -93,8 +156,8 @@ const CourseStudentTable = ({
                   </td>
                   <td>{student.grade || "N/A"}</td>
                   <td>
-                    <span className={getStatusBadgeClass(student.status || "inactive")}>
-                      {student.status === "active" ? "Active" : "Inactive"}
+                    <span className={getStatusBadgeClass(student.status)}>
+                      {getStatusText(student.status)}
                     </span>
                   </td>
                   <td className="action-cell">
@@ -105,22 +168,24 @@ const CourseStudentTable = ({
                       <div className="dropdown-menu">
                         <div className="dropdown-header">Actions</div>
                         <div className="dropdown-divider"></div>
-                        <button 
-                          className="dropdown-item" 
-                          onClick={() => onToggleStatus(student.id)}
-                        >
-                          {student.status === "active" ? (
-                            <>
-                              <UserX size={14} />
-                              <span>Set Inactive</span>
-                            </>
-                          ) : (
-                            <>
-                              <UserCheck size={14} />
-                              <span>Set Active</span>
-                            </>
-                          )}
-                        </button>
+                        {canToggleStatus(student.status) && (
+                          <button 
+                            className="dropdown-item" 
+                            onClick={() => onToggleStatus(student.id)}
+                          >
+                            {(student.status === "active" || student.status === "APPROVED" || student.status === "IN_PROGRESS") ? (
+                              <>
+                                <UserX size={14} />
+                                <span>Set Inactive</span>
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck size={14} />
+                                <span>Set Active</span>
+                              </>
+                            )}
+                          </button>
+                        )}
                         <div className="dropdown-divider"></div>
                         <button 
                           className="dropdown-item delete" 

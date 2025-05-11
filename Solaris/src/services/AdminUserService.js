@@ -42,6 +42,55 @@ class AdminUserService {
     return api.patch(`/api/admin/users/${userId}/deactivate`);
   };
   
+  // Get all students not enrolled in a specific course using client-side filtering
+  getAvailableStudentsForCourse = async (courseId) => {
+    try {
+      // Step 1: Get all students (users with STUDENT role)
+      const studentsResponse = await this.getUsers({ role: "STUDENT" });
+      const allStudents = studentsResponse.data.content || studentsResponse.data || [];
+      
+      // Step 2: Get current enrollments for the course
+      const enrollmentsResponse = await api.get(`/api/enrollments/course/${courseId}`);
+      const enrollments = enrollmentsResponse.data || [];
+      
+      // Step 3: Create a set of enrolled student IDs for quick lookups
+      const enrolledStudentIds = new Set();
+      
+      // Handle different possible data structures for enrollments
+      enrollments.forEach(enrollment => {
+        // Try to extract the student ID from different possible properties
+        const studentId = enrollment.studentId || 
+                          (enrollment.user && enrollment.user.id) ||
+                          (enrollment.student && enrollment.student.id);
+        
+        if (studentId) {
+          enrolledStudentIds.add(studentId);
+        }
+      });
+      
+      console.log(`Found ${enrolledStudentIds.size} students already enrolled in course ${courseId}`);
+      
+      // Step 4: Filter out students who are already enrolled
+      const availableStudents = allStudents.filter(student => !enrolledStudentIds.has(student.id));
+      
+      console.log(`Found ${availableStudents.length} available students for course ${courseId}`);
+      
+      // Step 5: Return in the same format as your API would
+      return {
+        data: {
+          content: availableStudents,
+          totalElements: availableStudents.length,
+          totalPages: 1,
+          size: availableStudents.length,
+          number: 0
+        }
+      };
+    } catch (error) {
+      console.error(`Error fetching available students for course ${courseId}:`, error);
+      throw error;
+    }
+  };
+  
   // Helper function to normalize user data before sending to API
   normalizeUserData(userData) {
     const normalizedData = { ...userData };

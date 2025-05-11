@@ -23,6 +23,7 @@ import OAuthHandler from './components/auth/OAuthHandler';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { CourseProvider } from './context/CourseContext';
 
 // Import admin pages
 import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
@@ -36,6 +37,11 @@ import SecurityManage from './components/pages/Admin/Security';
 
 // Import instructor pages
 import InstructorDashboard from './components/pages/Dashboards/InstructorDashboard';
+import InstructorCourses from './components/pages/instructor/InstructorCourses';
+import InstructorCourseDetail from './components/pages/instructor/InstructorCourseDetail';
+import CourseContent from './components/pages/instructor/CourseContent';
+import StudentProgress from './components/pages/instructor/StudentProgress';
+import StudentProgressDetail from './components/pages/instructor/StudentProgressDetail';
 
 // Import course management components
 import CourseDetails from './components/pages/Admin/CourseDetails';
@@ -57,80 +63,89 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <ErrorBoundary>
-          <Router>
-            <Toaster 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#333',
-                  color: '#fff',
-                  borderRadius: '8px',
-                  padding: '12px 20px',
-                },
-                success: {
+        <CourseProvider>
+          <ErrorBoundary>
+            <Router>
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
                   style: {
-                    background: '#10B981',
+                    background: '#333',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    padding: '12px 20px',
                   },
-                },
-                error: {
-                  style: {
-                    background: '#EF4444',
+                  success: {
+                    style: {
+                      background: '#10B981',
+                    },
                   },
-                },
-              }}
-            />
-            
-            <Routes>
-              {/* Auth routes - public routes outside the main layout */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/oauth2/success" element={<OAuthHandler />} />
+                  error: {
+                    style: {
+                      background: '#EF4444',
+                    },
+                  },
+                }}
+              />
               
-              {/* Student routes - protected by authentication */}
-              <Route element={<ProtectedRoute requiredRole="student" />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/:courseId" element={<CourseView />} />
-                <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/assessments" element={<Assessments />} />
-                <Route path="/vr-lab" element={<VRLab />} />
-                <Route path="/clinical-skills" element={<ClinicalSkills />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/community" element={<Community />} />
-              </Route>
-              
-              {/* Admin routes - protected by admin role */}
-              <Route element={<ProtectedRoute requiredRole="admin" />}>
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/departments" element={<Departments />} />
-                <Route path="/admin/courses" element={<CourseManagement />} />
-                <Route path="/admin/courses/:id" element={<CourseDetails />} />
-                <Route path="/admin/courses/:id/settings" element={<CourseSettings />} />
-                <Route path="/admin/courses/:id/students" element={<CourseStudents />} />
-                <Route path="/admin/content" element={<ContentManagement />} />
-                <Route path="/admin/assessments" element={<AssessmentManagement />} />
-                <Route path="/admin/certificates" element={<CertificateManagement />} />
-                <Route path="/admin/security" element={<SecurityManage />} />
-              </Route>
-              
-              {/* Instructor routes - protected by instructor role */}
-              <Route element={<ProtectedRoute requiredRole="instructor" />}>
-                <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
-                {/* Add more instructor routes as you implement them */}
-              </Route>
+              <Routes>
+                {/* Auth routes - public routes outside the main layout */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/oauth2/success" element={<OAuthHandler />} />
+                
+                {/* Student routes - protected by authentication */}
+                <Route element={<ProtectedRoute requiredRole="student" />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/courses/:courseId" element={<CourseView />} />
+                  <Route path="/courses/:courseId/content/:moduleId/:itemId" element={<ContentViewer />} />
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/assessments" element={<Assessments />} />
+                  <Route path="/vr-lab" element={<VRLab />} />
+                  <Route path="/clinical-skills" element={<ClinicalSkills />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/community" element={<Community />} />
+                </Route>
+                
+                {/* Admin routes - protected by admin role */}
+                <Route element={<ProtectedRoute requiredRole="admin" />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/users" element={<UserManagement />} />
+                  <Route path="/admin/departments" element={<Departments />} />
+                  <Route path="/admin/courses" element={<CourseManagement />} />
+                  <Route path="/admin/courses/:id" element={<CourseDetails />} />
+                  <Route path="/admin/courses/:id/settings" element={<CourseSettings />} />
+                  <Route path="/admin/courses/:id/students" element={<CourseStudents />} />
+                  <Route path="/admin/content" element={<ContentManagement />} />
+                  <Route path="/admin/assessments" element={<AssessmentManagement />} />
+                  <Route path="/admin/certificates" element={<CertificateManagement />} />
+                  <Route path="/admin/security" element={<SecurityManage />} />
+                </Route>
+                
+               {/* Instructor routes - protected by instructor role */}
+                  <Route element={<ProtectedRoute requiredRole="instructor" />}>
+                    <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+                    <Route path="/instructor/courses" element={<InstructorCourses />} />
+                    <Route path="/instructor/courses/:id" element={<InstructorCourseDetail />} />
+                    <Route path="/instructor/courses/:id/content" element={<CourseContent />} />
+                    <Route path="/instructor/student-progress" element={<StudentProgress />} />
+                    <Route path="/instructor/student-progress/:studentId" element={<StudentProgressDetail />} />
+                    <Route path="/instructor/content-management" element={<ContentManagement />} />
+                    <Route path="/instructor/assessment-management" element={<AssessmentManagement />} />
+                    <Route path="/instructor/calendar" element={<Calendar />} />
+                  </Route>
 
-              {/* Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Router>
-        </ErrorBoundary>
+                  {/* Catch-all redirect */}
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </Router>
+          </ErrorBoundary>
+        </CourseProvider>
       </NotificationProvider>
     </AuthProvider>
   );
