@@ -30,50 +30,137 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        // Get all courses
-        const response = await CourseService.getAllCourses();
-        console.log("Courses response:", response);
+        // Get the current user ID from auth context or local storage
+        const currentUserId = localStorage.getItem('userId') || 1; // Fallback to 1 for testing
         
-        // Process and categorize courses
-        if (response.data) {
-          // Handle both mock data and backend API formats
-          const allCourses = Array.isArray(response.data) 
-            ? response.data  // Direct array (from mock data)
-            : response.data._embedded?.entityModelList || []; // From Spring HATEOAS format
-          
-          console.log("All courses:", allCourses);
-          
-          // Transform backend data to match frontend structure if needed
-          const transformedCourses = allCourses.map(course => ({
-            id: course.id,
-            title: course.title,
-            code: course.code || `CODE${course.id}`, // Use provided code or generate one
-            description: course.description,
-            department: course.department || course.departmentName || 'General',
-            semester: course.semester || determineSemester(course),
-            credits: course.credits || 3, // Default if not provided
-            instructor: course.instructor?.name || course.instructorEmail || 'Unknown Instructor',
-            enrolled: course.enrolled || course.currentEnrollment || 0,
-            progress: course.progress || calculateProgress(course),
-            imageUrl: course.imageUrl || getPlaceholderImage(course),
-            status: course.status || determineStatus(course),
-            grade: course.grade || (course.averageRating ? convertToLetterGrade(course.averageRating) : null),
-            isArchived: course.isArchived || course.status === 'completed'
-          }));
-          
-          console.log("Transformed courses:", transformedCourses);
-          
-          // Separate active and archived courses
-          setActiveCourses(transformedCourses.filter(course => !course.isArchived));
-          setArchivedCourses(transformedCourses.filter(course => course.isArchived));
-        } else {
-          console.warn("No data found in response");
+        console.log(`Fetching enrollments for student ID: ${currentUserId}`);
+        
+        // Step 1: Get all enrollments for the student
+        const enrollmentsResponse = await CourseService.getStudentEnrollments(currentUserId);
+        console.log("Enrollments response:", enrollmentsResponse);
+        
+        if (!enrollmentsResponse?.data) {
+          throw new Error("No enrollment data returned");
+        }
+        
+        const enrollments = Array.isArray(enrollmentsResponse.data) 
+          ? enrollmentsResponse.data 
+          : enrollmentsResponse.data._embedded?.enrollmentDTOList || [];
+        
+        console.log("Processed enrollments:", enrollments);
+        
+        if (enrollments.length === 0) {
           setActiveCourses([]);
           setArchivedCourses([]);
+          return;
         }
+        
+        // Step 2: Fetch full course details for each enrollment
+        const coursePromises = enrollments.map(enrollment => 
+          CourseService.getCourseById(enrollment.courseId)
+            .then(resp => {
+              const courseData = resp.data;
+              
+              // Merge course data with enrollment data
+              return {
+                id: courseData.id,
+                title: courseData.title || courseData.name || enrollment.courseName || 'Untitled Course',
+                code: courseData.code || `COURSE-${courseData.id}`,
+                description: courseData.description || 'No description available',
+                department: courseData.department || courseData.departmentName || 'General',
+                semester: courseData.semester || (courseData.startDate ? determineSemester(courseData) : 'Current Term'),
+                credits: courseData.credits || 3,
+                instructor: courseData.instructor?.name || courseData.instructorName || 'Unknown',
+                enrolled: courseData.enrolledCount || courseData.currentEnrollment || 0,
+                
+                // Use enrollment-specific data for student progress
+                progress: enrollment.progress || 0,
+                status: getStatusFromEnrollment(enrollment.status),
+                grade: enrollment.grade || null,
+                lastAccessed: enrollment.lastAccessDate,
+                enrollmentDate: enrollment.enrollmentDate,
+                isArchived: enrollment.status === 'COMPLETED' || enrollment.status === 'DROPPED',
+                
+                // Visual elements
+                imageUrl: courseData.imageUrl || `https://source.unsplash.com/random/300x200?${encodeURIComponent(courseData.title || 'education')}`
+              };
+            })
+            .catch(err => {
+              console.error(`Error fetching details for course ${enrollment.courseId}:`, err);
+              // Create a fallback object with enrollment data only
+              return {
+                id: enrollment.courseId,
+                title: enrollment.courseName || `Course #${enrollment.courseId}`,
+                code: `COURSE-${enrollment.courseId}`,
+                description: 'Course details could not be loaded',
+                department: 'Unknown',
+                semester: 'Current Term',
+                progress: enrollment.progress || 0,
+                status: getStatusFromEnrollment(enrollment.status),
+                grade: enrollment.grade || null,
+                isArchived: enrollment.status === 'COMPLETED' || enrollment.status === 'DROPPED',
+                imageUrl: `https://source.unsplash.com/random/300x200?education`
+              };
+            })
+        );
+        
+        // Wait for all course data to be fetched
+        const coursesData = await Promise.all(coursePromises);
+        console.log("Transformed courses with enrollment data:", coursesData);
+        
+        // Separate active and archived courses
+        setActiveCourses(coursesData.filter(course => !course.isArchived));
+        setArchivedCourses(coursesData.filter(course => course.isArchived));
+        
       } catch (err) {
-        console.error('Error fetching courses:', err);
-        setError('Failed to load courses. Please try again later.');
+        console.error('Error fetching enrolled courses:', err);
+        setError('Failed to load your enrolled courses. Please try again later.');
+        
+        // Use example data for development as fallback
+        const exampleCourses = [
+          {
+            id: 1,
+            title: "Introduction to React",
+            description: "Learn the fundamentals of React development",
+            department: "Computer Science",
+            semester: "Spring 2025",
+            credits: 3,
+            instructor: "John Smith",
+            enrolled: 24,
+            progress: 65,
+            status: "in-progress",
+            imageUrl: "https://source.unsplash.com/random/300x200?react"
+          },
+          {
+            id: 2,
+            title: "Advanced Web Development",
+            description: "Master modern web development techniques",
+            department: "Computer Science",
+            semester: "Spring 2025",
+            credits: 4,
+            instructor: "Jane Doe",
+            enrolled: 18,
+            progress: 30,
+            status: "in-progress",
+            imageUrl: "https://source.unsplash.com/random/300x200?web"
+          },
+          {
+            id: 3,
+            title: "UI/UX Design Principles",
+            description: "Learn how to create intuitive user interfaces",
+            department: "Design",
+            semester: "Fall 2024",
+            credits: 3,
+            instructor: "Michael Johnson",
+            enrolled: 32,
+            isArchived: true,
+            grade: "A",
+            imageUrl: "https://source.unsplash.com/random/300x200?design"
+          }
+        ];
+        
+        setActiveCourses(exampleCourses.filter(course => !course.isArchived));
+        setArchivedCourses(exampleCourses.filter(course => course.isArchived));
       } finally {
         setLoading(false);
       }
@@ -95,35 +182,15 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
     return `Fall ${year}`;
   };
 
-  // Helper function to calculate progress
-  const calculateProgress = (course) => {
-    // In a real implementation, this would use actual progress data
-    return Math.floor(Math.random() * 100); // Placeholder random progress
-  };
-
-  // Helper function to get placeholder image
-  const getPlaceholderImage = (course) => {
-    // In a real implementation, this would use actual course images
-    return `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title || 'education')}`;
-  };
-
-  // Helper function to determine course status
-  const determineStatus = (course) => {
-    // In a real implementation, this would use actual course status
-    if (course.isArchived) return 'completed';
-    
-    const progress = course.progress || calculateProgress(course);
-    if (progress > 0) return 'in-progress';
-    return 'upcoming';
-  };
-
-  // Helper function to convert numerical grade to letter grade
-  const convertToLetterGrade = (grade) => {
-    if (grade >= 90) return 'A';
-    if (grade >= 80) return 'B';
-    if (grade >= 70) return 'C';
-    if (grade >= 60) return 'D';
-    return 'F';
+  // Helper function to convert enrollment status to display status
+  const getStatusFromEnrollment = (enrollmentStatus) => {
+    switch (enrollmentStatus) {
+      case 'ACTIVE': return 'in-progress';
+      case 'PENDING': return 'upcoming';
+      case 'COMPLETED': return 'completed';
+      case 'DROPPED': return 'dropped';
+      default: return 'in-progress';
+    }
   };
 
   // Filter active courses based on search term and filters
@@ -154,11 +221,26 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
     );
   });
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Never';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
+    return date.toLocaleDateString();
+  };
+
   if (loading) {
     return <div className="courses-loading">Loading courses...</div>;
   }
 
-  if (error) {
+  if (error && activeCourses.length === 0 && archivedCourses.length === 0) {
     return <div className="courses-error">{error}</div>;
   }
 
@@ -236,6 +318,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
                         {course.description}
                       </p>
                       
+                      {/* Updated course meta section */}
                       <div className="course-meta">
                         <div className="meta-item">
                           <Calendar className="meta-icon" />
@@ -245,10 +328,12 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
                           <Clock className="meta-icon" />
                           <span>{course.credits} Credits</span>
                         </div>
-                        <div className="meta-item">
-                          <Users className="meta-icon" />
-                          <span>{course.enrolled}</span>
-                        </div>
+                        {course.lastAccessed && (
+                          <div className="meta-item">
+                            <Clock className="meta-icon" />
+                            <span>Accessed: {formatDate(course.lastAccessed)}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <button className="course-action">

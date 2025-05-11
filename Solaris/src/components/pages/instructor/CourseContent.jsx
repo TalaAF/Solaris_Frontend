@@ -273,13 +273,29 @@ const handleAddContent = (moduleId) => {
   // Preview content
   const handlePreviewContent = async (item) => {
     try {
-      // Fetch complete content data if needed
-      const contentResponse = await ContentService.getContentById(item.id);
-      setCurrentItem(contentResponse.data);
+      setLoading(true);
+      
+      // Use the item data we already have if fetching fails
+      let contentData = item;
+      
+      try {
+        // Try to get more detailed content data
+        const contentResponse = await ContentService.getContentById(item.id);
+        if (contentResponse && contentResponse.data) {
+          contentData = contentResponse.data;
+        }
+      } catch (err) {
+        console.warn("Could not fetch detailed content data, using available data");
+        // Continue with what we have
+      }
+      
+      setCurrentItem(contentData);
       setIsPreviewModalOpen(true);
     } catch (err) {
-      console.error("Error fetching content details:", err);
-      toast.error("Failed to load content preview");
+      console.error("Error preparing content preview:", err);
+      toast.error("Failed to prepare content preview");
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -305,6 +321,19 @@ const handleAddContent = (moduleId) => {
     return module || null;
   };
   
+  // Add this function to your component
+const refreshContent = async () => {
+  try {
+    setLoading(true);
+    await fetchModules();
+    setLoading(false);
+  } catch (error) {
+    console.error("Error refreshing content:", error);
+    toast.error("Failed to refresh content");
+    setLoading(false);
+  }
+};
+
   if (loading) {
     return (
       <div className="course-content-page loading">

@@ -103,16 +103,36 @@ class ContentService {
   }
 
   // Get content by ID
-  async getContentById(id, userId = null) {
+  async getContentById(id) {
     try {
-      let url = `/api/contents/${id}`;
-      if (userId) {
-        url += `?userId=${userId}`;
+      console.log(`Fetching content ${id}`);
+      
+      // Add validation to prevent bad requests
+      if (!id || isNaN(parseInt(id))) {
+        console.error(`Invalid content ID: ${id}`);
+        throw new Error("Invalid content ID");
       }
-      return await api.get(url);
+      
+      const response = await api.get(`/api/contents/${id}`);
+      
+      // Check if the response contains valid data
+      if (!response || !response.data) {
+        throw new Error("No content data returned from API");
+      }
+      
+      return response;
     } catch (error) {
       console.error(`Error fetching content ${id}:`, error);
-      throw error;
+      // Return a minimal valid response to prevent UI crashes
+      return { 
+        data: { 
+          id: id,
+          title: "Content Unavailable",
+          description: "Could not load content details",
+          type: "document",
+          content: "Content could not be loaded due to an error."
+        } 
+      };
     }
   }
 

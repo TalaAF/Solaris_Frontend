@@ -168,36 +168,6 @@ class CourseService {
     }
   }
   
-  // Get course modules
-   async enrollStudent(courseId, studentId) {
-    try {
-      return await api.post(`/api/courses/${courseId}/students/${studentId}`);
-    } catch (error) {
-      console.error(`Error enrolling student ${studentId} in course ${courseId}:`, error);
-      throw error;
-    }
-  }
-
-  // Unenroll student from a course
-  async unenrollStudent(courseId, studentId) {
-    try {
-      return await api.delete(`/api/courses/${courseId}/students/${studentId}`);
-    } catch (error) {
-      console.error(`Error unenrolling student ${studentId} from course ${courseId}:`, error);
-      throw error;
-    }
-  }
-
-  // Get course statistics
-  async getCourseStatistics(courseId) {
-    try {
-      return await api.get(`/api/courses/${courseId}/statistics`);
-    } catch (error) {
-      console.error(`Error fetching statistics for course ${courseId}:`, error);
-      throw error;
-    }
-  }
-  
   // ===== MODULE RELATED FUNCTIONS =====
   
   // Get course modules - UPDATED to match backend endpoint
@@ -210,16 +180,22 @@ class CourseService {
         return { data: [] };
       }
       
-      const modules = response.data;
+      const modules = Array.isArray(response.data) 
+        ? response.data 
+        : response.data._embedded?.entityModelList || [];
       
       // Use ContentService to get content for each module
       const modulesWithContent = await Promise.all(modules.map(async module => {
         try {
           // Use the ContentService method that matches your backend
           const contentsResponse = await ContentService.getContentsByModule(module.id);
+          const contents = Array.isArray(contentsResponse.data)
+            ? contentsResponse.data
+            : contentsResponse.data._embedded?.entityModelList || [];
+            
           return {
             ...module,
-            items: contentsResponse.data || []
+            items: contents
           };
         } catch (contentErr) {
           console.error(`Error fetching content for module ${module.id}:`, contentErr);
@@ -277,7 +253,7 @@ class CourseService {
     }
   }
   
-  // Get module contents order - NEW to match backend endpoint
+  // Get module contents order
   async getModuleContentsOrder(moduleId) {
     try {
       return await api.get(`/api/modules/${moduleId}/contents-order`);
@@ -286,9 +262,33 @@ class CourseService {
       throw error;
     }
   }
-  
-  // Note: Delete module is not present in the backend controller
-  // If you need this functionality, backend changes would be required
+
+  // Get enrollments for a student
+  async getStudentEnrollments(studentId) {
+  try {
+    console.log(`Fetching enrollments for student ${studentId}`);
+    return await api.get(`/api/enrollments/student/${studentId}`);
+  } catch (error) {
+    console.error(`Error fetching enrollments for student ${studentId}:`, error);
+    
+    // Add detailed error information
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      console.error("Error response headers:", error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error("No response received:", error.request);
+    } else {
+      // Something happened in setting up the request
+      console.error("Error setting up request:", error.message);
+    }
+    
+    throw error;
+  }
+}
 }
 
 export default new CourseService();
