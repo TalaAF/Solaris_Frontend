@@ -1,31 +1,21 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-// Create the context
 const CourseContext = createContext();
 
-// Create the provider component
 export const CourseProvider = ({ children }) => {
-  const [courseData, setCourseData] = useState(null);
-
-  const setCurrentCourse = (course) => {
-    setCourseData(course);
-  };
-
-  const clearCurrentCourse = () => {
-    setCourseData(null);
-  };
-
+  const [currentCourse, setCurrentCourse] = useState(null);
+  
   return (
-    <CourseContext.Provider value={{ courseData, setCurrentCourse, clearCurrentCourse }}>
+    <CourseContext.Provider value={{ currentCourse, setCurrentCourse }}>
       {children}
     </CourseContext.Provider>
   );
 };
 
-// Create the hook for using the context
 export const useCourseContext = () => {
   const context = useContext(CourseContext);
+  if (!context) {
+    throw new Error('useCourseContext must be used within a CourseProvider');
+  }
   return context;
 };
-
-export default CourseContext;

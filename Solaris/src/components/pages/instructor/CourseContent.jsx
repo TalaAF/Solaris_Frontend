@@ -348,7 +348,7 @@ const CourseContent = () => {
           <div className="modules-header">
             <h2>Modules</h2>
             <button 
-              className="solaris-button icon-button"
+              className="solaris-button .add-module-button"
               onClick={() => setIsAddModuleModalOpen(true)}
               title="Add Module"
             >

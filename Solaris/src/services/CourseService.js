@@ -1,166 +1,117 @@
 // CourseService.js
-// Service to handle API calls to the course backend with fallback to mock data
+// Service to handle API calls to the course backend
 
-import axios from "axios";
-import api from "./api"; // Import the api service
-
-const API_URL = "http://localhost:8080/api";
-const USE_MOCK = false; // Toggle this when your backend is ready
-
-// Mock data
-const mockCourses = [
-  {
-    id: 1,
-    title: "Human Anatomy & Physiology",
-    code: "MED201",
-    description: "A comprehensive course on human anatomy and physiology covering body systems, structures, and functions.",
-    instructor: {
-      id: 1,
-      name: "Dr. Sarah Smith",
-      title: "Professor of Anatomy",
-      avatar: "https://i.pravatar.cc/150?img=5"
-    },
-    progress: 35,
-    modules: [
-      { id: 1, title: "Introduction to Anatomy", status: "completed" },
-      { id: 2, title: "Cell Structure and Function", status: "in-progress" },
-      { id: 3, title: "Tissues and Organs", status: "not-started" }
-    ]
-  },
-  {
-    id: 2,
-    title: "Introduction to Biochemistry",
-    code: "CHEM301",
-    description: "Explore the chemical processes within and related to living organisms, with focus on protein structure, enzyme function, and cellular metabolism.",
-    instructor: {
-      id: 2,
-      name: "Dr. Robert Johnson",
-      title: "Associate Professor of Biochemistry",
-      avatar: "https://i.pravatar.cc/150?img=8"
-    },
-    progress: 12,
-    modules: [
-      { id: 4, title: "Introduction to Biochemistry", status: "in-progress" },
-      { id: 5, title: "Protein Structure and Function", status: "not-started" },
-      { id: 6, title: "Enzymes and Metabolism", status: "not-started" }
-    ]
-  },
-  {
-    id: 3,
-    title: "Clinical Pathophysiology",
-    code: "MED405",
-    description: "Advanced examination of disease processes and the pathological basis of clinical symptoms, focusing on organ system dysfunction and therapeutic approaches.",
-    instructor: {
-      id: 1,
-      name: "Dr. Sarah Smith",
-      title: "Professor of Anatomy",
-      avatar: "https://i.pravatar.cc/150?img=5"
-    },
-    progress: 0,
-    modules: [
-      { id: 7, title: "Cardiovascular Pathophysiology", status: "not-started" },
-      { id: 8, title: "Respiratory System Disorders", status: "not-started" },
-      { id: 9, title: "Neurological Diseases", status: "not-started" }
-    ]
-  }
-];
-
-const mockRequirements = [
-  { id: 1, courseId: 1, type: "quiz", minScore: 70, title: "Final Exam" },
-  { id: 2, courseId: 1, type: "assignment", title: "Research Paper" }
-];
-
-const mockStatistics = {
-  averageCompletionPercentage: 35,
-  studentsEnrolled: 125,
-  averageRating: 4.7
-};
+import api from "./api";
+import ContentService from "./ContentService"; // Import ContentService
 
 class CourseService {
-  // Helper for mock responses
-  async mockDelay(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  
-  // Get all courses
-  async getAllCourses() {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: mockCourses };
-    }
-    
+  // Get all courses (paginated with filters)
+  async getCourses(page = 0, size = 10, sortBy = "id", sortDirection = "asc", filters = {}) {
     try {
-      return await axios.get(`${API_URL}/courses`);
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append("page", page);
+      params.append("size", size);
+      params.append("sortBy", sortBy);
+      params.append("sortDirection", sortDirection);
+      
+      // Add any filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value);
+        }
+      });
+      
+      return await api.get(`/api/courses?${params.toString()}`);
     } catch (error) {
       console.error("Error fetching courses:", error);
-      await this.mockDelay();
-      return { data: mockCourses };
+      throw error;
+    }
+  }
+
+  // Get all courses (without pagination)
+  async getAllCourses() {
+    try {
+      return await api.get('/api/courses/all');
+    } catch (error) {
+      console.error("Error fetching all courses:", error);
+      throw error;
     }
   }
 
   // Get course by ID
   async getCourseById(id) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const course = mockCourses.find(c => c.id == id);
-      if (!course) throw new Error("Course not found");
-      return { data: course };
-    }
-    
     try {
-      const response = await api.get(`/api/courses/${id}`);
+      if (!id) {
+        throw new Error("Course ID is required");
+      }
+      
+      // Ensure ID is a number if needed by your API
+      const numericId = isNaN(parseInt(id, 10)) ? id : parseInt(id, 10);
+      
+      const response = await api.get(`/api/courses/${numericId}`);
+      
+      // Check if the response actually has data
+      if (!response.data) {
+        throw new Error("Course not found");
+      }
+      
       return response;
     } catch (error) {
       console.error(`Error fetching course ${id}:`, error);
-      throw error;
+      
+      if (error.response?.status === 404) {
+        throw new Error("Course not found");
+      }
+      
+      throw error.message || "Failed to load course details";
     }
   }
 
   // Get courses by department
   async getCoursesByDepartment(departmentId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: mockCourses }; // Mock implementation returns all courses
-    }
-    
     try {
-      return await axios.get(`${API_URL}/courses/department/${departmentId}`);
+      return await api.get(`/api/courses/department/${departmentId}`);
     } catch (error) {
       console.error(`Error fetching courses for department ${departmentId}:`, error);
-      await this.mockDelay();
-      return { data: mockCourses };
+      throw error;
     }
   }
 
   // Get courses by instructor
   async getCoursesByInstructor(instructorId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const filtered = mockCourses.filter(c => c.instructor?.id == instructorId);
-      return { data: filtered };
-    }
-    
     try {
-      return await axios.get(`${API_URL}/courses/instructor/${instructorId}`);
+      return await api.get(`/api/courses/instructor/${instructorId}`);
     } catch (error) {
       console.error(`Error fetching courses for instructor ${instructorId}:`, error);
-      await this.mockDelay();
-      const filtered = mockCourses.filter(c => c.instructor?.id == instructorId);
-      return { data: filtered };
+      throw error;
+    }
+  }
+
+  // Get courses with user progress
+  async getCoursesWithProgress(userId) {
+    try {
+      return await api.get(`/api/courses/user/${userId}`);
+    } catch (error) {
+      console.error(`Error fetching courses with progress for user ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  // Get course with user progress
+  async getCourseWithProgress(courseId, userId) {
+    try {
+      return await api.get(`/api/courses/${courseId}/user/${userId}`);
+    } catch (error) {
+      console.error(`Error fetching course with progress for user ${userId}:`, error);
+      throw error;
     }
   }
 
   // Create a new course
   async createCourse(courseData) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const newCourse = { ...courseData, id: mockCourses.length + 1 };
-      mockCourses.push(newCourse);
-      return { data: newCourse };
-    }
-    
     try {
-      return await axios.post(`${API_URL}/courses`, courseData);
+      return await api.post('/api/courses', courseData);
     } catch (error) {
       console.error("Error creating course:", error);
       throw error;
@@ -169,16 +120,8 @@ class CourseService {
 
   // Update a course
   async updateCourse(id, courseData) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const index = mockCourses.findIndex(c => c.id == id);
-      if (index === -1) throw new Error("Course not found");
-      mockCourses[index] = { ...mockCourses[index], ...courseData };
-      return { data: mockCourses[index] };
-    }
-    
     try {
-      return await axios.put(`${API_URL}/courses/${id}`, courseData);
+      return await api.put(`/api/courses/${id}`, courseData);
     } catch (error) {
       console.error(`Error updating course ${id}:`, error);
       throw error;
@@ -187,16 +130,8 @@ class CourseService {
 
   // Delete a course
   async deleteCourse(id) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const index = mockCourses.findIndex(c => c.id == id);
-      if (index === -1) throw new Error("Course not found");
-      const deleted = mockCourses.splice(index, 1)[0];
-      return { data: deleted };
-    }
-    
     try {
-      return await axios.delete(`${API_URL}/courses/${id}`);
+      return await api.delete(`/api/courses/${id}`);
     } catch (error) {
       console.error(`Error deleting course ${id}:`, error);
       throw error;
@@ -205,13 +140,8 @@ class CourseService {
 
   // Enroll student in a course
   async enrollStudent(courseId, studentId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: { success: true } };
-    }
-    
     try {
-      return await axios.post(`${API_URL}/courses/${courseId}/students/${studentId}`);
+      return await api.post(`/api/courses/${courseId}/students/${studentId}`);
     } catch (error) {
       console.error(`Error enrolling student ${studentId} in course ${courseId}:`, error);
       throw error;
@@ -220,13 +150,8 @@ class CourseService {
 
   // Unenroll student from a course
   async unenrollStudent(courseId, studentId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: { success: true } };
-    }
-    
     try {
-      return await axios.delete(`${API_URL}/courses/${courseId}/students/${studentId}`);
+      return await api.delete(`/api/courses/${courseId}/students/${studentId}`);
     } catch (error) {
       console.error(`Error unenrolling student ${studentId} from course ${courseId}:`, error);
       throw error;
@@ -235,88 +160,135 @@ class CourseService {
 
   // Get course statistics
   async getCourseStatistics(courseId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: mockStatistics };
-    }
-    
     try {
-      return await axios.get(`${API_URL}/courses/${courseId}/statistics`);
+      return await api.get(`/api/courses/${courseId}/statistics`);
     } catch (error) {
       console.error(`Error fetching statistics for course ${courseId}:`, error);
-      await this.mockDelay();
-      return { data: mockStatistics };
+      throw error;
     }
   }
-
-  // Get completion requirements for a course
-  async getCompletionRequirements(courseId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const requirements = mockRequirements.filter(r => r.courseId == courseId);
-      return { data: requirements };
-    }
-    
+  
+  // Get course modules
+   async enrollStudent(courseId, studentId) {
     try {
-      return await axios.get(`${API_URL}/completion-requirements/course/${courseId}`);
+      return await api.post(`/api/courses/${courseId}/students/${studentId}`);
     } catch (error) {
-      console.error(`Error fetching completion requirements for course ${courseId}:`, error);
-      await this.mockDelay();
-      const requirements = mockRequirements.filter(r => r.courseId == courseId);
-      return { data: requirements };
-    }
-  }
-
-  // Create completion requirement
-  async createCompletionRequirement(courseId, requirementData) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const newRequirement = {
-        ...requirementData,
-        id: mockRequirements.length + 1,
-        courseId
-      };
-      mockRequirements.push(newRequirement);
-      return { data: newRequirement };
-    }
-    
-    try {
-      return await axios.post(`${API_URL}/completion-requirements/course/${courseId}`, requirementData);
-    } catch (error) {
-      console.error(`Error creating completion requirement for course ${courseId}:`, error);
+      console.error(`Error enrolling student ${studentId} in course ${courseId}:`, error);
       throw error;
     }
   }
 
-  // Verify course completion for a student
-  async verifyCompletion(studentId, courseId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      // Mock implementation - always return incomplete for demo
-      return { data: { completed: false, missingRequirements: [1, 2] } };
-    }
-    
+  // Unenroll student from a course
+  async unenrollStudent(courseId, studentId) {
     try {
-      return await axios.get(`${API_URL}/completion-requirements/verify/${studentId}/${courseId}`);
+      return await api.delete(`/api/courses/${courseId}/students/${studentId}`);
     } catch (error) {
-      console.error(`Error verifying completion for student ${studentId} in course ${courseId}:`, error);
-      await this.mockDelay();
-      return { data: { completed: false, missingRequirements: [1, 2] } };
-    }
-  }
-
-  // Update course enrollment count
-  async updateCourseEnrollmentCount(courseId) {
-    try {
-      // Call the specific API endpoint for updating enrollment count
-      const response = await api.post(`/api/admin/courses/${courseId}/update-enrollment`);
-      console.log(`Updated enrollment count for course ${courseId}:`, response);
-      return response;
-    } catch (error) {
-      console.error(`Error updating enrollment count for course ${courseId}:`, error);
+      console.error(`Error unenrolling student ${studentId} from course ${courseId}:`, error);
       throw error;
     }
   }
+
+  // Get course statistics
+  async getCourseStatistics(courseId) {
+    try {
+      return await api.get(`/api/courses/${courseId}/statistics`);
+    } catch (error) {
+      console.error(`Error fetching statistics for course ${courseId}:`, error);
+      throw error;
+    }
+  }
+  
+  // ===== MODULE RELATED FUNCTIONS =====
+  
+  // Get course modules - UPDATED to match backend endpoint
+  async getCourseModules(courseId) {
+    try {
+      // Get basic modules using the correct endpoint
+      const response = await api.get(`/api/modules/course/${courseId}`);
+      
+      if (!response || !response.data) {
+        return { data: [] };
+      }
+      
+      const modules = response.data;
+      
+      // Use ContentService to get content for each module
+      const modulesWithContent = await Promise.all(modules.map(async module => {
+        try {
+          // Use the ContentService method that matches your backend
+          const contentsResponse = await ContentService.getContentsByModule(module.id);
+          return {
+            ...module,
+            items: contentsResponse.data || []
+          };
+        } catch (contentErr) {
+          console.error(`Error fetching content for module ${module.id}:`, contentErr);
+          return {
+            ...module,
+            items: []
+          };
+        }
+      }));
+      
+      return { data: modulesWithContent };
+    } catch (error) {
+      console.error(`Error in getCourseModules for course ${courseId}:`, error);
+      return { data: [] };
+    }
+  }
+  
+  // Create module
+  async createModule(moduleData) {
+    try {
+      return await api.post('/api/modules', moduleData);
+    } catch (error) {
+      console.error('Error creating module:', error);
+      throw error;
+    }
+  }
+  
+  // Update module
+  async updateModule(moduleId, moduleData) {
+    try {
+      return await api.put(`/api/modules/${moduleId}`, moduleData);
+    } catch (error) {
+      console.error(`Error updating module ${moduleId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Get module by ID
+  async getModuleById(moduleId) {
+    try {
+      return await api.get(`/api/modules/${moduleId}`);
+    } catch (error) {
+      console.error(`Error fetching module ${moduleId}:`, error);
+      throw error;
+    }
+  }
+
+  // Reorder modules
+  async reorderModules(moduleOrderRequests) {
+    try {
+      return await api.post('/api/modules/reorder', moduleOrderRequests);
+    } catch (error) {
+      console.error('Error reordering modules:', error);
+      throw error;
+    }
+  }
+  
+  // Get module contents order - NEW to match backend endpoint
+  async getModuleContentsOrder(moduleId) {
+    try {
+      return await api.get(`/api/modules/${moduleId}/contents-order`);
+    } catch (error) {
+      console.error(`Error fetching contents order for module ${moduleId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Note: Delete module is not present in the backend controller
+  // If you need this functionality, backend changes would be required
 }
 
 export default new CourseService();

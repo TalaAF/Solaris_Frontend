@@ -1,93 +1,96 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ArrowUpDown } from 'lucide-react';
-import CoursesTabs from './components/CoursesTabs';
+import { Search, ArrowUpDown } from 'lucide-react';
 import CourseService from '../../../services/CourseService';
-import { useAuth } from '../../../context/AuthContext'; // Import auth context if available
+import { useAuth } from '../../../context/AuthContext';
 import { useCourseContext } from '../../../context/CourseContext';
 import EmptyState from '../../common/EmptyState';
 import './InstructorCourses.css';
 
 const InstructorCourses = () => {
-  // 1. First, initialize courses as an empty array to ensure it's always an array
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('title-asc');
   const navigate = useNavigate();
-  const { setCurrentCourse } = useCourseContext();
-
-  // If you have an auth context with user information
-  // const { user } = useAuth();
   
-  // Count courses by status
-  // 2. Update the courseCounts calculation to add defensive checks
-  const courseCounts = {
-    all: Array.isArray(courses) ? courses.length : 0,
-    active: Array.isArray(courses) ? courses.filter(course => course.status === 'active' || course.published).length : 0,
-    draft: Array.isArray(courses) ? courses.filter(course => course.status === 'draft' || !course.published).length : 0,
-    archived: Array.isArray(courses) ? courses.filter(course => course.status === 'archived' || course.archived).length : 0
-  };
+  // Get auth context
+  const { currentUser } = useAuth();
+  
+  // Get course context
+  const { setCurrentCourse } = useCourseContext();
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
         
-        // Call the appropriate CourseService method
-        // If your backend expects the instructor ID from the token:
-        // const response = await CourseService.getCoursesByInstructor('current');
+        // Check authentication
+        if (!currentUser) {
+          setError("You must be logged in to view courses");
+          setLoading(false);
+          return;
+        }
         
-        // Alternative approach if you need to pass a specific ID:
-        // const response = await CourseService.getCoursesByInstructor(user.id);
+        if (!currentUser.email) {
+          setError("User profile incomplete. Email is required.");
+          setLoading(false);
+          return;
+        }
         
-        // Option 1: Use the API endpoint that doesn't require an ID parameter
-        const response = await CourseService.getAllCourses();
+        // Simple approach: Get all courses and filter them
+        const response = await CourseService.getCourses(0, 1000); // Get a large number to ensure we get all
         
-        // Option 2: If you have the user context with ID available
-        // const { user } = useAuth();
-        // const response = await CourseService.getCoursesByInstructor(user.id);
-        
-        // Option 3: If you have a specific endpoint for instructor's own courses
-        // This would be the cleaner approach if available
-        // const response = await api.get('/api/instructor/courses');
-        
-        // 3. Fix the fetchCourses function to ensure we're always setting courses to an array
         if (response && response.data) {
           // Handle different possible API response formats
           let coursesData;
           
           if (Array.isArray(response.data)) {
-            // Response data is directly an array
             coursesData = response.data;
           } else if (response.data.content && Array.isArray(response.data.content)) {
-            // Response data has a content property that's an array (common in paged responses)
             coursesData = response.data.content;
           } else if (response.data.courses && Array.isArray(response.data.courses)) {
-            // Response data has a courses property that's an array
             coursesData = response.data.courses;
           } else {
-            // Fallback to empty array if no array can be found
             console.error("Could not find courses array in response:", response.data);
             coursesData = [];
           }
           
-          setCourses(coursesData);
-          console.log("Courses data:", coursesData);
+          // Filter for courses where this user is the instructor
+          const instructorCourses = coursesData.filter(course => {
+            // Check various ways the instructor might be specified in the course object
+            if (course.instructor === currentUser.email) return true;
+            if (course.instructorEmail === currentUser.email) return true;
+            if (course.instructor?.email === currentUser.email) return true;
+            if (course.instructor?.id === currentUser.id) return true;
+            
+            // Check instructors array if it exists
+            if (Array.isArray(course.instructors)) {
+              return course.instructors.some(instructor => 
+                instructor === currentUser.email ||
+                instructor.email === currentUser.email || 
+                instructor.id === currentUser.id
+              );
+            }
+            
+            return false;
+          });
+          
+          console.log(`Found ${instructorCourses.length} courses for instructor ${currentUser.email}`);
+          setCourses(instructorCourses);
         } else {
           console.error("Invalid response format:", response);
-          setCourses([]);  // Set to empty array
-          setError("Failed to load courses: Invalid response format");
+          setCourses([]);
+          setError("Failed to load assigned courses: Invalid response format");
         }
       } catch (err) {
         console.error("Error fetching instructor courses:", err);
-        setCourses([]);  // Set to empty array on error
+        setCourses([]);
         setError(
-          err.response?.data?.message || 
-          "Failed to load courses. Please try again later."
+          err.response?.data?.message || err.message || 
+          "Failed to load instructor courses. Please try again later."
         );
       } finally {
         setLoading(false);
@@ -95,9 +98,8 @@ const InstructorCourses = () => {
     };
 
     fetchCourses();
-  }, []);
+  }, [currentUser]);
 
-  // 4. Also make sure the filter function is using an array
   useEffect(() => {
     if (!Array.isArray(courses)) {
       setFilteredCourses([]);
@@ -106,24 +108,13 @@ const InstructorCourses = () => {
     
     let result = [...courses];
     
-    // Filter by status (tab)
-    if (activeTab !== 'all') {
-      if (activeTab === 'active') {
-        result = result.filter(course => course.status === 'active' || course.published);
-      } else if (activeTab === 'draft') {
-        result = result.filter(course => course.status === 'draft' || !course.published);
-      } else if (activeTab === 'archived') {
-        result = result.filter(course => course.status === 'archived' || course.archived);
-      }
-    }
-    
     // Apply search filter
     if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
       result = result.filter(course =>
-        course.title?.toLowerCase().includes(query) ||
-        course.code?.toLowerCase().includes(query) ||
-        course.description?.toLowerCase().includes(query)
+        (course.title || '').toLowerCase().includes(query) ||
+        (course.code || '').toLowerCase().includes(query) ||
+        (course.description || '').toLowerCase().includes(query)
       );
     }
     
@@ -133,11 +124,11 @@ const InstructorCourses = () => {
       let aValue, bValue;
       
       if (field === 'title') {
-        aValue = a.title || '';
-        bValue = b.title || '';
+        aValue = (a.title || '').toLowerCase();
+        bValue = (b.title || '').toLowerCase();
       } else if (field === 'date') {
-        aValue = new Date(a.updatedAt || a.createdAt).getTime();
-        bValue = new Date(b.updatedAt || b.createdAt).getTime();
+        aValue = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        bValue = new Date(b.updatedAt || b.createdAt || 0).getTime();
       } else if (field === 'students') {
         aValue = a.enrolledStudents || 0;
         bValue = b.enrolledStudents || 0;
@@ -151,7 +142,7 @@ const InstructorCourses = () => {
     });
     
     setFilteredCourses(result);
-  }, [courses, activeTab, searchQuery, sortOption]);
+  }, [courses, searchQuery, sortOption]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -210,24 +201,11 @@ const InstructorCourses = () => {
       <div className="instructor-dashboard-header">
         <div>
           <h1 className="instructor-title">My Courses</h1>
-          <p className="instructor-subtitle">Manage and organize your courses</p>
+          <p className="instructor-subtitle">Courses you are assigned to teach</p>
         </div>
-        <button 
-          className="solaris-button primary-button"
-          onClick={() => navigate('/instructor/courses/new')}
-        >
-          <Plus size={16} />
-          New Course
-        </button>
       </div>
       
       <div className="courses-actions">
-        <CoursesTabs 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab}
-          courseCounts={courseCounts}
-        />
-        
         <div className="search-filter-controls">
           <div className="search-container">
             <Search className="search-icon" size={16} />
@@ -240,34 +218,14 @@ const InstructorCourses = () => {
             />
           </div>
           
-          <div className="sort-container">
-            <ArrowUpDown className="sort-icon" size={16} />
-            <select 
-              className="sort-select"
-              value={sortOption}
-              onChange={handleSortChange}
-            >
-              <option value="title-asc">Name (A-Z)</option>
-              <option value="title-desc">Name (Z-A)</option>
-              <option value="date-desc">Recently Updated</option>
-              <option value="date-asc">Oldest First</option>
-              <option value="students-desc">Most Students</option>
-              <option value="students-asc">Fewest Students</option>
-            </select>
-          </div>
+         
         </div>
       </div>
       
       {filteredCourses.length === 0 ? (
         <EmptyState 
-          title="No courses found"
-          description={searchQuery ? "Try adjusting your search term or filter criteria" : "Create your first course to get started"}
-          action={
-            searchQuery ? null : {
-              label: "Create Course",
-              onClick: () => navigate('/instructor/courses/new')
-            }
-          }
+          title="No teaching assignments found"
+          description={searchQuery ? "Try adjusting your search term" : "You are not currently assigned to teach any courses"}
           icon="File"
         />
       ) : (
@@ -281,7 +239,7 @@ const InstructorCourses = () => {
               <div className="course-image-container">
                 <img 
                   src={course.coverImage || `https://source.unsplash.com/random/300x200?medicine,education`}
-                  alt={course.title}
+                  alt={course.title || 'Course'}
                   className="course-image"
                 />
                 <div className={`course-status ${getStatusClass(course)}`}>
@@ -290,11 +248,13 @@ const InstructorCourses = () => {
               </div>
               
               <div className="course-content">
-                <h2 className="course-title">{course.title}</h2>
+                <h2 className="course-title">{course.title || 'Untitled Course'}</h2>
                 <p className="course-description">
-                  {course.description?.length > 100 
-                    ? course.description.substring(0, 100) + '...' 
-                    : course.description}
+                  {course.description 
+                    ? (course.description.length > 100 
+                        ? course.description.substring(0, 100) + '...' 
+                        : course.description)
+                    : 'No description available'}
                 </p>
                 
                 <div className="course-meta">
@@ -306,21 +266,6 @@ const InstructorCourses = () => {
                       <span>Last updated: {course.updatedAt ? new Date(course.updatedAt).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </div>
-                  
-                  {course.progress !== undefined && (
-                    <div className="course-progress">
-                      <div className="progress-text">
-                        <span>Course Setup</span>
-                        <span>{course.progress}%</span>
-                      </div>
-                      <div className="progress-bar">
-                        <div 
-                          className="progress-fill" 
-                          style={{ width: `${course.progress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
