@@ -90,6 +90,18 @@ class ContentService {
     }
   }
 
+  // Replace your existing createContent method with this implementation
+  async createContent(moduleId, contentData) {
+    try {
+      console.log(`Creating content for module ${moduleId} with data:`, contentData);
+      const response = await api.post(`/api/contents/modules/${moduleId}/json`, contentData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating content for module ${moduleId}:`, error);
+      throw error;
+    }
+  }
+
   // Get content by ID
   async getContentById(id, userId = null) {
     try {

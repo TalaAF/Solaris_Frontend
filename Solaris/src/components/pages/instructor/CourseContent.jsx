@@ -180,37 +180,52 @@ const CourseContent = () => {
     }
   };
   
-  // Updated handleAddContentSubmit function for CourseContent.jsx
-
-const handleAddContentSubmit = async (contentData) => {
-  try {
-    setLoading(true);
-    
-    // Add moduleId to the data
-    const dataToSend = {
-      ...contentData,
-      moduleId: activeModule
-    };
-    
-    console.log("Submitting content data:", dataToSend);
-    
-    // Create the content
-    const response = await ContentService.createContent(courseId, dataToSend);
-    
-    if (response && response.data) {
-      // Update UI with the new content
-      await fetchModules();
-      toast.success(`${contentData.type.charAt(0).toUpperCase() + contentData.type.slice(1)} added successfully`);
-    }
-    
-    setIsAddContentModalOpen(false);
-  } catch (err) {
-    console.error("Error adding content:", err);
-    toast.error(`Failed to add content: ${err.message || "Unknown error"}`);
-  } finally {
-    setLoading(false);
-  }
+  // Add or modify handleAddContent function to properly set the module ID
+const handleAddContent = (moduleId) => {
+  // Store the target module ID for the content being added
+  setCurrentModuleForContent(moduleId);
+  // Open the modal
+  setIsAddContentModalOpen(true);
 };
+
+  // Update handleAddContentSubmit to use the correct module ID
+  const handleAddContentSubmit = async (contentData) => {
+    try {
+      setLoading(true);
+      
+      // Use currentModuleForContent instead of activeModule to ensure correct module ID
+      const moduleId = currentModuleForContent; 
+      
+      console.log(`Creating content for module ID: ${moduleId}`);
+      
+      // Create an object with only the fields needed by the API
+      const dataToSend = {
+        title: contentData.title,
+        description: contentData.description || "",
+        type: contentData.type.toUpperCase(), // Backend likely expects uppercase enum values
+        content: contentData.type === 'document' ? contentData.content : "",
+        videoUrl: contentData.type === 'video' ? contentData.videoUrl : "",
+        duration: contentData.duration || null,
+        order: parseInt(contentData.order || 0)
+      };
+      
+      // Create the content using the module ID
+      const response = await ContentService.createContent(moduleId, dataToSend);
+      
+      if (response) {
+        toast.success(`${contentData.type.charAt(0).toUpperCase() + contentData.type.slice(1)} added successfully`);
+        // Update the modules with the new content
+        await refreshContent();
+      }
+      
+      setIsAddContentModalOpen(false);
+    } catch (err) {
+      console.error("Error adding content:", err);
+      toast.error(`Failed to add content: ${err.message || "Unknown error"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Helper function to update modules with new content
   const updateModulesWithNewContent = (newItem) => {
@@ -253,12 +268,6 @@ const handleAddContentSubmit = async (contentData) => {
       console.error("Error deleting content:", err);
       toast.error("Failed to delete content");
     }
-  };
-  
-  // Add new content item
-  const handleAddContent = (moduleId) => {
-    setCurrentModuleForContent(moduleId);
-    setIsAddContentModalOpen(true);
   };
   
   // Preview content
