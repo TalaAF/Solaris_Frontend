@@ -1,164 +1,85 @@
 // ContentService.js
-// Service to handle API calls for content with mock data support
+// Service to handle API calls for content with appropriate backend integration
 
 import api from "./api";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-const USE_MOCK = false; // Toggle this when your backend is ready
-
-// Mock data for development
-const mockContents = {
-  1: {
-    id: 1,
-    title: "Introduction to Anatomical Terms",
-    type: "document",
-    courseId: 1,
-    moduleId: 1,
-    description: "Learn the fundamental terminology used in anatomy studies",
-    content: `
-      <h1 class="document-heading">Introduction to Anatomical Terms</h1>
-      <p class="document-paragraph">
-        Anatomical terminology is a standardized way of describing the human body. It uses specific terms to identify organs, structures, and their relationships to one another.
-      </p>
-      <h2 class="document-subheading">Why Use Anatomical Terminology?</h2>
-      <p class="document-paragraph">
-        Anatomical terminology provides a universal language that healthcare professionals can use to communicate accurately and efficiently, regardless of their native language or where they were trained.
-      </p>
-      <ul class="document-list">
-        <li class="document-list-item">Eliminates ambiguity in communication</li>
-        <li class="document-list-item">Provides precise descriptions of locations</li>
-        <li class="document-list-item">Ensures consistent understanding across medical disciplines</li>
-        <li class="document-list-item">Facilitates accurate medical documentation</li>
-      </ul>
-    `,
-    createdAt: "2025-03-15T14:30:00Z",
-    updatedAt: "2025-03-28T09:15:00Z",
-    tags: ["anatomy", "terminology", "basics"]
-  },
-  2: {
-    id: 2,
-    title: "Directional Terms Video",
-    type: "video",
-    courseId: 1,
-    moduleId: 1,
-    description: "Visual explanation of directional terms in anatomy",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-    duration: "10:25",
-    createdAt: "2025-03-16T10:45:00Z",
-    updatedAt: "2025-03-16T10:45:00Z",
-    tags: ["anatomy", "directional-terms", "video"]
-  },
-  3: {
-    id: 3,
-    title: "Anatomical Planes Quiz",
-    type: "quiz",
-    courseId: 1,
-    moduleId: 1,
-    description: "Test your knowledge of anatomical planes",
-    questions: [
-      {
-        id: 1,
-        text: "Which plane divides the body into left and right portions?",
-        options: [
-          { id: 1, text: "Sagittal plane" },
-          { id: 2, text: "Coronal plane" },
-          { id: 3, text: "Transverse plane" },
-          { id: 4, text: "Oblique plane" }
-        ],
-        correctOptionId: 1
-      }
-    ],
-    createdAt: "2025-03-17T16:20:00Z",
-    updatedAt: "2025-03-17T16:20:00Z",
-    tags: ["anatomy", "quiz", "assessment"]
-  },
-  4: {
-    id: 4,
-    title: "Cell Membrane Structure",
-    type: "document",
-    courseId: 1,
-    moduleId: 2,
-    description: "Detailed explanation of cell membrane structure and function",
-    content: `
-      <h1 class="document-heading">Cell Membrane Structure</h1>
-      <p class="document-paragraph">
-        The cell membrane, also known as the plasma membrane, is a biological membrane that separates the interior of all cells from the outside environment.
-      </p>
-      <h2 class="document-subheading">Composition</h2>
-      <p class="document-paragraph">
-        Cell membranes are composed primarily of phospholipids, which form a lipid bilayer. The membrane also contains cholesterol, proteins, and carbohydrates that are attached to some of the proteins and lipids.
-      </p>
-    `,
-    createdAt: "2025-03-20T11:30:00Z",
-    updatedAt: "2025-03-20T11:30:00Z",
-    tags: ["cells", "biology", "membranes"]
-  }
-};
-
-// Mock versions
-const mockContentVersions = {
-  1: [
-    {
-      id: 101,
-      contentId: 1,
-      version: 1,
-      changeDescription: "Initial creation",
-      createdAt: "2025-03-15T14:30:00Z"
-    },
-    {
-      id: 102,
-      contentId: 1,
-      version: 2,
-      changeDescription: "Added section on terminology importance",
-      createdAt: "2025-03-28T09:15:00Z"
-    }
-  ]
-};
+import ContentTypeAdapter from "./ContentTypeAdapter";
 
 class ContentService {
-  // Helper for mock responses
-  async mockDelay(ms = 300) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   // Create new content
-  async createContent(courseId, formData) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      const title = formData.get("title") || "New Content";
-      const description = formData.get("description") || "";
-      const type = formData.get("type") || "document";
-      const file = formData.get("file");
-      
-      const newId = Object.keys(mockContents).length + 1;
-      const newContent = {
-        id: newId,
-        title,
-        description,
-        type,
-        courseId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tags: []
-      };
-      
-      // Add type-specific properties
-      if (type === "document") {
-        newContent.content = "<p>Document content goes here</p>";
-      } else if (type === "video") {
-        newContent.videoUrl = "https://example.com/video.mp4";
-        newContent.thumbnailUrl = "https://example.com/thumbnail.jpg";
-        newContent.duration = "0:00";
+  async createContent(courseId, contentData) {
+    try {
+      // Check if contentData is already a FormData object
+      let formData;
+      if (contentData instanceof FormData) {
+        formData = contentData;
+        
+        // Ensure courseId is in the FormData
+        if (!formData.has('courseId')) {
+          formData.append('courseId', courseId);
+        }
+      } else {
+        // Create FormData from contentData object
+        formData = new FormData();
+        
+        // Add courseId
+        formData.append('courseId', courseId);
+        
+        // Add content type if specified
+        if (contentData.type) {
+          const backendType = ContentTypeAdapter.mapToBackendType(contentData.type);
+          formData.append('type', backendType);
+        }
+        
+        // Add basic content fields
+        if (contentData.title) formData.append('title', contentData.title);
+        if (contentData.description) formData.append('description', contentData.description || '');
+        if (contentData.moduleId) formData.append('moduleId', contentData.moduleId);
+        if (contentData.order !== undefined) formData.append('order', contentData.order);
+        
+        // Handle different content types
+        if (contentData.type === 'document') {
+          // For document type, handle file or content
+          if (contentData.file) {
+            formData.append('file', contentData.file);
+          } else if (contentData.content) {
+            // If no file, create a text file from the content
+            const textBlob = new Blob([contentData.content], { type: 'text/plain' });
+            formData.append('file', textBlob, 'content.txt');
+          }
+        } else if (contentData.type === 'video') {
+          // For video type, include videoUrl
+          if (contentData.videoUrl) formData.append('videoUrl', contentData.videoUrl);
+          if (contentData.duration) formData.append('duration', contentData.duration);
+        } else if (contentData.type === 'quiz') {
+          // For quiz type, handle quiz content
+          if (contentData.content) {
+            try {
+              // Check if content is a JSON string or object
+              const quizData = typeof contentData.content === 'string' ? 
+                JSON.parse(contentData.content) : contentData.content;
+              
+              // Create a structured quiz object
+              const quiz = {
+                title: contentData.title,
+                description: contentData.description || '',
+                courseId: courseId,
+                timeLimit: quizData.timeLimit || 0,
+                passingScore: quizData.passingScore || 70,
+                questions: quizData.questions || []
+              };
+              
+              // Send quiz data as JSON
+              return this.createQuiz(quiz);
+            } catch (err) {
+              console.error("Error parsing quiz content:", err);
+              throw new Error("Invalid quiz content format");
+            }
+          }
+        }
       }
       
-      mockContents[newId] = newContent;
-      return { data: newContent };
-    }
-    
-    try {
-      return await api.post(`/contents?courseId=${courseId}`, formData, {
+      // Send the content creation request
+      return await api.post(`/api/contents`, formData, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -171,66 +92,42 @@ class ContentService {
 
   // Get content by ID
   async getContentById(id, userId = null) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const content = mockContents[id];
-      if (!content) throw new Error("Content not found");
-      return { data: content };
-    }
-    
     try {
-      let url = `/contents/${id}`;
+      let url = `/api/contents/${id}`;
       if (userId) {
         url += `?userId=${userId}`;
       }
       return await api.get(url);
     } catch (error) {
       console.error(`Error fetching content ${id}:`, error);
-      await this.mockDelay();
-      const content = mockContents[id];
-      if (!content) throw new Error("Content not found");
-      return { data: content };
+      throw error;
     }
   }
 
   // Get content by course ID
   async getContentsByCourseId(courseId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const contents = Object.values(mockContents).filter(c => c.courseId == courseId);
-      return { data: contents };
-    }
-    
     try {
-      return await api.get(`/contents/course/${courseId}`);
+      return await api.get(`/api/contents/course/${courseId}`);
     } catch (error) {
       console.error(`Error fetching contents for course ${courseId}:`, error);
-      await this.mockDelay();
-      const contents = Object.values(mockContents).filter(c => c.courseId == courseId);
-      return { data: contents };
+      throw error;
     }
   }
 
   // Update content
-  async updateContent(id, title, description) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      if (!mockContents[id]) throw new Error("Content not found");
-      
-      if (title) mockContents[id].title = title;
-      if (description) mockContents[id].description = description;
-      mockContents[id].updatedAt = new Date().toISOString();
-      
-      return { data: mockContents[id] };
-    }
-    
+  async updateContent(id, updates) {
     try {
-      const formData = new FormData();
-      if (title) formData.append("title", title);
-      if (description) formData.append("description", description);
+      // If updates is a FormData object, use it directly
+      if (updates instanceof FormData) {
+        return await api.put(`/api/contents/${id}`, updates, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+      }
       
-      return await api.put(`/contents/${id}`, formData);
+      // Otherwise, send as JSON
+      return await api.put(`/api/contents/${id}`, updates);
     } catch (error) {
       console.error(`Error updating content ${id}:`, error);
       throw error;
@@ -239,19 +136,8 @@ class ContentService {
 
   // Delete content
   async deleteContent(id) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      if (!mockContents[id]) throw new Error("Content not found");
-      
-      const deleted = mockContents[id];
-      delete mockContents[id];
-      
-      return { data: deleted };
-    }
-    
     try {
-      return await api.delete(`/contents/${id}`);
+      return await api.delete(`/api/contents/${id}`);
     } catch (error) {
       console.error(`Error deleting content ${id}:`, error);
       throw error;
@@ -260,53 +146,18 @@ class ContentService {
 
   // Get content versions
   async getContentVersions(id) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      const versions = mockContentVersions[id] || [];
-      return { data: versions };
-    }
-    
     try {
-      return await api.get(`/contents/${id}/versions`);
+      return await api.get(`/api/contents/${id}/versions`);
     } catch (error) {
       console.error(`Error fetching versions for content ${id}:`, error);
-      await this.mockDelay();
-      const versions = mockContentVersions[id] || [];
-      return { data: versions };
+      throw error;
     }
   }
 
   // Search contents
   async searchContents(keyword, page = 0, size = 10) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      // Simple keyword search on title and description
-      const results = Object.values(mockContents).filter(content => 
-        content.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        content.description?.toLowerCase().includes(keyword.toLowerCase())
-      );
-      
-      // Pagination
-      const start = page * size;
-      const end = start + size;
-      const paginatedResults = results.slice(start, end);
-      
-      return { 
-        data: {
-          content: paginatedResults,
-          totalElements: results.length,
-          totalPages: Math.ceil(results.length / size),
-          size,
-          page,
-          last: end >= results.length
-        }
-      };
-    }
-    
     try {
-      return await api.get(`/contents/search?keyword=${keyword}&page=${page}&size=${size}`);
+      return await api.get(`/api/contents/search?keyword=${keyword}&page=${page}&size=${size}`);
     } catch (error) {
       console.error(`Error searching contents with keyword "${keyword}":`, error);
       throw error;
@@ -315,27 +166,8 @@ class ContentService {
 
   // Filter contents
   async filterContents(tags, fileType) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      let filtered = Object.values(mockContents);
-      
-      if (tags) {
-        const tagList = tags.split(",");
-        filtered = filtered.filter(content => 
-          content.tags && tagList.some(tag => content.tags.includes(tag))
-        );
-      }
-      
-      if (fileType) {
-        filtered = filtered.filter(content => content.type === fileType);
-      }
-      
-      return { data: filtered };
-    }
-    
     try {
-      let url = `${API_URL}/contents/filter?`;
+      let url = `/api/contents/filter?`;
       if (tags) url += `tags=${tags}`;
       if (fileType) url += `&fileType=${fileType}`;
       return await api.get(url);
@@ -347,20 +179,10 @@ class ContentService {
 
   // Upload file
   async uploadFile(file) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      // Mock file upload response
-      const fileName = file.name;
-      const fileUrl = `https://example.com/files/${fileName}`;
-      
-      return { data: { fileName, fileUrl } };
-    }
-    
     try {
       const formData = new FormData();
       formData.append("file", file);
-      return await api.post(`/files/upload`, formData, {
+      return await api.post(`/api/files/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -373,18 +195,8 @@ class ContentService {
 
   // Download file
   async downloadFile(fileName) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      // Can't really mock a file download in JavaScript
-      // Just return a mock blob
-      const mockBlob = new Blob(["Mock file content"], { type: "text/plain" });
-      
-      return { data: mockBlob };
-    }
-    
     try {
-      return await api.get(`/files/download/${fileName}`, {
+      return await api.get(`/api/files/download/${fileName}`, {
         responseType: "blob"
       });
     } catch (error) {
@@ -395,31 +207,18 @@ class ContentService {
   
   // Get content by module
   async getContentsByModule(moduleId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      const contents = Object.values(mockContents).filter(c => c.moduleId == moduleId);
-      return { data: contents };
-    }
-    
     try {
-      return await api.get(`/contents/module/${moduleId}`);
+      return await api.get(`/api/contents/module/${moduleId}`);
     } catch (error) {
       console.error(`Error fetching contents for module ${moduleId}:`, error);
-      await this.mockDelay();
-      const contents = Object.values(mockContents).filter(c => c.moduleId == moduleId);
-      return { data: contents };
+      throw error;
     }
   }
 
   // Mark content as viewed/completed
   async markAsViewed(contentId, userId) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      return { data: { success: true } };
-    }
-    
     try {
-      return await api.post(`/contents/${contentId}/mark-viewed`, { userId });
+      return await api.post(`/api/contents/${contentId}/mark-viewed`, { userId });
     } catch (error) {
       console.error(`Error marking content ${contentId} as viewed:`, error);
       throw error;
@@ -428,57 +227,8 @@ class ContentService {
 
   // Get all contents with pagination (admin view)
   async getAllContents(page = 0, size = 10, filters = {}) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      let filtered = Object.values(mockContents);
-      
-      // Apply filters
-      if (filters.courseId) {
-        filtered = filtered.filter(c => c.courseId == filters.courseId);
-      }
-      
-      if (filters.type) {
-        filtered = filtered.filter(c => c.type === filters.type);
-      }
-      
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        filtered = filtered.filter(c => 
-          c.title.toLowerCase().includes(searchLower) || 
-          c.description?.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      // Sort
-      const sortField = filters.sortBy || 'createdAt';
-      const sortDir = filters.sortDir === 'desc' ? -1 : 1;
-      
-      filtered.sort((a, b) => {
-        if (a[sortField] < b[sortField]) return -1 * sortDir;
-        if (a[sortField] > b[sortField]) return 1 * sortDir;
-        return 0;
-      });
-      
-      // Pagination
-      const total = filtered.length;
-      const start = page * size;
-      const paginatedResults = filtered.slice(start, start + size);
-      
-      return { 
-        data: {
-          content: paginatedResults,
-          totalElements: total,
-          totalPages: Math.ceil(total / size),
-          size,
-          number: page,
-          last: start + size >= total
-        }
-      };
-    }
-    
     try {
-      let url = `${API_URL}/contents?page=${page}&size=${size}`;
+      let url = `/api/contents?page=${page}&size=${size}`;
       
       // Add query parameters for filtering
       if (filters.courseId) url += `&courseId=${filters.courseId}`;
@@ -495,19 +245,8 @@ class ContentService {
   
   // Toggle content publish status (admin only)
   async toggleContentStatus(id, isPublished) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      if (!mockContents[id]) throw new Error("Content not found");
-      
-      mockContents[id].isPublished = isPublished;
-      mockContents[id].updatedAt = new Date().toISOString();
-      
-      return { data: mockContents[id] };
-    }
-    
     try {
-      return await api.patch(`/contents/${id}/publish`, { isPublished });
+      return await api.patch(`/api/contents/${id}/publish`, { isPublished });
     } catch (error) {
       console.error(`Error toggling status for content ${id}:`, error);
       throw error;
@@ -516,20 +255,8 @@ class ContentService {
   
   // Bulk operations (admin only)
   async bulkDeleteContents(contentIds) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      contentIds.forEach(id => {
-        if (mockContents[id]) {
-          delete mockContents[id];
-        }
-      });
-      
-      return { data: { success: true, count: contentIds.length } };
-    }
-    
     try {
-      return await api.post(`/contents/bulk-delete`, { contentIds });
+      return await api.post(`/api/contents/bulk-delete`, { contentIds });
     } catch (error) {
       console.error('Error bulk deleting contents:', error);
       throw error;
@@ -538,25 +265,209 @@ class ContentService {
   
   // Move content between modules (admin/instructor)
   async moveContent(contentId, targetModuleId, newOrder) {
-    if (USE_MOCK) {
-      await this.mockDelay();
-      
-      if (!mockContents[contentId]) throw new Error("Content not found");
-      
-      mockContents[contentId].moduleId = targetModuleId;
-      mockContents[contentId].order = newOrder;
-      mockContents[contentId].updatedAt = new Date().toISOString();
-      
-      return { data: mockContents[contentId] };
-    }
-    
     try {
-      return await api.put(`/contents/${contentId}/move`, {
+      return await api.put(`/api/contents/${contentId}/move`, {
         moduleId: targetModuleId,
         order: newOrder
       });
     } catch (error) {
       console.error(`Error moving content ${contentId}:`, error);
+      throw error;
+    }
+  }
+
+  // Download content file directly
+  async downloadContent(contentId) {
+    try {
+      return await api.get(`/api/contents/${contentId}/download`, {
+        responseType: "blob"
+      });
+    } catch (error) {
+      console.error(`Error downloading content ${contentId}:`, error);
+      throw error;
+    }
+  }
+
+  // Restore deleted content
+  async restoreContent(contentId) {
+    try {
+      return await api.post(`/api/contents/${contentId}/restore`);
+    } catch (error) {
+      console.error(`Error restoring content ${contentId}:`, error);
+      throw error;
+    }
+  }
+
+  // Get deleted contents
+  async getDeletedContents(page = 0, size = 10) {
+    try {
+      return await api.get(`/api/contents/deleted?page=${page}&size=${size}`);
+    } catch (error) {
+      console.error('Error fetching deleted contents:', error);
+      throw error;
+    }
+  }
+
+  // Helper methods for assignments (since they're a content type but have a separate API)
+  async getAssignmentsByCourse(courseId) {
+    try {
+      return await api.get(`/api/assignments/course/${courseId}`);
+    } catch (error) {
+      console.error(`Error fetching assignments for course ${courseId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAssignmentById(id) {
+    try {
+      return await api.get(`/api/assignments/${id}`);
+    } catch (error) {
+      console.error(`Error fetching assignment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async createAssignment(assignmentData) {
+    try {
+      return await api.post(`/api/assignments`, assignmentData);
+    } catch (error) {
+      console.error('Error creating assignment:', error);
+      throw error;
+    }
+  }
+
+  async updateAssignment(id, assignmentData) {
+    try {
+      return await api.put(`/api/assignments/${id}`, assignmentData);
+    } catch (error) {
+      console.error(`Error updating assignment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteAssignment(id) {
+    try {
+      return await api.delete(`/api/assignments/${id}`);
+    } catch (error) {
+      console.error(`Error deleting assignment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async publishAssignment(id) {
+    try {
+      return await api.patch(`/api/assignments/${id}/publish`);
+    } catch (error) {
+      console.error(`Error publishing assignment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async unpublishAssignment(id) {
+    try {
+      return await api.patch(`/api/assignments/${id}/unpublish`);
+    } catch (error) {
+      console.error(`Error unpublishing assignment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Helper methods for quizzes (since they're a content type but have a separate API)
+  async createQuiz(quizData) {
+    try {
+      return await api.post(`/api/quizzes`, quizData);
+    } catch (error) {
+      console.error('Error creating quiz:', error);
+      throw error;
+    }
+  }
+
+  async getQuizzesByCourse(courseId) {
+    try {
+      return await api.get(`/api/quizzes/course/${courseId}`);
+    } catch (error) {
+      console.error(`Error fetching quizzes for course ${courseId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAvailableQuizzesByCourse(courseId) {
+    try {
+      return await api.get(`/api/quizzes/course/${courseId}/available`);
+    } catch (error) {
+      console.error(`Error fetching available quizzes for course ${courseId}:`, error);
+      throw error;
+    }
+  }
+
+  async getQuizById(id) {
+    try {
+      return await api.get(`/api/quizzes/${id}`);
+    } catch (error) {
+      console.error(`Error fetching quiz ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getQuizWithQuestions(id) {
+    try {
+      return await api.get(`/api/quizzes/${id}/detailed`);
+    } catch (error) {
+      console.error(`Error fetching quiz with questions ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getQuizForStudent(quizId, studentId) {
+    try {
+      return await api.get(`/api/quizzes/${quizId}/student/${studentId}`);
+    } catch (error) {
+      console.error(`Error fetching quiz ${quizId} for student ${studentId}:`, error);
+      throw error;
+    }
+  }
+
+  async updateQuiz(id, quizData) {
+    try {
+      return await api.put(`/api/quizzes/${id}`, quizData);
+    } catch (error) {
+      console.error(`Error updating quiz ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteQuiz(id) {
+    try {
+      return await api.delete(`/api/quizzes/${id}`);
+    } catch (error) {
+      console.error(`Error deleting quiz ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async publishQuiz(id) {
+    try {
+      return await api.patch(`/api/quizzes/${id}/publish`);
+    } catch (error) {
+      console.error(`Error publishing quiz ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async unpublishQuiz(id) {
+    try {
+      return await api.patch(`/api/quizzes/${id}/unpublish`);
+    } catch (error) {
+      console.error(`Error unpublishing quiz ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getQuizAnalytics(id) {
+    try {
+      return await api.get(`/api/quizzes/${id}/analytics`);
+    } catch (error) {
+      console.error(`Error fetching quiz analytics ${id}:`, error);
       throw error;
     }
   }

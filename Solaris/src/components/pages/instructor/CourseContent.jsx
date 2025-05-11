@@ -180,36 +180,37 @@ const CourseContent = () => {
     }
   };
   
-  // Simplified content submission function
-  const handleAddContentSubmit = async (contentData) => {
-    try {
-      setLoading(true);
-      
-      // Add module ID to the data
-      const dataToSend = {
-        ...contentData,
-        moduleId: activeModule
-      };
-      
-      console.log("Submitting content data:", dataToSend);
-      
-      // Create the content
-      const response = await ContentService.createContent(courseId, dataToSend);
-      
-      if (response && response.data) {
-        // Update UI with the new content
-        await fetchModules();
-        toast.success(`${contentData.type.charAt(0).toUpperCase() + contentData.type.slice(1)} added successfully`);
-      }
-      
-      setIsAddContentModalOpen(false);
-    } catch (err) {
-      console.error("Error adding content:", err);
-      toast.error(`Failed to add content: ${err.message || "Unknown error"}`);
-    } finally {
-      setLoading(false);
+  // Updated handleAddContentSubmit function for CourseContent.jsx
+
+const handleAddContentSubmit = async (contentData) => {
+  try {
+    setLoading(true);
+    
+    // Add moduleId to the data
+    const dataToSend = {
+      ...contentData,
+      moduleId: activeModule
+    };
+    
+    console.log("Submitting content data:", dataToSend);
+    
+    // Create the content
+    const response = await ContentService.createContent(courseId, dataToSend);
+    
+    if (response && response.data) {
+      // Update UI with the new content
+      await fetchModules();
+      toast.success(`${contentData.type.charAt(0).toUpperCase() + contentData.type.slice(1)} added successfully`);
     }
-  };
+    
+    setIsAddContentModalOpen(false);
+  } catch (err) {
+    console.error("Error adding content:", err);
+    toast.error(`Failed to add content: ${err.message || "Unknown error"}`);
+  } finally {
+    setLoading(false);
+  }
+};
   
   // Helper function to update modules with new content
   const updateModulesWithNewContent = (newItem) => {
