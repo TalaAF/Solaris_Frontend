@@ -87,30 +87,30 @@ const Sidebar = ({ isOpen }) => {
         icon: <Headset size={20} />,
         iconClass: "icon-vr",
       },
-      {
-        name: "Messages",
-        path: "/messages",
-        icon: <MessageSquare size={20} />,
-        iconClass: "icon-message-square",
-      },
-      {
-        name: "Clinical Skills",
-        path: "/clinical-skills",
-        icon: <Stethoscope size={20} />,
-        iconClass: "icon-stethoscope",
-      },
-      {
-        name: "Progress",
-        path: "/progress",
-        icon: <BarChart2 size={20} />,
-        iconClass: "icon-bar-chart-2",
-      },
-      {
-        name: "Community",
-        path: "/community",
-        icon: <Users size={20} />,
-        iconClass: "icon-users",
-      },
+      // {
+      //   name: "Messages",
+      //   path: "/messages",
+      //   icon: <MessageSquare size={20} />,
+      //   iconClass: "icon-message-square",
+      // },
+      // {
+      //   name: "Clinical Skills",
+      //   path: "/clinical-skills",
+      //   icon: <Stethoscope size={20} />,
+      //   iconClass: "icon-stethoscope",
+      // },
+      // {
+      //   name: "Progress",
+      //   path: "/progress",
+      //   icon: <BarChart2 size={20} />,
+      //   iconClass: "icon-bar-chart-2",
+      // },
+      // {
+      //   name: "Community",
+      //   path: "/community",
+      //   icon: <Users size={20} />,
+      //   iconClass: "icon-users",
+      // },
     ],
 
     admin: [
@@ -183,23 +183,23 @@ const Sidebar = ({ isOpen }) => {
         icon: <BookOpen size={20} />,
         iconClass: "icon-book-open",
       },
-      {
-        name: "Content Library",
-        path: "/instructor/content",
-        icon: <FolderOpen size={20} />,
-        iconClass: "icon-folder",
-      },
+      // {
+      //   name: "Content Library",
+      //   path: "/instructor/content",
+      //   icon: <FolderOpen size={20} />,
+      //   iconClass: "icon-folder",
+      // },
       {
         name: "Student Progress",
         path: "/instructor/student-progress",
         icon: <BarChart2 size={20} />,
         iconClass: "icon-chart",
       },
-      {
-        name: "Assessments",
-        path: "/instructor/assessments",
-        icon: <Clipboard size={20} />,
-        iconClass: "icon-clipboard",
+       {
+        name: "Assessment ",
+        path: "/admin/assessments",
+        icon: <FileText size={20} />,
+        iconClass: "icon-file",
       },
       {
         name: "Calendar",
@@ -207,24 +207,24 @@ const Sidebar = ({ isOpen }) => {
         icon: <Calendar size={20} />,
         iconClass: "icon-calendar",
       },
-      {
-        name: "Lectures",
-        path: "/instructor/lectures",
-        icon: <Presentation size={20} />,
-        iconClass: "icon-presentation",
-      },
+      // {
+      //   name: "Lectures",
+      //   path: "/instructor/lectures",
+      //   icon: <Presentation size={20} />,
+      //   iconClass: "icon-presentation",
+      // },
       {
         name: "Student Management",
         path: "/instructor/students",
         icon: <GraduationCap size={20} />,
         iconClass: "icon-graduation",
       },
-      {
-        name: "Messages",
-        path: "/instructor/messages",
-        icon: <MessageSquare size={20} />,
-        iconClass: "icon-message",
-      },
+      // {
+      //   name: "Messages",
+      //   path: "/instructor/messages",
+      //   icon: <MessageSquare size={20} />,
+      //   iconClass: "icon-message",
+      // },
     ],
   };
 

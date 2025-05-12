@@ -1,138 +1,88 @@
-import React, { useState } from 'react';
+// src/components/Calendar.jsx
+import React, { useState, useEffect } from 'react';
 import CalendarView from '../calendar/CalendarView';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Plus, Calendar as CalendarIcon, ChevronDown } from 'react-feather';
+import CalendarService from '../../services/CalendarService';
+import CalendarEventForm from './CalendarEventForm'; // This would be a form component for events
 import './calendar.css';
-
-// Define event types
-const CalendarEvent = {
-  // These are sample events for the calendar
-  events: [
-    {
-      id: '1',
-      title: 'Anatomy Lecture: Cardiovascular System',
-      startTime: '08:30',
-      endTime: '10:00',
-      location: 'Medical Building, Room A102',
-      type: 'lecture',
-      date: new Date(2025, 3, 14)
-    },
-    {
-      id: '2',
-      title: 'Clinical Pathology Lab',
-      startTime: '11:00',
-      endTime: '13:00',
-      location: 'Science Lab Wing, Room L205',
-      type: 'lab',
-      date: new Date(2025, 3, 14)
-    },
-    {
-      id: '3',
-      title: 'Pharmacology Study Group',
-      startTime: '14:30',
-      endTime: '16:00',
-      location: 'Library, Study Room 3',
-      type: 'meeting',
-      date: new Date(2025, 3, 14)
-    },
-    {
-      id: '4',
-      title: 'Medical Ethics Seminar',
-      startTime: '16:30',
-      endTime: '18:00',
-      location: 'Medical Building, Auditorium',
-      type: 'seminar',
-      date: new Date(2025, 3, 14)
-    },
-    {
-      id: '5',
-      title: 'Physiology Lecture: Respiratory System',
-      startTime: '09:00',
-      endTime: '10:30',
-      location: 'Medical Building, Room A104',
-      type: 'lecture',
-      date: new Date(2025, 3, 15)
-    },
-    {
-      id: '6',
-      title: 'Anatomy Lab: Heart Dissection',
-      startTime: '13:00',
-      endTime: '15:00',
-      location: 'Anatomy Lab, Room A001',
-      type: 'lab',
-      date: new Date(2025, 3, 15)
-    },
-    {
-      id: '7',
-      title: 'Midterm Exam: Cardiovascular System',
-      startTime: '10:00',
-      endTime: '12:00',
-      location: 'Examination Hall, Building E',
-      type: 'exam',
-      date: new Date(2025, 3, 16)
-    },
-    {
-      id: '8',
-      title: 'Patient Case Presentation',
-      startTime: '14:00',
-      endTime: '16:00',
-      location: 'Medical Building, Conference Room 3',
-      type: 'meeting',
-      date: new Date(2025, 3, 16)
-    },
-    {
-      id: '9',
-      title: 'Pharmacology Assignment Due',
-      startTime: '23:59',
-      endTime: '23:59',
-      location: 'Online Submission',
-      type: 'assignment',
-      date: new Date(2025, 3, 17)
-    },
-    {
-      id: '10',
-      title: 'Medical Imaging Lecture',
-      startTime: '11:00',
-      endTime: '12:30',
-      location: 'Medical Building, Room B201',
-      type: 'lecture',
-      date: new Date(2025, 3, 17)
-    },
-    {
-      id: '11',
-      title: 'Clinical Skills Practice',
-      startTime: '13:30',
-      endTime: '15:30',
-      location: 'Simulation Lab, Building S',
-      type: 'lab',
-      date: new Date(2025, 3, 17)
-    },
-    {
-      id: '12',
-      title: 'Research Methods Seminar',
-      startTime: '15:00',
-      endTime: '16:30',
-      location: 'Research Center, Room 102',
-      type: 'seminar',
-      date: new Date(2025, 3, 18)
-    }
-  ]
-};
 
 function Calendar() {
   const [filter, setFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [activeCalendars, setActiveCalendars] = useState({
     courses: true,
     clinical: true,
     exams: true,
     personal: true
   });
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Filter events based on selection
+  // Fetch calendar events and settings on component mount
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Calculate date range (current month)
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 2, 0); // Include next month
+        
+        // Fetch events
+        const eventsData = await CalendarService.getEvents(firstDay, lastDay);
+        setEvents(eventsData);
+        
+        // Fetch settings
+        const settings = await CalendarService.getSettings();
+        setActiveCalendars({
+          courses: settings.showCourses,
+          clinical: settings.showClinical,
+          exams: settings.showExams,
+          personal: settings.showPersonal
+        });
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching calendar data:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCalendarData();
+  }, []);
+  
+  // Filter events based on selection and active calendars
   const filterEvents = () => {
-    if (filter === 'all') return CalendarEvent.events;
-    return CalendarEvent.events.filter(event => event.type === filter);
+    if (!events || events.length === 0) return [];
+    
+    let filtered = [...events];
+    
+    // Filter by event type
+    if (filter !== 'all') {
+      filtered = filtered.filter(event => event.type === filter);
+    }
+    
+    // Filter by active calendars
+    if (!activeCalendars.courses) {
+      filtered = filtered.filter(event => event.type !== 'lecture' && event.type !== 'seminar');
+    }
+    
+    if (!activeCalendars.clinical) {
+      filtered = filtered.filter(event => event.type !== 'lab');
+    }
+    
+    if (!activeCalendars.exams) {
+      filtered = filtered.filter(event => event.type !== 'exam' && event.type !== 'assignment');
+    }
+    
+    if (!activeCalendars.personal) {
+      filtered = filtered.filter(event => event.type !== 'personal' && event.type !== 'meeting');
+    }
+    
+    return filtered;
   };
   
   const filteredEvents = filterEvents();
@@ -141,15 +91,83 @@ function Calendar() {
     setFilter(e.target.value);
   };
   
-  const handleCalendarToggle = (calendarType) => {
-    setActiveCalendars(prev => ({
-      ...prev,
-      [calendarType]: !prev[calendarType]
-    }));
+  const handleCalendarToggle = async (calendarType) => {
+    const newActiveCalendars = {
+      ...activeCalendars,
+      [calendarType]: !activeCalendars[calendarType]
+    };
+    
+    setActiveCalendars(newActiveCalendars);
+    
+    // Update calendar settings
+    try {
+      await CalendarService.updateSettings({
+        showCourses: newActiveCalendars.courses,
+        showClinical: newActiveCalendars.clinical,
+        showExams: newActiveCalendars.exams,
+        showPersonal: newActiveCalendars.personal
+      });
+    } catch (error) {
+      console.error('Error updating calendar settings:', error);
+    }
   };
 
   const handleAddEvent = () => {
+    setSelectedEvent(null);
     setIsModalOpen(true);
+  };
+
+  const handleEditEvent = (event) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      await CalendarService.deleteEvent(eventId);
+      // Refresh events
+      setEvents(events.filter(event => event.id !== eventId));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
+
+  const handleSaveEvent = async (eventData) => {
+    try {
+      let savedEvent;
+      
+      if (selectedEvent) {
+        // Update existing event
+        savedEvent = await CalendarService.updateEvent(selectedEvent.id, eventData);
+        // Update in local state
+        setEvents(events.map(event => 
+          event.id === savedEvent.id ? savedEvent : event
+        ));
+      } else {
+        // Create new event
+        savedEvent = await CalendarService.createEvent(eventData);
+        // Add to local state
+        setEvents([...events, savedEvent]);
+      }
+      
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving event:', error);
+    }
+  };
+  
+  const handleSyncCalendar = async () => {
+    try {
+      await CalendarService.syncCalendar();
+      // Refresh events after sync
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      const eventsData = await CalendarService.getEvents(firstDay, lastDay);
+      setEvents(eventsData);
+    } catch (error) {
+      console.error('Error syncing calendar:', error);
+    }
   };
   
   return (
@@ -188,7 +206,15 @@ function Calendar() {
         
         <div className="calendar-layout">
           <div className="calendar-main">
-            <CalendarView events={filteredEvents} />
+            {isLoading ? (
+              <div className="calendar-loading">Loading calendar...</div>
+            ) : (
+              <CalendarView 
+                events={filteredEvents} 
+                onEventClick={handleEditEvent}
+                onEventDelete={handleDeleteEvent}
+              />
+            )}
           </div>
           
           <div className="calendar-sidebar">
@@ -254,7 +280,7 @@ function Calendar() {
                 
                 <div className="divider"></div>
                 
-                <button className="calendar-sync-button">
+                <button className="calendar-sync-button" onClick={handleSyncCalendar}>
                   <CalendarIcon size={16} />
                   Sync with External Calendar
                 </button>
@@ -267,8 +293,9 @@ function Calendar() {
               </CardHeader>
               <CardContent className="calendar-card-content">
                 <div className="deadline-list">
-                  {CalendarEvent.events
+                  {filteredEvents
                     .filter(event => event.type === 'assignment' || event.type === 'exam')
+                    .sort((a, b) => new Date(a.date) - new Date(b.date))
                     .slice(0, 5)
                     .map(event => (
                       <div key={event.id} className="deadline-card">
@@ -289,7 +316,9 @@ function Calendar() {
           <div className="calendar-modal-overlay">
             <div className="calendar-modal">
               <div className="calendar-modal-header">
-                <h2 className="calendar-modal-title">Add New Event</h2>
+                <h2 className="calendar-modal-title">
+                  {selectedEvent ? 'Edit Event' : 'Add New Event'}
+                </h2>
                 <button 
                   className="calendar-modal-close" 
                   onClick={() => setIsModalOpen(false)}
@@ -298,7 +327,12 @@ function Calendar() {
                 </button>
               </div>
               <div className="calendar-modal-content">
-                {/* Modal content remains the same */}
+                <CalendarEventForm 
+                  event={selectedEvent}
+                  onSave={handleSaveEvent}
+                  onCancel={() => setIsModalOpen(false)}
+                  onDelete={handleDeleteEvent} // Add this line to pass the delete handler
+                />
               </div>
             </div>
           </div>
