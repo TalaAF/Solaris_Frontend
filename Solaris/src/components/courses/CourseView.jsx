@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Button } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 // Import our smaller components
 import CourseHeader from "./CourseHeader";
@@ -15,22 +16,29 @@ import {
   CourseResources,
 } from "./CourseTabs";
 
-// Import mock data instead of API services
-import mockCourseData from "../../mocks/courseData";
-import mockModuleData from "../../mocks/moduleData";
-import mockContentData from "../../mocks/contentData";
-import mockQuizData from "../../mocks/quizData";
+// Import API services
+import CourseService from "../../services/CourseService";
+import ContentService from "../../services/ContentService";
+
+// Import mock data as fallbacks if needed
 import mockAssignmentData from "../../mocks/assignmentData";
+import mockQuizData from "../../mocks/quizData";
+
+import { getCurrentUserId } from '../../utils/userUtils';
+import { useAuth } from "../../context/AuthContext";
 
 import "./CourseView.css"; // Component-specific CSS
 
 /**
  * CourseView Component (Container Component)
  * 
- * Using mock data for frontend development
+ * Now using real API data instead of mocks
  */
 function CourseView({ course }) {
   const { courseId } = useParams();
+  // Get auth information from context
+  const { currentUser, isAuthenticated } = useAuth();
+  
   const [courseData, setCourseData] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,36 +46,119 @@ function CourseView({ course }) {
   const [activeModule, setActiveModule] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [activeTab, setActiveTab] = useState("overview"); // Default tab
+  const [currentContent, setCurrentContent] = useState(null);
+  const [contentLoading, setContentLoading] = useState(false);
 
-  // Load mock data with simulated API delay
+  // Load real data from the API
   useEffect(() => {
-    const loadMockData = async () => {
+    const fetchCourseData = async () => {
       setLoading(true);
+      setError(null);
       
       try {
-        // Wait a bit to simulate network request
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // 1. Fetch course details
+        console.log(`Fetching data for course ID: ${courseId}`);
+        const courseResponse = await CourseService.getCourseById(courseId);
         
-        // Set course data from mock
-        setCourseData(mockCourseData);
-        
-        // Set modules data from mock
-        setModules(mockModuleData);
-        
-        // Set first module as active by default
-        if (mockModuleData.length > 0) {
-          setActiveModule(mockModuleData[0].id);
+        if (!courseResponse || !courseResponse.data) {
+          throw new Error("Failed to fetch course data");
         }
-      } catch (error) {
-        console.error("Error loading mock data:", error);
+        
+        setCourseData(courseResponse.data);
+        
+        // 2. Fetch course modules with their content items
+        const modulesResponse = await CourseService.getCourseModules(courseId);
+        
+        if (!modulesResponse || !modulesResponse.data) {
+          throw new Error("Failed to fetch course modules");
+        }
+        
+        // Process and sort modules
+        const fetchedModules = Array.isArray(modulesResponse.data) 
+          ? modulesResponse.data 
+          : [];
+        
+        // Sort modules by order if available
+        const sortedModules = fetchedModules.sort((a, b) => 
+          (a.order || 0) - (b.order || 0)
+        );
+        
+        console.log("Fetched modules:", sortedModules);
+        setModules(sortedModules);
+        
+        // Set first module as active by default if available
+        if (sortedModules.length > 0) {
+          setActiveModule(sortedModules[0].id);
+        }
+      } catch (err) {
+        console.error("Error fetching course data:", err);
+        toast.error("Failed to load course data. Please try again.");
         setError("Failed to load course data. Please try again.");
       } finally {
         setLoading(false);
       }
     };
     
-    loadMockData();
+    if (courseId) {
+      fetchCourseData();
+    }
   }, [courseId]);
+
+  // Fetch content when an item is selected
+  useEffect(() => {
+    const fetchContentData = async () => {
+      if (!activeItem) {
+        setCurrentContent(null);
+        return;
+      }
+      
+      setContentLoading(true);
+      
+      try {
+        const contentResponse = await ContentService.getContentById(activeItem);
+        
+        if (contentResponse && contentResponse.data) {
+          console.log("Fetched content:", contentResponse.data);
+          setCurrentContent(contentResponse.data);
+          
+          // Check if we have a logged-in user and access their ID
+          if (currentUser && isAuthenticated) {
+            // Log the user object to see available properties
+            console.log("Current authenticated user:", currentUser);
+            
+            // Get the ID from the user object
+            const userId = currentUser.id || 
+                          currentUser._id || 
+                          currentUser.userId;
+            
+            if (userId) {
+              try {
+                await ContentService.markContentAsViewed(activeItem, userId);
+                console.log(`Content ${activeItem} marked as viewed by user ${userId}`);
+              } catch (viewErr) {
+                console.warn("Could not mark content as viewed:", viewErr);
+              }
+            } else {
+              console.warn("User is authenticated but ID not found in user object", currentUser);
+            }
+          } else {
+            console.log("User not authenticated, content view not tracked");
+          }
+        } else {
+          setCurrentContent(null);
+          toast.error("Could not load content data");
+        }
+      } catch (err) {
+        console.error("Error fetching content:", err);
+        toast.error("Failed to load content");
+        setCurrentContent(null);
+      } finally {
+        setContentLoading(false);
+      }
+    };
+    
+    fetchContentData();
+  }, [activeItem]);
 
   // Handle tab switching
   const handleTabClick = (tab) => {
@@ -97,13 +188,7 @@ function CourseView({ course }) {
     }
   };
 
-  // Get content data for a specific item
-  const getContentForItem = (itemId) => {
-    // Find matching content in mock data
-    return mockContentData.find(item => item.id === itemId) || null;
-  };
-
-  // Get quiz data for a specific item
+  // Get quiz data for a specific item - still using mock data for now
   const getQuizForItem = (itemId) => {
     // For demo purpose, just return the first quiz if the item is of quiz type
     const item = modules.flatMap(m => m.items).find(i => i.id === itemId);
@@ -113,12 +198,40 @@ function CourseView({ course }) {
     return null;
   };
 
+  // Add this inside your component, just after the useAuth() call
+  useEffect(() => {
+    if (currentUser) {
+      console.log("Auth context user object structure:", {
+        id: currentUser.id,
+        _id: currentUser._id,
+        userId: currentUser.userId,
+        email: currentUser.email,
+        hasRoles: !!currentUser.roles,
+        rolesType: typeof currentUser.roles,
+        fullObject: currentUser
+      });
+    }
+  }, [currentUser]);
+
   if (loading) {
-    return <div className="course-loading">Loading course...</div>;
+    return (
+      <div className="course-loading">
+        <div className="spinner"></div>
+        <p>Loading course content...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="course-error">{error}</div>;
+    return (
+      <div className="course-error">
+        <h3>Error</h3>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} className="retry-button">
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (!courseData) {
@@ -226,7 +339,7 @@ function CourseView({ course }) {
               {activeTab === "assessments" && (
                 <CourseAssessments 
                   courseData={courseData} 
-                  assignments={mockAssignmentData}
+                  assignments={mockAssignmentData} // Still using mocks for now
                   quizzes={mockQuizData}
                 />
               )}
@@ -234,13 +347,20 @@ function CourseView({ course }) {
                 <CourseResources courseData={courseData} />
               )}
               {activeTab === "content" && activeItem && currentModule && (
-                <ContentViewer 
-                  module={currentModule}
-                  itemId={activeItem}
-                  onNavigate={handleNavigate}
-                  contentData={getContentForItem(activeItem)}
-                  quizData={getQuizForItem(activeItem)}
-                />
+                contentLoading ? (
+                  <div className="content-loading">
+                    <div className="spinner spinner-sm"></div>
+                    <p>Loading content...</p>
+                  </div>
+                ) : (
+                  <ContentViewer 
+                    module={currentModule}
+                    itemId={activeItem}
+                    onNavigate={handleNavigate}
+                    contentData={currentContent}
+                    quizData={getQuizForItem(activeItem)}
+                  />
+                )
               )}
               {activeTab === "content" && (!activeItem || !currentModule) && (
                 <div className="content-select-prompt">

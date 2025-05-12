@@ -257,6 +257,29 @@ class ContentService {
     }
   }
 
+  // Mark content as viewed (alternative method)
+  async markContentAsViewed(contentId, userId) {
+    try {
+      if (!userId) {
+        console.warn('No user ID provided, cannot mark content as viewed');
+        return null;
+      }
+
+      console.log(`Marking content ${contentId} as viewed by user ${userId}`);
+      
+      // Use the new endpoint format
+      const response = await api.post(`/api/contents/${contentId}/mark-viewed`, { 
+        userId: userId 
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error marking content ${contentId} as viewed:`, error);
+      // Non-critical feature, don't throw error
+      return null;
+    }
+  }
+
   // Get all contents with pagination (admin view)
   async getAllContents(page = 0, size = 10, filters = {}) {
     try {

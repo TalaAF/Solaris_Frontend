@@ -1,148 +1,209 @@
-import React from "react";
-import { Button } from "@mui/material";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-
-// Import different content type components
-import DocumentViewer from "./DocumentViewer";
-import VideoViewer from "./VideoViewer";
-import QuizViewer from "./QuizViewer";
-import AssignmentViewer from "./AssignmentViewer";
-
-import "./ContentViewer.css"; // Add appropriate styling
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { FileText, Video, FileQuestion } from "lucide-react";
+import ContentService from "../../../services/ContentService";
+import ProgressService from "../../../services/ProgressService";
+import { useAuth } from "../../../context/AuthContext";
+import "./ContentViewer.css";
 
 /**
  * ContentViewer Component
- *
- * Displays the content of a selected course module item.
- * It renders different content types (video, document, quiz, interactive)
- * using specialized components.
+ * Displays content based on its type and tracks user progress
  */
-function ContentViewer({ module, itemId, onNavigate, contentData, quizData }) {
-  // Find the current item from the module
-  const currentItem = module.items.find((item) => item.id === itemId);
+const ContentViewer = ({ 
+  module, 
+  itemId, 
+  onNavigate, 
+  contentData, 
+  quizData,
+  onProgressUpdate // NEW: Add callback to notify parent of progress updates
+}) => {
+  const { currentUser } = useAuth();
+  const [progressUpdated, setProgressUpdated] = useState(false);
 
-  if (!currentItem) {
-    return <div className="content-error">Content not found</div>;
+  // Track user progress when content is viewed
+  useEffect(() => {
+    const trackContentProgress = async () => {
+      if (!contentData || !contentData.id) return;
+      
+      // Always show progress indicator for better UX
+      setProgressUpdated(true);
+      
+      // Hide progress indicator after 3 seconds
+      const hideTimer = setTimeout(() => {
+        setProgressUpdated(false);
+      }, 3000);
+      
+      try {
+        // Try to mark content as viewed
+        const result = await ProgressService.markContentAsViewed(contentData.id);
+        
+        console.log("Progress tracking result:", result);
+        
+        // Even if server tracking fails, track progress locally
+        if (!result || !result.success) {
+          console.log("Using local fallback for progress tracking");
+          ProgressService.trackProgressLocally(contentData.id);
+        }
+        
+        // If we have a courseId, fetch updated progress
+        if (module && module.courseId) {
+          try {
+            const progressData = await ProgressService.getDetailedCourseProgress(module.courseId);
+            
+            if (progressData) {
+              console.log("Updated course progress:", progressData);
+              
+              // Notify parent component about progress update
+              if (onProgressUpdate) {
+                onProgressUpdate(progressData);
+              }
+            }
+          } catch (progressErr) {
+            console.warn("Failed to get updated course progress:", progressErr);
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to track content progress:", error);
+        // Track locally even if everything else fails
+        ProgressService.trackProgressLocally(contentData.id);
+      }
+      
+      return () => clearTimeout(hideTimer);
+    };
+    
+    // Track progress when content changes
+    trackContentProgress();
+  }, [contentData, module, onProgressUpdate]);
+
+  if (!contentData) {
+    return (
+      <div className="content-empty">
+        <p>Select content to view</p>
+      </div>
+    );
   }
 
-  // Determine content display based on type
+  // Helper function to render content based on type
   const renderContent = () => {
-    switch (currentItem.type) {
+    switch (contentData.type?.toLowerCase()) {
       case "document":
         return (
-          <DocumentViewer
-            title={currentItem.title}
-            content={
-              contentData?.content ||
-              `This is a placeholder for the document content: ${currentItem.title}. When connected to the backend, this will display actual document content.`
-            }
-          />
+          <div className="document-content">
+            <div className="content-icon-header">
+              <FileText size={24} />
+              <h3>{contentData.title}</h3>
+            </div>
+            <div 
+              className="document-text"
+              dangerouslySetInnerHTML={{ __html: contentData.content }}
+            />
+          </div>
         );
-
+        
       case "video":
         return (
-          <VideoViewer
-            title={currentItem.title}
-            videoUrl={
-              contentData?.videoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"
-            } // Placeholder video
-            transcript={
-              contentData?.transcript ||
-              "Transcript will be available when connected to the backend."
-            }
-          />
+          <div className="video-content">
+            <div className="content-icon-header">
+              <Video size={24} />
+              <h3>{contentData.title}</h3>
+            </div>
+            <div className="video-container">
+              {contentData.videoUrl ? (
+                <iframe
+                  src={contentData.videoUrl}
+                  title={contentData.title}
+                  width="100%"
+                  height="500"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="video-placeholder">Video URL not available</div>
+              )}
+            </div>
+          </div>
         );
-
+        
       case "quiz":
         return (
-          <QuizViewer
-            title={currentItem.title}
-            quizData={
-              quizData || {
-                title: currentItem.title,
-                questions: [
-                  {
-                    question:
-                      "This is a placeholder quiz question. Real questions will load when connected to the backend.",
-                    options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-                    correctAnswer: "Option 1",
-                  },
-                ],
-              }
-            }
-          />
+          <div className="quiz-content">
+            <div className="content-icon-header">
+              <FileQuestion size={24} />
+              <h3>{contentData.title}</h3>
+            </div>
+            {quizData ? (
+              <div className="quiz-container">
+                <p className="quiz-description">{contentData.description}</p>
+                <div className="quiz-details">
+                  <div className="quiz-info">
+                    <span>Questions: {quizData.questions?.length || 0}</span>
+                    <span>Time Limit: {quizData.timeLimit || "None"}</span>
+                    <span>Passing Score: {quizData.passingScore || 70}%</span>
+                  </div>
+                </div>
+                <button className="start-quiz-button">
+                  Start Quiz
+                </button>
+              </div>
+            ) : (
+              <div className="quiz-placeholder">Quiz data not available</div>
+            )}
+          </div>
         );
-
-      case "assignment":
-        return (
-          <AssignmentViewer
-            title={currentItem.title}
-            assignment={
-              contentData || {
-                title: currentItem.title,
-                description:
-                  "This is a placeholder assignment. Real assignment details will load when connected to the backend.",
-                dueDate: "2025-05-15",
-                submissionStatus: "not-submitted",
-              }
-            }
-          />
-        );
-
+        
       default:
-        return <div>Unsupported content type</div>;
+        return (
+          <div className="unknown-content">
+            <h3>{contentData.title}</h3>
+            <p>{contentData.description || "No description available"}</p>
+            <div className="content-message">
+              <p>This content type cannot be displayed.</p>
+            </div>
+          </div>
+        );
     }
   };
-
-  // Find the current item's index to determine if we can navigate prev/next
-  const items = module.items;
-  const currentIndex = items.findIndex((item) => item.id === itemId);
-  const isPrevAvailable = currentIndex > 0;
-  const isNextAvailable = currentIndex < items.length - 1;
 
   return (
     <div className="content-viewer">
       <div className="content-header">
-        <h2>{currentItem.title}</h2>
-        <div className="content-info">
-          <span className="content-type">{currentItem.type}</span>
-          <span className="content-duration">{currentItem.duration}</span>
+        <div className="content-breadcrumb">
+          <span className="module-name">{module?.title || "Module"}</span>
+          <span className="separator">›</span>
+          <span className="content-name">{contentData.title}</span>
         </div>
+        
+        <div className="navigation-buttons">
+          <button
+            className="nav-button prev"
+            onClick={() => onNavigate("prev")}
+          >
+            Previous
+          </button>
+          <button
+            className="nav-button next"
+            onClick={() => onNavigate("next")}
+          >
+            Next
+          </button>
+        </div>
+        
+        {/* Add progress indicator */}
+        {progressUpdated && (
+          <div className="progress-updated">
+            <span>Progress updated</span>
+            <div className="checkmark"></div>
+          </div>
+        )}
       </div>
-
-      <div className="content-body">{renderContent()}</div>
-
-      <div className="content-navigation">
-        <Button
-          variant="contained"
-          disabled={!isPrevAvailable}
-          onClick={() => onNavigate("prev")}
-          startIcon={<NavigateBeforeIcon />}
-          sx={{
-            mr: 1,
-            backgroundColor: isPrevAvailable ? "#0f172a" : "#e5e7eb",
-            "&:hover": { backgroundColor: "#1e293b" },
-          }}
-        >
-          Previous
-        </Button>
-
-        <Button
-          variant="contained"
-          disabled={!isNextAvailable}
-          onClick={() => onNavigate("next")}
-          endIcon={<NavigateNextIcon />}
-          sx={{
-            backgroundColor: isNextAvailable ? "#0f172a" : "#e5e7eb",
-            "&:hover": { backgroundColor: "#1e293b" },
-          }}
-        >
-          Next
-        </Button>
+      
+      <div className="content-body">
+        {renderContent()}
       </div>
     </div>
   );
-}
+};
 
 export default ContentViewer;
