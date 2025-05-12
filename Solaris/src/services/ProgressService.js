@@ -54,12 +54,56 @@ export const getDetailedCourseProgress = async (courseId) => {
   }
 };
 
+/**
+ * Track progress locally when server APIs fail
+ * This is a fallback mechanism using localStorage
+ */
+export const trackProgressLocally = (contentId) => {
+  try {
+    // Get currently viewed content IDs
+    const viewedStr = localStorage.getItem('viewed_content') || '[]';
+    const viewed = JSON.parse(viewedStr);
+    
+    // Add this content if not already there
+    if (!viewed.includes(contentId)) {
+      viewed.push(contentId);
+      localStorage.setItem('viewed_content', JSON.stringify(viewed));
+      console.log(`Locally tracked content ${contentId} as viewed`);
+    }
+    
+    return {
+      success: true,
+      local: true,
+      contentId: contentId
+    };
+  } catch (e) {
+    console.error('Error storing local progress:', e);
+    return { success: false, local: true, error: e.message };
+  }
+};
+
+/**
+ * Get locally tracked content progress
+ * @returns {array} Array of content IDs that have been viewed locally
+ */
+export const getLocalProgress = () => {
+  try {
+    const viewedStr = localStorage.getItem('viewed_content') || '[]';
+    return JSON.parse(viewedStr);
+  } catch (e) {
+    console.error('Error getting local progress:', e);
+    return [];
+  }
+};
+
 // Group all functions into a service object and export as default
 const ProgressService = {
   markContentAsViewed,
   getProgressDashboard,
   getCourseProgress,
-  getDetailedCourseProgress
+  getDetailedCourseProgress,
+  trackProgressLocally,
+  getLocalProgress
 };
 
 // Add default export
