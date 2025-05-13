@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
 import DepartmentService from "../../services/DepartmentService";
 import RoleService from "../../services/RoleService";
-import "./UserDialog.css";
+
 
 const UserDialog = ({ isOpen, onClose, onSubmit, user, title }) => {
   // Separate state for API data

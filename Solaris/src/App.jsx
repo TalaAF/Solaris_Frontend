@@ -5,7 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import { Outlet } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
-import Dashboard from './components/pages/Dashboard';
+import StudentDashboard from './components/pages/Dashboards/StudentDashboard';
+import Dashboard from './components/pages/Dashboards/StudentDashboard';
 import Courses from './components/pages/Courses';
 import CourseView from './components/courses/CourseView';
 import ContentViewer from './components/courses/CourseContent/ContentViewer';
@@ -20,10 +21,11 @@ import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import OAuthHandler from './components/auth/OAuthHandler';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { CourseProvider } from './context/CourseContext';
+import NotFound from './components/common/NotFound';
 
 // Import admin pages
 import AdminDashboard from './components/pages/Dashboards/AdminDashboard';
@@ -60,6 +62,42 @@ const PublicLayout = () => {
       <Outlet />
     </Layout>
   );
+};
+
+// Add this new component for role-based routing
+const RootRedirect = () => {
+  const { currentUser } = useAuth();
+  
+  // Add extensive debugging
+  console.log("RootRedirect - Current user:", currentUser);
+  
+  // Get user from multiple sources to ensure we have the data
+  const user = currentUser || JSON.parse(localStorage.getItem('user')) || {};
+  const roles = user.roles || [];
+  
+  console.log("RootRedirect - User roles:", roles);
+  
+  // Helper function to check for a role
+  const hasRole = (roleName) => {
+    return roles.some(role => {
+      // Handle different role formats (string or object)
+      const roleValue = typeof role === 'string' ? role : (role.name || '');
+      console.log(`Checking if ${roleValue} includes ${roleName}`);
+      return roleValue.toLowerCase().includes(roleName.toLowerCase());
+    });
+  };
+  
+  // Redirect based on actual role checks
+  if (hasRole('instructor')) {
+    console.log("Redirecting to instructor dashboard");
+    return <Navigate to="/instructor/dashboard" replace />;
+  } else if (hasRole('admin')) {
+    console.log("Redirecting to admin dashboard");
+    return <Navigate to="/admin/dashboard" replace />;
+  } else {
+    console.log("Redirecting to student dashboard");
+    return <Navigate to="/dashboard" replace />;
+  }
 };
 
 function App() {
@@ -100,9 +138,11 @@ function App() {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/oauth2/success" element={<OAuthHandler />} />
                 
+                {/* Root route - redirect based on role */}
+                <Route path="/" element={<RootRedirect />} />
+                
                 {/* Student routes - protected by authentication */}
                 <Route element={<ProtectedRoute requiredRole="student" />}>
-                  <Route path="/" element={<Dashboard />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/courses" element={<Courses />} />
                   <Route path="/courses/:courseId" element={<CourseView />} />
@@ -146,10 +186,31 @@ function App() {
                     <Route path="/instructor/quizzes/:quizId/edit" element={<QuizCreator />} />
                     <Route path="/instructor/quizzes/:quizId/questions" element={<QuizCreator />} />
                     <Route path="/instructor/quizzes/:quizId/analytics" element={<QuizAnalytics />} />
+                    
+                    {/* Add this catch-all for instructor paths */}
+                    <Route path="/instructor/*" element={<NotFound />} />
                   </Route>
 
-                  {/* Catch-all redirect */}
-                <Route path="*" element={<Navigate to="/" />} />
+                  {/* Admin routes - protected by admin role */}
+                  <Route element={<ProtectedRoute requiredRole="admin" />}>
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/users" element={<UserManagement />} />
+                    <Route path="/admin/departments" element={<Departments />} />
+                    <Route path="/admin/courses" element={<CourseManagement />} />
+                    <Route path="/admin/courses/:id" element={<CourseDetails />} />
+                    <Route path="/admin/courses/:id/settings" element={<CourseSettings />} />
+                    <Route path="/admin/courses/:id/students" element={<CourseStudents />} />
+                    <Route path="/admin/content" element={<ContentManagement />} />
+                    <Route path="/admin/assessments" element={<AssessmentManagement />} />
+                    <Route path="/admin/certificates" element={<CertificateManagement />} />
+                    <Route path="/admin/security" element={<SecurityManage />} />
+                    
+                    {/* Add this catch-all for admin paths */}
+                    <Route path="/admin/*" element={<NotFound />} />
+                  </Route>
+                  
+                {/* Catch-all redirect */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Router>
           </ErrorBoundary>

@@ -98,9 +98,7 @@ const Login = () => {
           <div className="form-group">
             <label htmlFor="password">
               Password
-              <Link to="/forgot-password" className="forgot-password">
-                Forgot password?
-              </Link>
+            
             </label>
             <input
               type="password"
@@ -115,7 +113,9 @@ const Login = () => {
           {(formError || error) && (
             <div className="auth-error">{formError || error}</div>
           )}
-          
+            <Link to="/forgot-password" className="forgot-password">
+                Forgot password?
+              </Link>
           <button 
             type="submit" 
             className="auth-button" 

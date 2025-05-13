@@ -14,8 +14,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Award,
-  RefreshCw
+  Award // Add this import
 } from "lucide-react";
 import CourseDialog from "./CourseDialog";
 import "./CourseTable.css";
@@ -38,8 +37,7 @@ const CourseTable = ({
   onFilterChange,
   onCourseAdd, 
   onCourseUpdate, 
-  onCourseToggleStatus,
-  onRefreshEnrollment
+  onCourseToggleStatus 
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState(initialCourses);
@@ -51,13 +49,12 @@ const CourseTable = ({
     departmentId: "",
     instructorEmail: "",
     isPublished: "",
-    semester: ""
+    semester: "" // Add semester to filters
   });
   
   const [departments, setDepartments] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [filterLoading, setFilterLoading] = useState(false);
-  const [refreshingCourseId, setRefreshingCourseId] = useState(null);
   
   const navigate = useNavigate();
 
@@ -66,10 +63,6 @@ const CourseTable = ({
       fetchFilterOptions();
     }
   }, [showFilters]);
-
-  useEffect(() => {
-    setCourses(initialCourses);
-  }, [initialCourses]);
 
   const fetchFilterOptions = async () => {
     setFilterLoading(true);
@@ -117,6 +110,10 @@ const CourseTable = ({
       setFilterLoading(false);
     }
   };
+
+  useEffect(() => {
+    setCourses(initialCourses);
+  }, [initialCourses]);
 
   const filteredCourses = courses.filter((course) => 
     course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -172,6 +169,39 @@ const CourseTable = ({
     setIsDialogOpen(false);
   };
 
+  const getEnrollmentPercentage = (enrolled, capacity) => {
+    if (!capacity) return 0;
+    return Math.min((enrolled / capacity) * 100, 100);
+  };
+
+  const handleViewDetails = (course) => {
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}`, { 
+      state: { courseData: course } 
+    });
+  };
+
+  const handleManageStudents = (course) => {
+    // Pass the entire course object as state when navigating
+    navigate(`/admin/courses/${course.id}/students`, { 
+      state: { 
+        courseData: course,
+        returnPath: '/admin/courses' // Add return path to go back to course list
+      } 
+    });
+  };
+
+  const handleSettings = (course) => {
+    navigate(`/admin/courses/${course.id}/settings`);
+  };
+
+  const handleGenerateCertificates = (course) => {
+    // Navigate to certificate generation page with course context
+    navigate(`/admin/courses/${course.id}/certificates`, { 
+      state: { courseData: course } 
+    });
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
     
@@ -216,59 +246,6 @@ const CourseTable = ({
     }
   };
   
-  // Add these handler functions after your other handler functions
-  const handleRefreshCourse = async (course) => {
-    if (onRefreshEnrollment) {
-      setRefreshingCourseId(course.id);
-      try {
-        await onRefreshEnrollment(course.id);
-      } finally {
-        setRefreshingCourseId(null);
-      }
-    }
-  };
-
-  const handleRefreshAllCourses = async () => {
-    if (onRefreshEnrollment) {
-      setRefreshingCourseId('all');
-      try {
-        await onRefreshEnrollment(); // No argument refreshes all courses
-      } finally {
-        setRefreshingCourseId(null);
-      }
-    }
-  };
-
-  const getEnrollmentPercentage = (enrolled, capacity) => {
-    if (!capacity) return 0;
-    return Math.min((enrolled / capacity) * 100, 100);
-  };
-
-  const handleViewDetails = (course) => {
-    // Pass the entire course object as state when navigating
-    navigate(`/admin/courses/${course.id}`, { 
-      state: { courseData: course } 
-    });
-  };
-
-  const handleManageStudents = (course) => {
-    // Pass the entire course object as state when navigating
-    navigate(`/admin/courses/${course.id}/students`, { 
-      state: { courseData: course } 
-    });
-  };
-
-  const handleSettings = (course) => {
-    navigate(`/admin/courses/${course.id}/settings`);
-  };
-
-  const handleGenerateCertificates = (course) => {
-    // Navigate to certificate generation page with course context
-    navigate(`/admin/courses/${course.id}/certificates`, { 
-      state: { courseData: course } 
-    });
-  };
-
   return (
     <div className="course-table-container">
       <div className="course-table-header">
@@ -292,19 +269,6 @@ const CourseTable = ({
               <Filter size={18} />
             </button>
           </div>
-          {onRefreshEnrollment && (
-            <button 
-              className={`refresh-button ${refreshingCourseId === 'all' ? 'refreshing' : ''}`}
-              onClick={handleRefreshAllCourses}
-              disabled={loading || refreshingCourseId !== null}
-            >
-              <RefreshCw 
-                size={16} 
-                className={refreshingCourseId === 'all' ? 'spinning' : ''} 
-              />
-              <span>Refresh Enrollments</span>
-            </button>
-          )}
           <button className="add-button" onClick={handleOpenAddDialog}>
             <Plus size={16} />
             <span>Add Course</span>
@@ -470,9 +434,9 @@ const CourseTable = ({
                       </span>
                     </td>
                     <td>
-                      <span className={`status-badge ${course.isPublished ? 'published' : 'draft'}`}>
+                      <div className={`status-badge ${course.isPublished ? 'published' : 'draft'}`}>
                         {course.isPublished ? 'Published' : 'Draft'}
-                      </span>
+                      </div>
                     </td>
                     <td className="action-cell">
                       <div className="dropdown">
@@ -502,26 +466,6 @@ const CourseTable = ({
                             <Settings size={14} />
                             <span>Settings</span>
                           </button>
-                          {onRefreshEnrollment && (
-                            <>
-                              <div className="dropdown-divider"></div>
-                              <button 
-                                className="dropdown-item" 
-                                onClick={() => handleRefreshCourse(course)}
-                                disabled={refreshingCourseId !== null}
-                              >
-                                <RefreshCw 
-                                  size={14} 
-                                  className={refreshingCourseId === course.id ? 'spinning' : ''} 
-                                />
-                                <span>
-                                  {refreshingCourseId === course.id 
-                                    ? 'Refreshing...' 
-                                    : 'Refresh Enrollment'}
-                                </span>
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -529,12 +473,12 @@ const CourseTable = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="empty-table">No courses found.</td>
+                  <td colSpan="7" className="empty-table">No courses found.</td>
                 </tr>
               )}
             </tbody>
           </table>
-        )}                   
+        )}
       </div>
 
       {/* Pagination controls */}
@@ -549,14 +493,13 @@ const CourseTable = ({
         />
       )}
 
-      {isDialogOpen && (
-        <CourseDialog
-          course={selectedCourse}
-          title={dialogTitle}
-          onClose={() => setIsDialogOpen(false)}
-          onSubmit={handleSubmitCourse}
-        />
-      )}
+      <CourseDialog 
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleSubmitCourse}
+        course={selectedCourse}
+        title={dialogTitle}
+      />
     </div>
   );
 };

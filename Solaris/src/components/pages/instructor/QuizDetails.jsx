@@ -220,31 +220,13 @@ const QuizDetails = () => {
     try {
       setSaving(true);
       
-      // Start with the EXISTING quiz data to maintain all fields
+      // Format data for API
       const quizData = {
-        ...quiz,            // Include ALL existing quiz fields as base
-        // Then override with edited values
-        title: editForm.title,
-        description: editForm.description,
+        ...editForm,
         timeLimit: parseInt(editForm.timeLimit, 10),
         passingScore: parseFloat(editForm.passingScore),
-        randomizeQuestions: editForm.randomizeQuestions,
-        // Explicitly include these important fields
-        id: parseInt(quizId, 10),
-        courseId: quiz.courseId,
-        published: quiz.published || false,
-        // Format dates properly if they exist
-        startDate: editForm.startDate ? new Date(editForm.startDate).toISOString() : null,
-        endDate: editForm.endDate ? new Date(editForm.endDate).toISOString() : null
+        id: quizId
       };
-      
-      // Remove any fields that might cause validation issues
-      delete quizData.createdAt;
-      delete quizData.updatedAt;
-      delete quizData.questions;
-      delete quizData.questionCount;
-      
-      console.log("Sending quiz data:", quizData);
       
       // Update quiz
       const response = await QuizService.updateQuiz(quizId, quizData);
@@ -261,14 +243,7 @@ const QuizDetails = () => {
       }
     } catch (err) {
       console.error("Error updating quiz:", err);
-      
-      // Add better error handling
-      if (err.response && err.response.data) {
-        console.error("Server error details:", err.response.data);
-        toast.error(err.response.data.message || err.response.data.error || "Failed to update quiz");
-      } else {
-        toast.error(err.message || "Failed to update quiz");
-      }
+      toast.error(err.message || "Failed to update quiz");
     } finally {
       setSaving(false);
     }

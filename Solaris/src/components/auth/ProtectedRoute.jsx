@@ -9,9 +9,14 @@ import Layout from '../layout/Layout';
  * 
  * @param {String} requiredRole - The role required to access this route
  */
-const ProtectedRoute = () => {
-  const { currentUser, loading } = useAuth();
+const ProtectedRoute = ({ requiredRole }) => {
+  const { currentUser, loading, getUserRole } = useAuth();
   const location = useLocation();
+  const role = getUserRole();
+  
+  console.log("ProtectedRoute - Required role:", requiredRole);
+  console.log("ProtectedRoute - User role:", role);
+  console.log("ProtectedRoute - Current user:", currentUser);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -27,8 +32,29 @@ const ProtectedRoute = () => {
   if (!currentUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+  
+  // Check if user has required role
+  if (requiredRole) {
+    const roleStr = String(role).toLowerCase();
+    const requiredRoleStr = String(requiredRole).toLowerCase();
+    
+    console.log(`Checking if ${roleStr} includes ${requiredRoleStr}`);
+    
+    if (!roleStr.includes(requiredRoleStr)) {
+      console.log("User doesn't have required role, redirecting to appropriate dashboard");
+      
+      // Redirect to appropriate dashboard based on actual role
+      if (roleStr.includes('instructor')) {
+        return <Navigate to="/instructor/dashboard" replace />;
+      } else if (roleStr.includes('admin')) {
+        return <Navigate to="/admin/dashboard" replace />;
+      } else {
+        return <Navigate to="/dashboard" replace />;
+      }
+    }
+  }
 
-  // If authenticated, render the route with layout
+  // If authenticated and has required role, render the route with layout
   return (
     <Layout>
       <Outlet />

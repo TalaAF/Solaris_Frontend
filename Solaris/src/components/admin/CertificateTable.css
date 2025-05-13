@@ -53,6 +53,7 @@
     color: #64748b;
     width: 16px;
     height: 16px;
+   
   }
   
   .search-input {
@@ -60,6 +61,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     width: 100%;
+    
     min-width: 240px;
   }
   

@@ -97,12 +97,12 @@
 }
 
 .action-button.primary:hover {
-  background-color: #d4b003;
+  background-color: #d4b003 !important;
 }
 
 .action-button:hover {
-  border-color: #cbd5e1;
-  background-color: #f8fafc;
+  border-color: #cbd5e1 !important ;
+  background-color: #f8fafc !important ;
 }
 
 /* Course details card */

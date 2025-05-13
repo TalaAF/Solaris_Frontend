@@ -155,22 +155,33 @@ export const AuthProvider = ({ children }) => {
     return currentUser.role === role;
   };
   
-  // Update the getUserRole function to handle complex role objects
+  // Update the getUserRole function in your AuthContext
+
   const getUserRole = () => {
-    if (!currentUser) return null;
+    const user = currentUser || JSON.parse(localStorage.getItem('user')) || {};
+    const roles = user.roles || [];
     
-    // When roles is an array of objects with a name property
-    if (Array.isArray(currentUser.roles) && currentUser.roles.length > 0) {
-      console.log("Found roles array:", currentUser.roles);
-      // Extract the name property from the role object
-      if (currentUser.roles[0].name) {
-        return currentUser.roles[0].name;
-      }
-      return currentUser.roles[0]; // Fallback
+    console.log("getUserRole called - user:", user);
+    console.log("getUserRole called - roles:", roles);
+    
+    // Check for instructor role
+    if (roles.some(role => {
+      const roleStr = typeof role === 'string' ? role : (role.name || '');
+      return roleStr.toLowerCase().includes('instructor');
+    })) {
+      return 'instructor';
     }
     
+    // Check for admin role
+    if (roles.some(role => {
+      const roleStr = typeof role === 'string' ? role : (role.name || '');
+      return roleStr.toLowerCase().includes('admin');
+    })) {
+      return 'admin';
+    }
     
-    return 'STUDENT'; // Default fallback
+    // Default to student
+    return 'student';
   };
   
   const value = {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from 'react-dom';
 import Dialog from "../common/Dialog";
 import AdminCourseService from "../../services/AdminCourseService";
 import "./CourseDialog.css";
@@ -224,7 +225,8 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
   onSubmit(submissionData);
 };
 
-  return (
+  // Wrap your return statement to use portal rendering:
+  return ReactDOM.createPortal(
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
@@ -405,7 +407,8 @@ const CourseDialog = ({ isOpen, onClose, onSubmit, course, title }) => {
           </div>
         </form>
       )}
-    </Dialog>
+    </Dialog>,
+    document.body
   );
 };
 

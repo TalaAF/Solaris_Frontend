@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
-import "./CertificateDialog.css";
 
 // Semesters - in a real app these could come from an API or be a free-form text field
 const semesters = [

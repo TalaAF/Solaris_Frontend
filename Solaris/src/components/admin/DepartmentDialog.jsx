@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Dialog from "../common/Dialog";
 import AdminUserService from "../../services/AdminUserService";
-import "./DepartmentDialog.css";
+
 
 const DepartmentDialog = ({ isOpen, onClose, onSubmit, department, title }) => {
   // Update the initialFormData to have all required properties

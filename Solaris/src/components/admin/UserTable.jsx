@@ -542,9 +542,7 @@ const UserTable = ({
                                 <Edit size={14} />
                                 <span>Edit</span>
                               </button>
-                              <Link to={`/admin/users/${user.id}`} className="dropdown-item">
-                                <span>View Details</span>
-                              </Link>
+                              
                               <div className="dropdown-divider"></div>
                               <button className="dropdown-item" onClick={() => handleToggleStatus(user)}>
                                 <span>{getStatusText(user) === 'Active' ? 'Deactivate' : 'Activate'}</span>
