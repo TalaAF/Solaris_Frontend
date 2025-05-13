@@ -262,33 +262,6 @@ class CourseService {
       throw error;
     }
   }
-
-  // Get enrollments for a student
-  async getStudentEnrollments(studentId) {
-  try {
-    console.log(`Fetching enrollments for student ${studentId}`);
-    return await api.get(`/api/enrollments/student/${studentId}`);
-  } catch (error) {
-    console.error(`Error fetching enrollments for student ${studentId}:`, error);
-    
-    // Add detailed error information
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      console.error("Error response headers:", error.response.headers);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error("No response received:", error.request);
-    } else {
-      // Something happened in setting up the request
-      console.error("Error setting up request:", error.message);
-    }
-    
-    throw error;
-  }
-}
 }
 
 export default new CourseService();

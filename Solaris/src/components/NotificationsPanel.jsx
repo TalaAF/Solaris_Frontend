@@ -1,11 +1,10 @@
 import React, { useState } from "react";
+import { Clock, FileText, Bell, CheckCheck, X } from "lucide-react";
 import "./NotificationsPanel.css";
-import { useNotifications } from "./NotificationContext";
 import NotificationDetail from "./NotificationDetail";
 
-const NotificationsPanel = ({ isOpen, onClose }) => {
+const NotificationsPanel = ({ isOpen, onClose, notifications = [] }) => {
   const [activeFilter, setActiveFilter] = useState("all");
-  const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const [selectedNotification, setSelectedNotification] = useState(null);
 
   const filterNotifications = (type) => {
@@ -18,14 +17,13 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
       return notifications;
     }
     return notifications.filter(
-      (notification) => notification.type === activeFilter,
+      (notification) => notification.type === activeFilter
     );
   };
 
   const filteredNotifications = getFilteredNotifications();
 
   const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
     setSelectedNotification(notification);
   };
 
@@ -93,81 +91,96 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
   // If notification detail is open, close notification panel
   const panelOpenClass = isOpen && !selectedNotification ? "open" : "";
 
+  const hasUnread = notifications.some((notif) => !notif.read);
+
   return (
     <>
       <div className={`notifications-panel ${panelOpenClass}`}>
         <div className="notifications-header">
-          <h2>Notifications</h2>
-          <button className="close-button" onClick={onClose}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+          <h2 className="notifications-title">Notifications</h2>
+          <button className="close-notifications" onClick={onClose}>
+            <X size={18} />
           </button>
         </div>
 
-        <div className="notifications-filter">
+        <div className="notifications-tabs">
           <button
-            className={`filter-button ${activeFilter === "all" ? "active" : ""}`}
+            className={`notification-tab ${
+              activeFilter === "all" ? "active" : ""
+            }`}
             onClick={() => filterNotifications("all")}
           >
             All
           </button>
           <button
-            className={`filter-button ${activeFilter === "academic" ? "active" : ""}`}
+            className={`notification-tab ${
+              activeFilter === "academic" ? "active" : ""
+            }`}
             onClick={() => filterNotifications("academic")}
           >
             Academic
           </button>
           <button
-            className={`filter-button ${activeFilter === "reminder" ? "active" : ""}`}
+            className={`notification-tab ${
+              activeFilter === "reminder" ? "active" : ""
+            }`}
             onClick={() => filterNotifications("reminder")}
           >
             Reminders
           </button>
           <button
-            className={`filter-button ${activeFilter === "announcement" ? "active" : ""}`}
+            className={`notification-tab ${
+              activeFilter === "announcement" ? "active" : ""
+            }`}
             onClick={() => filterNotifications("announcement")}
           >
             Announcements
           </button>
         </div>
 
-        <div className="notifications-actions">
-          <button className="mark-all-read" onClick={markAllAsRead}>
-            Mark all as read
-          </button>
-        </div>
+        {hasUnread && (
+          <div className="notifications-actions">
+            <button className="mark-read-button">Mark all as read</button>
+          </div>
+        )}
 
         <div className="notifications-list">
-          {filteredNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`notification-item ${!notification.read ? "unread" : ""}`}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              <div className="notification-icon">
-                {getTypeIcon(notification.type)}
+          {filteredNotifications.length === 0 ? (
+            <div className="notifications-empty">
+              <div className="empty-icon">
+                <Bell />
               </div>
-              <div className="notification-content">
-                <h3 className="notification-title">{notification.title}</h3>
-                <p className="notification-message">{notification.message}</p>
-                <span className="notification-time">{notification.time}</span>
-              </div>
-              {!notification.read && <div className="unread-indicator"></div>}
+              <p className="empty-text">No notifications to display</p>
             </div>
-          ))}
+          ) : (
+            filteredNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`notification-item ${
+                  !notification.read ? "unread" : ""
+                }`}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <div className={`notification-icon ${notification.type}`}>
+                  {getTypeIcon(notification.type)}
+                </div>
+                <div className="notification-content">
+                  <div className="notification-title">{notification.title}</div>
+                  <div className="notification-message">
+                    {notification.message}
+                  </div>
+                  <div className="notification-time">{notification.time}</div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
+
+        {filteredNotifications.length > 0 && (
+          <div className="notifications-footer">
+            <button className="view-all-button">View all notifications</button>
+          </div>
+        )}
       </div>
 
       {/* Backdrop for notification detail */}

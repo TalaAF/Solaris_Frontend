@@ -8,10 +8,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress
 } from "@mui/material";
 import Sidebar from "../layout/Sidebar";
 import Header from "../layout/Header";
 import CourseList from "../courses/CourseList";
+import CourseService from "../../services/CourseService";
 import "./Courses.css";
 
 function Courses() {
@@ -22,16 +24,38 @@ function Courses() {
   const [semesters, setSemesters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filtersChanged, setFiltersChanged] = useState(false);
 
-  // Fetch departments and course data
+  // Fetch departments and semesters from backend
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchFilterData = async () => {
+      setLoading(true);
       try {
-        // In a real app, you would fetch departments from an API
-        // const departmentsResponse = await axios.get('/api/departments');
-        // setDepartments(departmentsResponse.data);
-
-        // For now, using mockup departments
+        console.log("Fetching filter options for Courses page...");
+        
+        // Fetch both departments and semesters in parallel
+        const [deptsResponse, semestersResponse] = await Promise.all([
+          CourseService.getDepartments(),
+          CourseService.getSemesters()
+        ]);
+        
+        console.log("Department response:", deptsResponse);
+        console.log("Semesters response:", semestersResponse);
+        
+        // Set departments - handle different response formats
+        const departmentData = deptsResponse?.data?.content || deptsResponse?.data || [];
+        setDepartments(Array.isArray(departmentData) ? departmentData : []);
+        
+        // Set semesters
+        const semesterData = semestersResponse?.data || [];
+        setSemesters(Array.isArray(semesterData) ? semesterData : []);
+        
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching filter data:", err);
+        setError("Failed to load filter options. Please try again later.");
+        
+        // Fallback to default values
         setDepartments([
           { id: 1, name: "Anatomy" },
           { id: 2, name: "Biochemistry" },
@@ -39,39 +63,43 @@ function Courses() {
           { id: 4, name: "Medical Humanities" },
           { id: 5, name: "Clinical Sciences" },
         ]);
-
-        // Set semesters (these would typically be derived from course data)
+        
         setSemesters([
           "Fall 2024",
           "Spring 2025",
           "Fall 2025",
           "Spring 2026"
         ]);
-
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching filter data:", err);
-        setError("Failed to load filter options. Please try again later.");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchDepartments();
+    fetchFilterData();
   }, []);
 
-  // Handle search input change
+  // Handle search input change with debounce
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
+    setFiltersChanged(true);
   };
 
   // Handle department filter change
   const handleDepartmentChange = (event) => {
     setDepartmentFilter(event.target.value);
+    setFiltersChanged(true);
   };
 
   // Handle semester filter change
   const handleSemesterChange = (event) => {
     setSemesterFilter(event.target.value);
+    setFiltersChanged(true);
+  };
+
+  // Apply filters - only used if you want a separate apply button
+  const handleApplyFilters = () => {
+    setFiltersChanged(false);
+    // The effect of this is that it forces a re-render of CourseList
   };
 
   return (
@@ -86,7 +114,7 @@ function Courses() {
               </Typography>
 
               {/* Filters section */}
-              <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
+              <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap", alignItems: "center" }}>
                 <TextField
                   label="Search courses"
                   variant="outlined"
@@ -106,6 +134,7 @@ function Courses() {
                     value={departmentFilter}
                     label="Department"
                     onChange={handleDepartmentChange}
+                    disabled={loading}
                   >
                     <MenuItem value="all">All Departments</MenuItem>
                     {departments.map((dept) => (
@@ -124,26 +153,31 @@ function Courses() {
                     value={semesterFilter}
                     label="Semester"
                     onChange={handleSemesterChange}
+                    disabled={loading}
                   >
                     <MenuItem value="all">All Semesters</MenuItem>
-                    {semesters.map((semester) => (
-                      <MenuItem key={semester} value={semester}>
+                    {semesters.map((semester, index) => (
+                      <MenuItem key={index} value={semester}>
                         {semester}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                
+                {loading && (
+                  <CircularProgress size={24} sx={{ ml: 2 }} />
+                )}
               </Box>
 
-              {loading && <Typography>Loading courses...</Typography>}
               {error && <Typography color="error">{error}</Typography>}
-              {!loading && !error && (
-                <CourseList
-                  searchTerm={searchTerm}
-                  departmentFilter={departmentFilter}
-                  semesterFilter={semesterFilter}
-                />
-              )}
+              
+              {/* Pass filters to CourseList - use key to force re-render when filters change */}
+              <CourseList
+                key={`${searchTerm}-${departmentFilter}-${semesterFilter}`}
+                searchTerm={searchTerm}
+                departmentFilter={departmentFilter}
+                semesterFilter={semesterFilter}
+              />
             </Box>
           </Container>
         </div>

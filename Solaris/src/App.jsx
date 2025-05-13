@@ -42,6 +42,9 @@ import InstructorCourseDetail from './components/pages/instructor/InstructorCour
 import CourseContent from './components/pages/instructor/CourseContent';
 import StudentProgress from './components/pages/instructor/StudentProgress';
 import StudentProgressDetail from './components/pages/instructor/StudentProgressDetail';
+import QuizCreator from './components/pages/instructor/QuizCreator';
+import QuizDetails from './components/pages/instructor/QuizDetails';
+import QuizAnalytics from './components/pages/instructor/QuizAnalytics';
 
 // Import course management components
 import CourseDetails from './components/pages/Admin/CourseDetails';
@@ -138,6 +141,11 @@ function App() {
                     <Route path="/instructor/content-management" element={<ContentManagement />} />
                     <Route path="/instructor/assessment-management" element={<AssessmentManagement />} />
                     <Route path="/instructor/calendar" element={<Calendar />} />
+                    <Route path="/instructor/courses/:courseId/create-quiz" element={<QuizCreator />} />
+                    <Route path="/instructor/quizzes/:quizId" element={<QuizDetails />} />
+                    <Route path="/instructor/quizzes/:quizId/edit" element={<QuizCreator />} />
+                    <Route path="/instructor/quizzes/:quizId/questions" element={<QuizCreator />} />
+                    <Route path="/instructor/quizzes/:quizId/analytics" element={<QuizAnalytics />} />
                   </Route>
 
                   {/* Catch-all redirect */}

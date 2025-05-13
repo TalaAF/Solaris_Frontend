@@ -143,12 +143,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* Logout Button - Positioned at the bottom right */}
-      <button 
-        onClick={logout}
-        className="logout-button"
-      >
-        Logout
-      </button>
+     
     </div>
   );
 };

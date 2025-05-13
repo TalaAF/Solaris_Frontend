@@ -1,239 +1,236 @@
-/* Use CSS custom properties for dynamic layout */
+/* VRLab.css - Simplified for Clinical VR focus */
+
 :root {
-  /* Base values that can be updated via JavaScript when sidebar changes */
-  --sidebar-width: 240px;
-  --content-padding: 24px;
-}
-.vr-lab-container {
-   width: calc(100% - var(--content-padding) * 2);
-  margin-top: 70px;
-  padding: var(--content-padding);
-  transition: width 0.3s ease;
+  --solaris-yellow: #e6b400;
+  --solaris-yellow-light: #fff8e1;
+  --solaris-yellow-dark: #d4a500;
 }
 
-/* Page header styling */
+.vr-lab-container {
+  padding: 2rem 0;
+  margin-top: 70px;
+}
+
+/* Header styles */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .page-title {
-  color: #eab308; /* Yellow */
   font-weight: 600;
-  margin: 0;
+  color: #333;
 }
 
 .page-subtitle {
-  color: #6b7280;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  color: #555;
 }
 
-.schedule-button {
-  background-color: #eab308 !important; /* Yellow */
-  text-transform: none;
-  padding: 0.5rem 1rem;
+.launch-vr-button {
+  background-color: var(--solaris-yellow) !important;
+  color: white !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.schedule-button:hover {
-  background-color: #ca8a04 !important; /* Darker yellow on hover */
+.launch-vr-button:hover {
+  background-color: var(--solaris-yellow-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(230, 180, 0, 0.25);
 }
 
-/* Tab styling */
-.tab-container {
-  margin-bottom: 1.5rem;
-}
-
-.vr-tabs {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.vr-tab {
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  letter-spacing: 0.05rem;
-  min-height: 48px;
-}
-
-.vr-tab.Mui-selected {
-  color: #eab308; /* Yellow */
-}
-
-.tab-content {
-  padding-top: 1rem;
-}
-
-/* Empty state styling */
-.empty-state {
-  padding: 2rem;
-  text-align: center;
-  color: #6b7280;
-  background-color: #f9fafc;
-}
-
-/* Modal styles */
-.modal-header {
+/* Hero section */
+.hero-section {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  margin-bottom: 3rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fafafa;
 }
 
-.modal-category {
-  background-color: #eab308 !important; /* Light yellow background */
-  color: #ffffff !important; /* Yellow text */
-  margin-top: 0.5rem;
+.hero-content {
+  flex: 1;
+  padding: 2.5rem;
 }
 
-.close-button {
-  min-width: auto;
-  padding: 8px;
-  color: #6b7280 !important;
+.hero-image-container {
+  flex: 1;
+  min-height: 300px;
+  background-color: #eee;
+  position: relative;
 }
 
-.preview-placeholder {
-  background-color: #1a1f36;
-  color: white;
-  height: 240px;
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-cta-button {
+  background-color: var(--solaris-yellow) !important;
+  color: white !important;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.hero-cta-button:hover {
+  background-color: var(--solaris-yellow-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(230, 180, 0, 0.25);
+}
+
+.system-requirements {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 1rem;
+}
+
+/* Features section */
+.section-title {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.feature-card {
   border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin: 1.5rem 0;
+  border: 1px solid rgba(230, 180, 0, 0.15);
+  transition: all 0.2s ease;
+  background-color: transparent !important;
+  height: 100%;
 }
 
-.preview-3d {
-  color: #eab308; /* Yellow */
-  font-weight: 700;
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(230, 180, 0, 0.18) !important;
 }
 
-.preview-text {
-  color: white;
-  margin-top: 0.5rem;
-}
-
-.simulation-details {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
-  gap: clamp(30px, 1vw, 20px); /* Responsive gap that adjusts with viewport width */
-  padding: 1.5rem 0;
-  width: 100%;
-  margin: 0 auto;
-  transition: all 0.3s ease;
-}
-
-.detail-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  flex-basis: 30%;
-}
-
-.detail-label {
-  color: #9ca3af;
-  font-size: 0.75rem;
-}
-
-.equipment-note {
-  color: #6b7280;
-  text-align: center;
-  margin: 1.5rem 0;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
-.cancel-button {
-  color: #6b7280 !important; 
-}
-
-.start-button {
-  background-color: #eab308 !important; /* Yellow */
-  text-transform: uppercase;
+.feature-card h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
+  color: #333;
 }
 
-.start-button:hover {
-  background-color: #ca8a04 !important; /* Darker yellow on hover */
+/* How to access section */
+.access-guide {
+  margin-bottom: 3rem;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  background-color: white;
+  border: 1px solid rgba(230, 180, 0, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Simulation grid styles with dynamic adjustments */
-.simulation-grid {
+.access-guide-content {
+  padding: 2rem;
+}
+
+.access-steps {
+  margin-top: 1.5rem;
+}
+
+.step {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  width: 100%;
-  transition: all 0.3s ease;
-  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-/* Flexible grid item that will allow proper wrapping */
-.simulation-grid-item {
-  flex: 0 0 auto; /* Don't grow, don't shrink, use auto width based on child */
-  width: calc((100% - 48px) / 3); /* Subtract gap space for 3 items per row */
-  max-width: 100%;
-  margin-bottom: 10px;
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--solaris-yellow);
+  color: white;
+  border-radius: 50%;
+  margin-right: 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.empty-state-container {
-  width: 100%; /* Full width for empty state */
+.help-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--solaris-yellow-light);
+  padding: 1.25rem 2rem;
+  border-top: 1px solid rgba(230, 180, 0, 0.2);
 }
 
-/* Responsive breakpoints */
-@media (max-width: 1400px) {
-  .simulation-grid-item {
-    width: calc((100% - 24px) / 2); /* Two cards per row on medium-large screens */
-  }
+.help-box a {
+  color: var(--solaris-yellow-dark);
+  text-decoration: none;
+  font-weight: 500;
 }
 
+.help-box a:hover {
+  text-decoration: underline;
+}
+
+/* Floating button for mobile */
+.floating-launch-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background-color: var(--solaris-yellow) !important;
+  color: white !important;
+  padding: 0.75rem 1.25rem;
+  border-radius: 30px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+  z-index: 1000;
+}
+
+/* Responsive adjustments */
 @media (max-width: 900px) {
-  .simulation-grid-item {
-    width: 100%; /* One card per row on small screens */
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+  .hero-section {
+    flex-direction: column;
   }
   
-  .simulation-grid {
-    justify-content: center;
+  .hero-image-container {
+    min-height: 200px;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 
-/* Additional responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
   
-  .schedule-button {
-    width: 100%;
+  .features-grid {
+    grid-template-columns: 1fr;
   }
   
-  .simulation-details {
-    flex-direction: column;
-    gap: 20px;
+  .hero-content {
+    padding: 1.5rem;
   }
   
-  .detail-item {
-    flex-basis: 100%;
+  .help-box {
+    padding: 1rem 1.5rem;
   }
   
-  .modal-actions {
-    flex-direction: column;
-  }
-  
-  .modal-actions button {
-    width: 100%;
+  .launch-vr-button {
+    display: none;
   }
 }

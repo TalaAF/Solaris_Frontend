@@ -1,12 +1,33 @@
 import React from "react";
 import "./WelcomeSection.css";
+import { useAuth } from "../../context/AuthContext";
 
 const WelcomeSection = () => {
+  const { currentUser } = useAuth();
+  
+  // Get student name from the authenticated user
+  const studentName = currentUser?.displayName || currentUser?.email?.split('@')[0] || "Student";
+  
+  // Get current date
+  const today = new Date();
+  const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+  const formattedDate = today.toLocaleDateString('en-US', options);
+  
+  // Determine time of day for greeting
+  const hours = today.getHours();
+  let greeting = "Good morning";
+  
+  if (hours >= 12 && hours < 17) {
+    greeting = "Good afternoon";
+  } else if (hours >= 17) {
+    greeting = "Good evening";
+  }
+  
   return (
     <div className="welcome-container">
       <div className="welcome-header">
-        <h1>Good evening, Saja Shawawra</h1>
-        <p className="date">Friday, April 18, 2025</p>
+        <h1>{greeting}, {studentName}</h1>
+        <p className="date">{formattedDate}</p>
       </div>
       
       <div className="glance-card">

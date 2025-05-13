@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Pencil, Trash2, Layout, Eye, FileText, Video, FileQuestion } from 'lucide-react';
+import { 
+  ChevronLeft, Plus, Pencil, Trash2, Layout, Eye, FileText, 
+  Video, FileQuestion, Book, Award, CheckCircle, Settings 
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import CourseService from '../../../services/CourseService';
 import ContentService from '../../../services/ContentService';
+import QuizService from '../../../services/QuizService';
 import { useCourseContext } from '../../../context/CourseContext';
 import './CourseContent.css';
 
@@ -23,6 +27,7 @@ const CourseContent = () => {
   
   const [course, setCourse] = useState(contextCourse || null);
   const [modules, setModules] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeModule, setActiveModule] = useState(null);
@@ -72,12 +77,81 @@ const CourseContent = () => {
       setLoading(false);
     }
   };
+
+  // Fetch quizzes for the course
+ // Updated fetchQuizzes function for CourseContent.jsx
+
+const fetchQuizzes = async () => {
+  try {
+    console.log(`Fetching quizzes for course ID: ${courseId}...`);
+    
+    // Add a mock quiz to test UI rendering without API
+    const mockQuiz = {
+      id: 999,
+      title: "Test Quiz (Mocked)",
+      description: "This is a test quiz to verify UI rendering",
+      timeLimit: 30,
+      passingScore: 70,
+      published: true,
+      questionCount: 5
+    };
+    
+    try {
+      // First try showing a mock quiz to test the UI
+      console.log("Setting mock quiz for testing UI...");
+      setQuizzes([mockQuiz]);
+      
+      // Then fetch actual quizzes from API
+      console.log("Making actual API call for quizzes...");
+      const quizzesResponse = await QuizService.getQuizzesByCourse(courseId);
+      
+      console.log("Raw API response:", quizzesResponse);
+      
+      if (!quizzesResponse) {
+        console.error("Quiz response is null or undefined!");
+        return; // Keep using the mock quiz
+      }
+      
+      // Check the structure of the response
+      if (Array.isArray(quizzesResponse)) {
+        console.log("API returned an array of quizzes:", quizzesResponse);
+        setQuizzes(quizzesResponse);
+      } else if (quizzesResponse.data && Array.isArray(quizzesResponse.data)) {
+        console.log("API returned an object with data array:", quizzesResponse.data);
+        setQuizzes(quizzesResponse.data);
+      } else if (typeof quizzesResponse === 'object') {
+        console.log("API returned a non-array object:", quizzesResponse);
+        
+        // Check if it might be a single quiz object instead of an array
+        if (quizzesResponse.id) {
+          console.log("Appears to be a single quiz object, converting to array");
+          setQuizzes([quizzesResponse]);
+        } else {
+          console.error("Unexpected response format:", quizzesResponse);
+          // Keep the mock quiz to show something
+        }
+      } else {
+        console.error("Completely unexpected response type:", typeof quizzesResponse);
+        // Keep the mock quiz to show something
+      }
+      
+    } catch (apiError) {
+      console.error("Error during API call:", apiError);
+      console.log("Using mock quiz data for display");
+      // Keep the mock quiz showing since the API call failed
+    }
+  } catch (err) {
+    console.error("Fatal error in fetchQuizzes:", err);
+    toast.error("Failed to load quizzes");
+  }
+};
   
   // Update the useEffect hook that fetches initial data
   useEffect(() => {
     // Only fetch if we have a valid courseId
     if (courseId) {
       fetchCourseAndModules();
+      fetchQuizzes();
     }
   }, [courseId]);
   
@@ -181,12 +255,12 @@ const CourseContent = () => {
   };
   
   // Add or modify handleAddContent function to properly set the module ID
-const handleAddContent = (moduleId) => {
-  // Store the target module ID for the content being added
-  setCurrentModuleForContent(moduleId);
-  // Open the modal
-  setIsAddContentModalOpen(true);
-};
+  const handleAddContent = (moduleId) => {
+    // Store the target module ID for the content being added
+    setCurrentModuleForContent(moduleId);
+    // Open the modal
+    setIsAddContentModalOpen(true);
+  };
 
   // Update handleAddContentSubmit to use the correct module ID
   const handleAddContentSubmit = async (contentData) => {
@@ -322,17 +396,66 @@ const handleAddContent = (moduleId) => {
   };
   
   // Add this function to your component
-const refreshContent = async () => {
-  try {
-    setLoading(true);
-    await fetchModules();
-    setLoading(false);
-  } catch (error) {
-    console.error("Error refreshing content:", error);
-    toast.error("Failed to refresh content");
-    setLoading(false);
-  }
-};
+  const refreshContent = async () => {
+    try {
+      setLoading(true);
+      await fetchModules();
+      await fetchQuizzes();
+      setLoading(false);
+    } catch (error) {
+      console.error("Error refreshing content:", error);
+      toast.error("Failed to refresh content");
+      setLoading(false);
+    }
+  };
+
+  // Navigate to create quiz page
+  const handleNavigateToCreateQuiz = () => {
+    navigate(`/instructor/courses/${courseId}/create-quiz`);
+  };
+
+  // Navigate to quiz details page
+  const handleNavigateToQuizDetails = (quizId) => {
+    navigate(`/instructor/quizzes/${quizId}`);
+  };
+
+  // Handle publish/unpublish quiz
+  const handlePublishQuiz = async (quiz) => {
+    try {
+      let response;
+      
+      if (quiz.published) {
+        response = await QuizService.unpublishQuiz(quiz.id);
+        toast.success("Quiz unpublished successfully");
+      } else {
+        response = await QuizService.publishQuiz(quiz.id);
+        toast.success("Quiz published successfully");
+      }
+      
+      if (response) {
+        await fetchQuizzes(); // Refresh quiz list with updated published status
+      }
+    } catch (err) {
+      console.error("Error updating quiz publish status:", err);
+      toast.error("Failed to update quiz status");
+    }
+  };
+
+  // Delete quiz
+  const handleDeleteQuiz = async (quizId) => {
+    if (!confirm("Are you sure you want to delete this quiz? This will also delete all questions and student attempts.")) {
+      return;
+    }
+    
+    try {
+      await QuizService.deleteQuiz(quizId);
+      toast.success("Quiz deleted successfully");
+      await fetchQuizzes(); // Refresh quiz list
+    } catch (err) {
+      console.error("Error deleting quiz:", err);
+      toast.error("Failed to delete quiz");
+    }
+  };
 
   if (loading) {
     return (
@@ -371,13 +494,15 @@ const refreshContent = async () => {
         
         <div className="content-title-container">
           <h1 className="content-title">Course Content: {course?.title}</h1>
-          <button 
-            className="solaris-button secondary-button"
-            onClick={() => fetchModules()}
-            title="Refresh Content"
-          >
-            Refresh Content
-          </button>
+          <div className="content-actions">
+            <button 
+              className="solaris-button secondary-button"
+              onClick={() => refreshContent()}
+              title="Refresh Content"
+            >
+              Refresh Content
+            </button>
+          </div>
         </div>
       </div>
       
@@ -448,7 +573,7 @@ const refreshContent = async () => {
                   </div>
                 </div>
               ))
-           ) }
+            )}
           </div>
         </div>
         
@@ -539,6 +664,96 @@ const refreshContent = async () => {
             </div>
           )}
         </div>
+      </div>
+      
+      {/* Quizzes Section */}
+      <div className="quizzes-section">
+        <div className="quizzes-header">
+          <h2>
+            <FileQuestion size={20} />
+            Quizzes & Assessments
+          </h2>
+          <button 
+            className="solaris-button primary-button"
+            onClick={handleNavigateToCreateQuiz}
+          >
+            <Plus size={16} />
+            Create New Quiz
+          </button>
+        </div>
+        
+        {quizzes.length === 0 ? (
+          <div className="empty-quizzes">
+            <p>No quizzes have been created for this course yet.</p>
+            <button 
+              className="solaris-button primary-button"
+              onClick={handleNavigateToCreateQuiz}
+            >
+              <Plus size={16} />
+              Create First Quiz
+            </button>
+          </div>
+        ) : (
+          <div className="quiz-cards">
+            {quizzes.map(quiz => (
+              <div key={quiz.id} className="quiz-card">
+                <div className="quiz-card-header">
+                  <FileQuestion size={20} />
+                  {quiz.published ? (
+                    <span className="status-badge published">
+                      <CheckCircle size={14} />
+                      Published
+                    </span>
+                  ) : (
+                    <span className="status-badge draft">Draft</span>
+                  )}
+                </div>
+                
+                <div className="quiz-card-content">
+                  <h3 className="quiz-title">{quiz.title}</h3>
+                  <p className="quiz-description">{quiz.description || "No description provided."}</p>
+                  
+                  <div className="quiz-meta">
+                    <div>
+                      <strong>Questions:</strong> {quiz.questionCount || 0}
+                    </div>
+                    <div>
+                      <strong>Time Limit:</strong> {quiz.timeLimit} min
+                    </div>
+                    <div>
+                      <strong>Passing Score:</strong> {quiz.passingScore}%
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="quiz-card-actions">
+                  <button 
+                    className="solaris-button secondary-button"
+                    onClick={() => handleNavigateToQuizDetails(quiz.id)}
+                  >
+                    <Settings size={16} />
+                    Manage
+                  </button>
+                  
+                  <button 
+                    className={`solaris-button ${quiz.published ? 'warning-button' : 'success-button'}`}
+                    onClick={() => handlePublishQuiz(quiz)}
+                  >
+                    {quiz.published ? 'Unpublish' : 'Publish'}
+                  </button>
+                  
+                  <button 
+                    className="solaris-button danger-button"
+                    onClick={() => handleDeleteQuiz(quiz.id)}
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       {/* Modals */}

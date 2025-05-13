@@ -293,10 +293,7 @@ function CourseList({ searchTerm = '', departmentFilter = 'all', semesterFilter 
                           <div className="course-department">{course.department}</div>
                           <div className="course-instructor">{course.instructor}</div>
                         </div>
-                        <div className={`course-status status-${course.status}`}>
-                          {course.status === 'in-progress' ? 'In Progress' : 
-                           course.status === 'upcoming' ? 'Upcoming' : 'Completed'}
-                        </div>
+                       
                       </div>
                       
                       {course.status === 'in-progress' && (

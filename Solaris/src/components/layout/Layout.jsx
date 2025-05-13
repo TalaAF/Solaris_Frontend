@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import ChatbotProvider from "../ChatbotProvider";
 import "./Layout.css";
 
 const Layout = ({ children }) => {
@@ -23,6 +24,10 @@ const Layout = ({ children }) => {
       setPageType("courses");
     } else if (path.includes("/assessments")) {
       setPageType("assessments");
+    } else if (path.includes("/profile")) {
+      setPageType("profile");
+    } else if (path.includes("/calendar")) {
+      setPageType("calendar");
     } else {
       setPageType("default");
     }
@@ -59,6 +64,9 @@ const Layout = ({ children }) => {
           )}
         </button>
       </div>
+
+      {/* Add the ChatbotProvider here */}
+      <ChatbotProvider />
     </div>
   );
 };

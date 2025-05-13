@@ -1,277 +1,194 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { 
-  Tabs, 
-  Tab, 
-  Box,
-  Button,
   Typography,
   Container,
-  Grid,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip
+  Box,
+  Button
 } from "@mui/material";
 import {
-  Brain,
-  Calendar,
-  BookOpen,
-  X,
-  Clock,
-  GraduationCap,
-  Users
+  ExternalLink,
+  Stethoscope,
+  UserPlus,
+  Clipboard,
+  Activity,
+  LifeBuoy
 } from "lucide-react";
-// Remove the problematic import
-// import { useSidebar } from "../../context/SidebarContext";
-import SimulationCard from "../vr/SimulationCard";
 import "./VRLab.css";
 
-// Use proper yellow color instead of orange
-const THEME_COLOR = "#eab308";
+// Use proper yellow color
+const THEME_COLOR = "#e6b400";
 
-// Simulation data
-const simulations = [
-  {
-    id: 1,
-    title: "Human Anatomy Explorer",
-    description: "Explore the human body in 3D VR environment with detailed organs and systems.",
-    duration: 45,
-    level: "Intermediate",
-    participants: "Individual",
-    category: "Anatomy",
-    code: "VRMED101"
-  },
-  {
-    id: 2,
-    title: "Cardiovascular System Simulation",
-    description: "Interact with a realistic heart model and observe blood flow in real-time.",
-    duration: 60,
-    level: "Advanced",
-    participants: "Up to 4 students",
-    category: "Physiology",
-    code: "VRPHY202"
-  },
-  {
-    id: 3,
-    title: "Virtual Dissection Lab",
-    description: "Practice dissection techniques in a risk-free virtual environment.",
-    duration: 90,
-    level: "Advanced",
-    participants: "Individual or pairs",
-    category: "Anatomy",
-    code: "VRANA301"
-  },
-  {
-    id: 4,
-    title: "Surgical Procedures Training",
-    description: "Step-by-step guidance through common surgical procedures with haptic feedback.",
-    duration: 120,
-    level: "Advanced",
-    participants: "Individual",
-    category: "Surgery",
-    code: "VRSUR401"
-  },
-];
-
-// Main VR Lab component
+// Simplified VR Lab component focused only on Clinical VR
 const VRLab = () => {
-  const [tabValue, setTabValue] = useState(0);
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedSimulation, setSelectedSimulation] = useState(null);
-  
-  // Replace the sidebar context with a prop from Layout component or window resize detection
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
-  
-  // Add a resize listener to detect sidebar state changes based on window width
-  useEffect(() => {
-    const handleResize = () => {
-      // This is a simplistic approach - if your app has actual sidebar state management,
-      // you'll need to connect to that instead
-      setIsSidebarOpen(window.innerWidth > 768);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // These effects can stay, using the local isSidebarOpen state
-  useEffect(() => {
-    const contentWidth = isSidebarOpen ? "calc(100% - 240px)" : "calc(100% - 70px)";
-    document.documentElement.style.setProperty("--content-width", contentWidth);
-  }, [isSidebarOpen]);
-
-  useEffect(() => {
-    const cardWidth = isSidebarOpen ? "390px" : "330px";
-    document.documentElement.style.setProperty("--card-width", cardWidth);
-  }, [isSidebarOpen]);
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
-  const handleOpenSimulation = (simulation) => {
-    setSelectedSimulation(simulation);
-    setOpenModal(true);
-  };
-
-  // Filter simulations based on the selected tab
-  const getFilteredSimulations = () => {
-    if (tabValue === 0) return simulations; // VR Simulations
-    if (tabValue === 1) return []; // Lab Schedule
-    return []; // Tutorials
+  // Function to open Clinic VR in a new window
+  const handleOpenClinicVR = () => {
+    window.open('https://api2.enscape3d.com/v1/view/0c0cb551-20c3-4ceb-b979-6373fd702c01', '_blank', 'noopener,noreferrer');
   };
 
   return (
     <Container maxWidth="xl" className="vr-lab-container">
       <div className="page-header">
         <Typography variant="h4" component="h1" className="page-title">
-          Virtual Reality Lab
+          Solaris Clinic VR
         </Typography>
-        <Button variant="contained" className="schedule-button">
-          Schedule Session
+        <Button 
+          variant="contained" 
+          className="launch-vr-button"
+          onClick={handleOpenClinicVR}
+          startIcon={<ExternalLink size={18} />}
+          sx={{ backgroundColor: THEME_COLOR }}
+        >
+          Launch Clinic VR
         </Button>
       </div>
       
       <Typography variant="subtitle1" className="page-subtitle">
-        Immersive learning experiences for medical education
+        Experience clinical scenarios in an immersive virtual environment
       </Typography>
 
-      <Box className="tab-container">
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange} 
-          aria-label="VR lab tabs"
-          variant="fullWidth"
-          className="vr-tabs"
-        >
-          <Tab 
-            icon={<Brain size={18} color={THEME_COLOR} />} 
-            label="VR SIMULATIONS" 
-            className="vr-tab"
+      {/* Hero section with VR image and CTA */}
+      <Paper elevation={0} className="hero-section">
+        <Box className="hero-content">
+          <Typography variant="h5" component="h2" gutterBottom>
+            Virtual Reality Clinical Training
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Practice clinical skills, patient interactions, and diagnostic procedures in our 
+            state-of-the-art virtual clinic environment. Solaris Clinic VR provides realistic 
+            scenarios that prepare you for real-world medical practice.
+          </Typography>
+         
+          <Typography variant="body2" className="system-requirements">
+            Requires Chrome or Edge browser. For best experience, use with compatible VR headset.
+          </Typography>
+        </Box>
+        <Box className="hero-image-container">
+          <img 
+            src="/images/clinic-vr-preview.jpg" 
+            alt="Clinic VR Preview" 
+            className="hero-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://placehold.co/600x400/e6b400/ffffff?text=Clinic+VR";
+            }}
           />
-          <Tab 
-            icon={<Calendar size={18} color={THEME_COLOR} />} 
-            label="LAB SCHEDULE" 
-            className="vr-tab"
-          />
-          <Tab 
-            icon={<BookOpen size={18} color={THEME_COLOR} />} 
-            label="TUTORIALS" 
-            className="vr-tab"
-          />
-        </Tabs>
+        </Box>
+      </Paper>
+
+      {/* Features section */}
+      <Typography variant="h5" component="h2" className="section-title">
+        Features
+      </Typography>
+      
+      <Box className="features-grid">
+        <Paper className="feature-card" elevation={0}>
+          <Box sx={{ p: 2 }}>
+            <Stethoscope size={32} color={THEME_COLOR} />
+            <Typography variant="h6" component="h3">
+              Clinical Examination
+            </Typography>
+            <Typography variant="body2">
+              Practice physical examination techniques with realistic patient responses
+            </Typography>
+          </Box>
+        </Paper>
+
+        <Paper className="feature-card" elevation={0}>
+          <Box sx={{ p: 2 }}>
+            <UserPlus size={32} color={THEME_COLOR} />
+            <Typography variant="h6" component="h3">
+              Patient Interaction
+            </Typography>
+            <Typography variant="body2">
+              Develop communication skills with virtual patients in various scenarios
+            </Typography>
+          </Box>
+        </Paper>
+
+        <Paper className="feature-card" elevation={0}>
+          <Box sx={{ p: 2 }}>
+            <Clipboard size={32} color={THEME_COLOR} />
+            <Typography variant="h6" component="h3">
+              Case Management
+            </Typography>
+            <Typography variant="body2">
+              Work through complete clinical cases from intake to treatment
+            </Typography>
+          </Box>
+        </Paper>
+
+        <Paper className="feature-card" elevation={0}>
+          <Box sx={{ p: 2 }}>
+            <Activity size={32} color={THEME_COLOR} />
+            <Typography variant="h6" component="h3">
+              Diagnostic Tools
+            </Typography>
+            <Typography variant="body2">
+              Use virtual medical equipment and interpret diagnostic results
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
 
-      <Box className="tab-content">
-        <div className="simulation-grid">
-          {getFilteredSimulations().map((simulation) => (
-            <div className="simulation-grid-item" key={simulation.id}>
-              <SimulationCard 
-                simulation={simulation}
-                onLaunch={handleOpenSimulation}
-                sidebarOpen={isSidebarOpen}
-              />
+      {/* How to access section */}
+      <Paper elevation={1} className="access-guide">
+        <Box className="access-guide-content">
+          <Typography variant="h5" component="h2" gutterBottom>
+            How to Access
+          </Typography>
+          <Typography variant="body1" paragraph>
+            The Clinic VR application opens in a new browser window and can be used with or 
+            without a VR headset. For the full immersive experience, connect your VR headset 
+            before launching.
+          </Typography>
+          <Box className="access-steps">
+            <div className="step">
+              <div className="step-number">1</div>
+              <Typography variant="body1">Click the "Launch Clinic VR" button above</Typography>
             </div>
-          ))}
-          
-          {/* Show message if no items in this tab */}
-          {getFilteredSimulations().length === 0 && (
-            <div className="empty-state-container">
-              <Paper className="empty-state">
-                <Typography variant="body1">
-                  {tabValue === 1 ? 
-                    "No lab schedules available at the moment." : 
-                    "No tutorials available at the moment."}
-                </Typography>
-              </Paper>
+            <div className="step">
+              <div className="step-number">2</div>
+              <Typography variant="body1">Allow browser permissions for VR when prompted</Typography>
             </div>
-          )}
+            <div className="step">
+              <div className="step-number">3</div>
+              <Typography variant="body1">Select a clinical scenario from the available options</Typography>
+            </div>
+            <div className="step">
+              <div className="step-number">4</div>
+              <Typography variant="body1">Follow the on-screen instructions to begin</Typography>
+            </div>
+          </Box>
+        </Box>
+        <div className="help-box">
+          <LifeBuoy size={24} color={THEME_COLOR} />
+          <div>
+            <Typography variant="body1" fontWeight="500">Need help?</Typography>
+            <Typography variant="body2">
+              Contact technical support at <a href="mailto:vr-support@solaris-med.edu">vr-support@solaris-med.edu</a> 
+              or visit the <a href="/help/vr-guide">VR User Guide</a>
+            </Typography>
+          </div>
         </div>
-      </Box>
+      </Paper>
 
-      {/* Simulation launch modal */}
-      <Dialog
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        maxWidth="md"
-        fullWidth
-        className="simulation-modal"
+      {/* Floating action button for mobile */}
+      <Button 
+        variant="contained" 
+        className="floating-launch-button"
+        onClick={handleOpenClinicVR}
+        startIcon={<ExternalLink size={18} />}
+        sx={{ 
+          backgroundColor: THEME_COLOR,
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          display: { xs: 'flex', md: 'none' }
+        }}
       >
-        {selectedSimulation && (
-          <>
-            <DialogTitle className="modal-header">
-              <div>
-                <Typography variant="h5">{selectedSimulation.title}</Typography>
-                <Chip label={selectedSimulation.category} size="small" className="modal-category" />
-              </div>
-              <Button 
-                className="close-button" 
-                onClick={() => setOpenModal(false)}
-              >
-                <X size={20} />
-              </Button>
-            </DialogTitle>
-            
-            <DialogContent className="modal-content">
-              <Typography variant="body1" paragraph>
-                {selectedSimulation.description}
-              </Typography>
-
-              <div className="preview-placeholder">
-                <Typography variant="h3" className="preview-3d">3D</Typography>
-                <Typography variant="h6" className="preview-text">Ready to Begin</Typography>
-              </div>
-
-              <div className="simulation-details">
-                <div className="detail-item">
-                  <Clock size={18} color={THEME_COLOR} />
-                  <div>
-                    <Typography variant="body2" className="detail-label">Duration</Typography>
-                    <Typography variant="body1">{selectedSimulation.duration} min</Typography>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <GraduationCap size={18} color={THEME_COLOR} />
-                  <div>
-                    <Typography variant="body2" className="detail-label">Level</Typography>
-                    <Typography variant="body1">{selectedSimulation.level}</Typography>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <Users size={18} color={THEME_COLOR} />
-                  <div>
-                    <Typography variant="body2" className="detail-label">Participants</Typography>
-                    <Typography variant="body1">{selectedSimulation.participants}</Typography>
-                  </div>
-                </div>
-              </div>
-
-              <Typography variant="body2" className="equipment-note">
-                Make sure your VR equipment is properly connected
-              </Typography>
-            </DialogContent>
-
-            <DialogActions className="modal-actions">
-              <Button 
-                onClick={() => setOpenModal(false)} 
-                className="cancel-button"
-              >
-                Cancel
-              </Button>
-              <Button 
-                variant="contained" 
-                className="start-button"
-              >
-                START SIMULATION
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+        Launch Clinic VR
+      </Button>
     </Container>
   );
 };
