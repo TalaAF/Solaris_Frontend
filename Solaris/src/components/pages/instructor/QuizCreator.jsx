@@ -300,39 +300,56 @@ const QuizCreator = () => {
       
       // Format data for API
       const questionData = {
-        ...questionForm,
+        text: questionForm.text,
+        type: questionForm.type,
         points: parseInt(questionForm.points, 10),
+        feedback: questionForm.feedback || "",
+        options: questionForm.options.map(option => ({
+          text: option.text,
+          isCorrect: option.isCorrect,  // Keep isCorrect not "correct"
+          feedback: option.feedback || ""
+        })),
         quizId: currentQuiz.id
       };
       
       // Create question
-      const response = await QuizService.createQuestion(questionData);
-      
-      if (response) {
-        // Add to questions list
-        setQuestions(prev => [...prev, response]);
+      try {
+        console.log("Sending question data:", JSON.stringify(questionData, null, 2));
+        const response = await QuizService.createQuestion(questionData);
         
-        // Reset form for next question
-        setQuestionForm({
-          text: '',
-          type: 'MULTIPLE_CHOICE',
-          points: 5,
-          feedback: '',
-          options: [
-            { text: '', isCorrect: false, feedback: '' },
-            { text: '', isCorrect: false, feedback: '' },
-            { text: '', isCorrect: false, feedback: '' },
-            { text: '', isCorrect: false, feedback: '' }
-          ]
-        });
-        
-        toast.success('Question added successfully');
-        
-        // Fetch updated quiz details to show accurate question count
-        const updatedQuiz = await QuizService.getQuizById(currentQuiz.id);
-        if (updatedQuiz) {
-          setCurrentQuiz(updatedQuiz);
+        if (response) {
+          // Add to questions list
+          setQuestions(prev => [...prev, response]);
+          
+          // Reset form for next question
+          setQuestionForm({
+            text: '',
+            type: 'MULTIPLE_CHOICE',
+            points: 5,
+            feedback: '',
+            options: [
+              { text: '', isCorrect: false, feedback: '' },
+              { text: '', isCorrect: false, feedback: '' },
+              { text: '', isCorrect: false, feedback: '' },
+              { text: '', isCorrect: false, feedback: '' }
+            ]
+          });
+          
+          toast.success('Question added successfully');
+          
+          // Fetch updated quiz details to show accurate question count
+          const updatedQuiz = await QuizService.getQuizById(currentQuiz.id);
+          if (updatedQuiz) {
+            setCurrentQuiz(updatedQuiz);
+          }
         }
+      } catch (error) {
+        console.error("Error details:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        toast.error(error.message || 'Failed to add question');
       }
     } catch (err) {
       console.error("Error adding question:", err);

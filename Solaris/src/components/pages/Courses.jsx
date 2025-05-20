@@ -5,6 +5,24 @@ import CourseService from '../../services/CourseService';
 import "./Courses.css";
 
 function Courses() {
+
+   const DEFAULT_COURSE_IMAGES = [
+    "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80", // Medical students
+    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Stethoscope with books
+    "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Medical lab
+    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // ECG/EKG
+    "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Medical education concept
+    "https://images.unsplash.com/photo-1583912086096-8c60d75a13de?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80"  // Anatomy model
+  ];
+  
+  // Helper function to get a default image based on course info
+  const getDefaultCourseImage = (course) => {
+    // Generate a deterministic index based on course ID to always get the same image for the same course
+    const index = course.id ? (Number(course.id) % DEFAULT_COURSE_IMAGES.length) : 0;
+    
+    // Always return a default image based on the course ID, ignoring any existing imageUrl
+    return DEFAULT_COURSE_IMAGES[index];
+  };
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -197,7 +215,7 @@ function Courses() {
             lastAccessed: course.lastAccessDate,
             enrollmentDate: course.enrollmentDate,
             isArchived: course.archived || false,
-            imageUrl: course.imageUrl || `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title || 'education')}`
+            imageUrl: course.imageUrl || `https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80?${encodeURIComponent(course.title || 'education')}`
           };
         });
         
@@ -516,8 +534,13 @@ function Courses() {
                         <Link to={`/courses/${course.id}`} className="sc-course-link">
                           <div className="sc-course-image">
                             <img 
-                              src={`https://source.unsplash.com/random/400x200?${encodeURIComponent(course.title || 'education')}`} 
-                              alt={course.title} 
+                               src={getDefaultCourseImage(course)} 
+  alt={course.title} 
+  onError={(e) => {
+    // If image fails to load, use a fallback
+    e.target.onerror = null;
+    e.target.src = DEFAULT_COURSE_IMAGES[0];
+  }}
                             />
                             <div className="sc-course-code">
                               {/* Display code directly, without conditional rendering */}

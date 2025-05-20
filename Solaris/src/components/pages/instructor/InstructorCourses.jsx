@@ -8,6 +8,24 @@ import EmptyState from '../../common/EmptyState';
 import './InstructorCourses.css';
 
 const InstructorCourses = () => {
+
+    const DEFAULT_COURSE_IMAGES = [
+    "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80", // Medical students
+    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Stethoscope with books
+    "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Medical lab
+    "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // ECG/EKG
+    "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80", // Medical education concept
+    "https://images.unsplash.com/photo-1583912086096-8c60d75a13de?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80"  // Anatomy model
+  ];
+  
+  // Helper function to get a default image based on course info
+  const getDefaultCourseImage = (course) => {
+    // Generate a deterministic index based on course ID to always get the same image for the same course
+    const index = course.id ? (Number(course.id) % DEFAULT_COURSE_IMAGES.length) : 0;
+    
+    // Always return a default image based on the course ID, ignoring any existing imageUrl
+    return DEFAULT_COURSE_IMAGES[index];
+  };
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -238,7 +256,7 @@ const InstructorCourses = () => {
             >
               <div className="course-image-container">
                 <img 
-                  src={course.coverImage || `https://source.unsplash.com/random/300x200?medicine,education`}
+                  src={getDefaultCourseImage(course)}
                   alt={course.title || 'Course'}
                   className="course-image"
                 />
