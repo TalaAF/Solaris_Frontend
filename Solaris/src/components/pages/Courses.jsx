@@ -1,61 +1,75 @@
 import React, { useState, useEffect } from "react";
-import {
-  Typography,
-  Box,
-  Container,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress
-} from "@mui/material";
-import Sidebar from "../layout/Sidebar";
-import Header from "../layout/Header";
-import CourseList from "../courses/CourseList";
-import CourseService from "../../services/CourseService";
+import { Link } from "react-router-dom";
+import { Calendar, Clock, Search, Filter, BookOpen, Users, BadgeCheck } from "lucide-react";
+import CourseService from '../../services/CourseService';
 import "./Courses.css";
 
 function Courses() {
+  // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [semesterFilter, setSemesterFilter] = useState("all");
   const [departments, setDepartments] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Course data states
+  const [activeCourses, setActiveCourses] = useState([]);
+  const [archivedCourses, setArchivedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filtersChanged, setFiltersChanged] = useState(false);
+  const [activeTab, setActiveTab] = useState('active');
 
-  // Fetch departments and semesters from backend
+  // Fetch departments and semesters
   useEffect(() => {
-    const fetchFilterData = async () => {
-      setLoading(true);
+    const fetchFilters = async () => {
       try {
-        console.log("Fetching filter options for Courses page...");
+        // Try to fetch departments from API
+        const deptResponse = await CourseService.getAllCourses();
+        console.log("Department response:", deptResponse);
         
-        // Fetch both departments and semesters in parallel
-        const [deptsResponse, semestersResponse] = await Promise.all([
-          CourseService.getDepartments(),
-          CourseService.getSemesters()
+        // Handle different response formats
+        let coursesData = [];
+        
+        if (deptResponse?.data) {
+          // Check what format the data is in
+          if (Array.isArray(deptResponse.data)) {
+            coursesData = deptResponse.data;
+          } else if (deptResponse.data._embedded?.courseList) {
+            coursesData = deptResponse.data._embedded.courseList;
+          } else if (typeof deptResponse.data === 'object') {
+            // If it's a single course object
+            coursesData = [deptResponse.data];
+          } else {
+            console.warn("Unexpected data format returned from getAllCourses()");
+          }
+        }
+        
+        // Extract unique departments from courses
+        const uniqueDepartments = [...new Set(
+          coursesData
+            .map(course => course?.department || course?.departmentName)
+            .filter(Boolean)
+        )].sort();
+        
+        setDepartments(uniqueDepartments.map((name, id) => ({ id: id+1, name })));
+        
+        // Get unique semesters from courses
+        const uniqueSemesters = [...new Set(
+          coursesData
+            .map(course => course?.semester || course?.semesterName)
+            .filter(Boolean)
+        )].sort();
+        
+        setSemesters(uniqueSemesters.length > 0 ? uniqueSemesters : [
+          "Fall 2024",
+          "Spring 2025",
+          "Fall 2025",
+          "Spring 2026"
         ]);
-        
-        console.log("Department response:", deptsResponse);
-        console.log("Semesters response:", semestersResponse);
-        
-        // Set departments - handle different response formats
-        const departmentData = deptsResponse?.data?.content || deptsResponse?.data || [];
-        setDepartments(Array.isArray(departmentData) ? departmentData : []);
-        
-        // Set semesters
-        const semesterData = semestersResponse?.data || [];
-        setSemesters(Array.isArray(semesterData) ? semesterData : []);
-        
-        setError(null);
       } catch (err) {
         console.error("Error fetching filter data:", err);
-        setError("Failed to load filter options. Please try again later.");
-        
-        // Fallback to default values
+        // Fallback data
         setDepartments([
           { id: 1, name: "Anatomy" },
           { id: 2, name: "Biochemistry" },
@@ -63,125 +77,575 @@ function Courses() {
           { id: 4, name: "Medical Humanities" },
           { id: 5, name: "Clinical Sciences" },
         ]);
-        
+
         setSemesters([
           "Fall 2024",
           "Spring 2025",
-          "Fall 2025",
+          "Fall 2025", 
           "Spring 2026"
         ]);
+      }
+    };
+
+    fetchFilters();
+  }, []);
+
+  // Fetch courses from API using proper service method
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        // Get the current user ID from auth context or local storage
+        const currentUserId = localStorage.getItem('userId') || 1; // Fallback to 1 for testing
+        
+        console.log(`Fetching courses with progress for student ID: ${currentUserId}`);
+        
+        // Try alternative endpoints if the main one fails
+        let coursesResponse;
+        try {
+          coursesResponse = await CourseService.getCoursesWithProgress(currentUserId);
+        } catch (primaryError) {
+          console.log("Primary endpoint failed, trying fallback:", primaryError);
+          
+          // Try a fallback method if available
+          coursesResponse = await CourseService.getStudentEnrollments(currentUserId);
+        }
+        
+        console.log("Courses response:", coursesResponse);
+        
+        if (!coursesResponse?.data) {
+          throw new Error("No course data returned");
+        }
+        
+        // Process courses based on the API response format - handle different structures
+        let courses = [];
+        
+        if (Array.isArray(coursesResponse.data)) {
+          courses = coursesResponse.data;
+        } else if (coursesResponse.data._embedded?.entityModelList) {
+          courses = coursesResponse.data._embedded.entityModelList;
+        } else if (coursesResponse.data._embedded?.enrollmentDTOList) {
+          courses = coursesResponse.data._embedded.enrollmentDTOList;
+        } else if (typeof coursesResponse.data === 'object') {
+          // It might be a single course or a different structure
+          console.log("Single object returned for courses, examining structure");
+          
+          // Try to find arrays in the response
+          for (const key in coursesResponse.data) {
+            if (Array.isArray(coursesResponse.data[key])) {
+              console.log(`Found array in response.data.${key}`);
+              courses = coursesResponse.data[key];
+              break;
+            }
+          }
+          
+          // If we still didn't find an array, use the object itself
+          if (courses.length === 0 && coursesResponse.data.id) {
+            courses = [coursesResponse.data];
+          }
+        }
+        
+        console.log("Processed courses:", courses);
+        
+        // Transform course data to match our component needs
+        const processedCourses = courses.map(course => {
+          // Debugging for this specific course
+          console.log("Processing course:", course);
+          
+          // Handle nested objects better
+          const instructorName = course.instructor?.name || 
+            course.instructorName || 
+            (typeof course.instructor === 'string' ? course.instructor : null) ||
+            'Unknown';
+            
+          // Extract department info (could be in various places)
+          const departmentInfo = course.department || 
+            course.departmentName || 
+            course.departmentInfo?.name ||
+            (course.courseInfo?.department || 'General');
+            
+          return {
+            id: course.id || course.courseId,
+            title: course.title || course.name || course.courseName || 'Untitled Course',
+            
+            // For code field - explicitly handle null value
+            code: (course.code !== null && course.code !== undefined) ? course.code : `COURSE-${course.id}`,
+            
+            description: course.description || 'No description available',
+            
+            // For department - use departmentName directly as your API has this field
+            department: course.departmentName || departmentInfo || 'General',
+            
+            // For semester - use startDate since your JSON example has it but semester is null
+            semester: course.semester || 
+              course.semesterName || 
+              (course.startDate ? determineSemester(course) : 'Current Term'),
+            
+            // For credits - use a default if null (your API shows credits as null)
+            credits: (course.credits !== null && course.credits !== undefined) ? 
+              course.credits : 3,
+            
+            // For instructor - use instructorName directly as your API has this field
+            instructor: course.instructorName || instructorName,
+            
+            // For enrollment - use currentEnrollment as shown in your API
+            enrolled: course.currentEnrollment || course.enrolled || 0,
+            
+            progress: course.progress || 0,
+            status: determineStatus(course) || 'in-progress',
+            grade: course.grade || null,
+            lastAccessed: course.lastAccessDate,
+            enrollmentDate: course.enrollmentDate,
+            isArchived: course.archived || false,
+            imageUrl: course.imageUrl || `https://source.unsplash.com/random/300x200?${encodeURIComponent(course.title || 'education')}`
+          };
+        });
+        
+        // Add this after your courses are processed, before setting activeCourses
+        console.log("FINAL PROCESSED COURSES:", processedCourses);
+        if (processedCourses.length > 0) {
+          console.log("SAMPLE COURSE FIELDS:");
+          console.log("- title:", processedCourses[0].title);
+          console.log("- code:", processedCourses[0].code);
+          console.log("- department:", processedCourses[0].department);
+          console.log("- instructor:", processedCourses[0].instructor);
+          console.log("- credits:", processedCourses[0].credits);
+          console.log("- semester:", processedCourses[0].semester);
+        }
+        
+        // Separate active and archived courses
+        setActiveCourses(processedCourses.filter(course => !course.isArchived));
+        setArchivedCourses(processedCourses.filter(course => course.isArchived));
+        
+      } catch (err) {
+        console.error('Error fetching enrolled courses:', err);
+        setError('Failed to load your enrolled courses. Please try again later.');
+        
+        // Use example data for development as fallback
+        const exampleCourses = [
+          {
+            id: 1,
+            title: "Introduction to React",
+            code: "COMP-301",
+            description: "Learn the fundamentals of React development",
+            department: "Computer Science",
+            semester: "Spring 2025",
+            credits: 3,
+            instructor: "John Smith",
+            enrolled: 24,
+            progress: 65,
+            status: "in-progress",
+            imageUrl: "https://source.unsplash.com/random/300x200?react"
+          },
+          {
+            id: 2,
+            title: "Advanced Web Development",
+            code: "COMP-401",
+            description: "Master modern web development techniques",
+            department: "Computer Science",
+            semester: "Spring 2025",
+            credits: 4,
+            instructor: "Jane Doe",
+            enrolled: 18,
+            progress: 30,
+            status: "in-progress",
+            imageUrl: "https://source.unsplash.com/random/300x200?web"
+          },
+          {
+            id: 3,
+            title: "UI/UX Design Principles",
+            code: "DESIGN-201",
+            description: "Learn how to create intuitive user interfaces",
+            department: "Design",
+            semester: "Fall 2024",
+            credits: 3,
+            instructor: "Michael Johnson",
+            enrolled: 32,
+            isArchived: true,
+            grade: "A",
+            imageUrl: "https://source.unsplash.com/random/300x200?design"
+          }
+        ];
+        
+        setActiveCourses(exampleCourses.filter(course => !course.isArchived));
+        setArchivedCourses(exampleCourses.filter(course => course.isArchived));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFilterData();
+    fetchCourses();
   }, []);
 
-  // Handle search input change with debounce
+  // Helper functions
+  const determineSemester = (course) => {
+    if (!course.startDate) return 'Spring 2025';
+    
+    const startDate = new Date(course.startDate);
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth();
+    
+    if (month >= 0 && month <= 4) return `Spring ${year}`;
+    if (month >= 5 && month <= 7) return `Summer ${year}`;
+    return `Fall ${year}`;
+  };
+
+  const determineSemesterFromDates = (startDate, endDate) => {
+    if (!startDate) return 'Current Term';
+    
+    const start = new Date(startDate);
+    const year = start.getFullYear();
+    const month = start.getMonth();
+    
+    if (month >= 0 && month <= 4) return `Spring ${year}`;
+    if (month >= 5 && month <= 7) return `Summer ${year}`;
+    return `Fall ${year}`;
+  };
+
+  const getStatusFromEnrollment = (enrollmentStatus) => {
+    switch (enrollmentStatus) {
+      case 'ACTIVE': return 'in-progress';
+      case 'PENDING': return 'upcoming';
+      case 'COMPLETED': return 'completed';
+      case 'DROPPED': return 'dropped';
+      default: return 'in-progress';
+    }
+  };
+
+  const determineStatus = (course) => {
+    if (course.archived) return 'completed';
+    
+    const now = new Date();
+    const start = course.startDate ? new Date(course.startDate) : null;
+    const end = course.endDate ? new Date(course.endDate) : null;
+    
+    if (start && start > now) return 'upcoming';
+    if (end && end < now) return 'completed';
+    return 'in-progress';
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Never';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  // Handle course click - navigate to course details
+  const handleCourseClick = (course) => {
+    console.log("Clicked course:", course);
+    // Navigation handled by Link component
+  };
+
+  // Filter active courses based on search term and filters
+  const filteredActiveCourses = activeCourses.filter(course => {
+    const titleMatch = course.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const codeMatch = course.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const instructorMatch = typeof course.instructor === 'string' ? 
+      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    
+    return (
+      (searchTerm === '' || titleMatch || codeMatch || instructorMatch) &&
+      (departmentFilter === 'all' || course.department === departmentFilter) &&
+      (semesterFilter === 'all' || course.semester === semesterFilter)
+    );
+  });
+  
+  // Filter archived courses based on search term and filters
+  const filteredArchivedCourses = archivedCourses.filter(course => {
+    const titleMatch = course.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const codeMatch = course.code?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const instructorMatch = typeof course.instructor === 'string' ? 
+      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    
+    return (
+      (searchTerm === '' || titleMatch || codeMatch || instructorMatch) &&
+      (departmentFilter === 'all' || course.department === departmentFilter) &&
+      (semesterFilter === 'all' || course.semester === semesterFilter)
+    );
+  });
+
+  // UI interaction handlers
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    setFiltersChanged(true);
   };
 
-  // Handle department filter change
   const handleDepartmentChange = (event) => {
     setDepartmentFilter(event.target.value);
-    setFiltersChanged(true);
   };
 
-  // Handle semester filter change
   const handleSemesterChange = (event) => {
     setSemesterFilter(event.target.value);
-    setFiltersChanged(true);
   };
 
-  // Apply filters - only used if you want a separate apply button
-  const handleApplyFilters = () => {
-    setFiltersChanged(false);
-    // The effect of this is that it forces a re-render of CourseList
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  // Handle continue learning click
+  const handleContinueClick = (e, courseId) => {
+    e.preventDefault(); // Prevent Link navigation
+    console.log(`Continue learning for course ${courseId}`);
+    window.location.href = `/course/${courseId}/learn`;
   };
 
   return (
-    <div className="app-container">
-      <main className="main-content">
-        <Header title="Courses" />
-        <div className="content-wrapper">
-          <Container maxWidth="lg">
-            <Box sx={{ paddingTop: 3, paddingBottom: 5 }}>
-              <Typography variant="h4" component="h1" gutterBottom>
-                My Courses
-              </Typography>
+    <div className="sc-container">
+      <div className="sc-header">
+        <h1 className="sc-title">My Courses</h1>
+        <p className="sc-subtitle">Browse and access your enrolled courses</p>
+      </div>
 
-              {/* Filters section */}
-              <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap", alignItems: "center" }}>
-                <TextField
-                  label="Search courses"
-                  variant="outlined"
-                  size="small"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  sx={{ minWidth: "250px", flex: 1 }}
-                />
-
-                <FormControl size="small" sx={{ minWidth: "200px" }}>
-                  <InputLabel id="department-filter-label">
-                    Department
-                  </InputLabel>
-                  <Select
-                    labelId="department-filter-label"
-                    id="department-filter"
-                    value={departmentFilter}
-                    label="Department"
-                    onChange={handleDepartmentChange}
-                    disabled={loading}
-                  >
-                    <MenuItem value="all">All Departments</MenuItem>
-                    {departments.map((dept) => (
-                      <MenuItem key={dept.id} value={dept.name}>
-                        {dept.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl size="small" sx={{ minWidth: "200px" }}>
-                  <InputLabel id="semester-filter-label">Semester</InputLabel>
-                  <Select
-                    labelId="semester-filter-label"
-                    id="semester-filter"
-                    value={semesterFilter}
-                    label="Semester"
-                    onChange={handleSemesterChange}
-                    disabled={loading}
-                  >
-                    <MenuItem value="all">All Semesters</MenuItem>
-                    {semesters.map((semester, index) => (
-                      <MenuItem key={index} value={semester}>
-                        {semester}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                
-                {loading && (
-                  <CircularProgress size={24} sx={{ ml: 2 }} />
-                )}
-              </Box>
-
-              {error && <Typography color="error">{error}</Typography>}
-              
-              {/* Pass filters to CourseList - use key to force re-render when filters change */}
-              <CourseList
-                key={`${searchTerm}-${departmentFilter}-${semesterFilter}`}
-                searchTerm={searchTerm}
-                departmentFilter={departmentFilter}
-                semesterFilter={semesterFilter}
-              />
-            </Box>
-          </Container>
+      {/* Search and filters section */}
+      <div className="sc-controls">
+        <div className="sc-search-container">
+          <Search className="sc-search-icon" size={18} />
+          <input
+            type="text"
+            className="sc-search-input"
+            placeholder="Search for courses..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <button className="sc-filter-toggle" onClick={toggleFilters}>
+            <Filter size={18} />
+            <span>Filters</span>
+          </button>
         </div>
-      </main>
+
+        {/* Collapsible filters */}
+        <div className={`sc-filters ${showFilters ? 'sc-filters-visible' : ''}`}>
+          <div className="sc-filter-group">
+            <label htmlFor="department-filter">Department:</label>
+            <select
+              id="department-filter"
+              className="sc-select"
+              value={departmentFilter}
+              onChange={handleDepartmentChange}
+            >
+              <option value="all">All Departments</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.name}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="sc-filter-group">
+            <label htmlFor="semester-filter">Semester:</label>
+            <select
+              id="semester-filter"
+              className="sc-select"
+              value={semesterFilter}
+              onChange={handleSemesterChange}
+            >
+              <option value="all">All Semesters</option>
+              {semesters.map((semester) => (
+                <option key={semester} value={semester}>
+                  {semester}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="sc-tabs">
+        <button 
+          className={`sc-tab-button ${activeTab === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveTab('active')}
+        >
+          Active Courses
+        </button>
+        <button 
+          className={`sc-tab-button ${activeTab === 'archived' ? 'active' : ''}`}
+          onClick={() => setActiveTab('archived')}
+        >
+          Completed Courses
+        </button>
+      </div>
+
+      {/* Content area */}
+      <div className="sc-content">
+        {loading && (
+          <div className="sc-loading">
+            <div className="sc-spinner"></div>
+            <p>Loading your courses...</p>
+          </div>
+        )}
+        
+        {error && !loading && activeCourses.length === 0 && archivedCourses.length === 0 && (
+          <div className="sc-error">
+            <p>{error}</p>
+            <button 
+              className="sc-button"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+        
+        {!loading && (
+          <>
+            {/* Active Courses Tab */}
+            {activeTab === 'active' && (
+              <>
+                {filteredActiveCourses.length === 0 ? (
+                  <div className="sc-empty">
+                    <div className="sc-empty-icon">
+                      <BookOpen size={32} />
+                    </div>
+                    <h3 className="sc-empty-title">No active courses found</h3>
+                    <p className="sc-empty-message">Try adjusting your search or filters</p>
+                  </div>
+                ) : (
+                  <div className="sc-course-grid">
+                    {filteredActiveCourses.map(course => (
+                      <div className="sc-course-card" key={course.id}>
+                        <Link to={`/courses/${course.id}`} className="sc-course-link">
+                          <div className="sc-course-image">
+                            <img 
+                              src={`https://source.unsplash.com/random/400x200?${encodeURIComponent(course.title || 'education')}`} 
+                              alt={course.title} 
+                            />
+                            <div className="sc-course-code">
+                              {/* Display code directly, without conditional rendering */}
+                              {course.code || `COURSE-${course.id}`}
+                            </div>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="sc-course-title">{course.title}</h3>
+                          
+                          {/* Department - Direct output */}
+                          <div className="sc-course-department" style={{fontWeight: 'bold'}}>
+                            {course.department || course.departmentName || 'General'}
+                          </div>
+                          
+                          {/* Instructor - Direct output */}
+                          <div className="sc-course-instructor" style={{fontWeight: 'bold'}}>
+                            Teacher: {course.instructor || course.instructorName || 'Unknown'}
+                          </div>
+                          
+                          {/* Progress bar remains the same */}
+                          <div className="sc-progress-container">
+                            <div className="sc-progress-bar">
+                              <div 
+                                className="sc-progress-fill" 
+                                style={{ width: `${course.progress || 0}%` }}
+                              ></div>
+                            </div>
+                            <div className="sc-progress-text">
+                              <span>Progress</span>
+                              <span>{course.progress || 0}%</span>
+                            </div>
+                          </div>
+                          
+                          {/* Meta information with explicit display */}
+                          <div className="sc-course-meta">
+                            <div className="sc-meta-item">
+                              <Calendar size={14} />
+                              <span style={{fontWeight: 'bold'}}>
+                                {course.semester || determineSemester(course) || 'Current Term'}
+                              </span>
+                            </div>
+                            <div className="sc-meta-item">
+                              <Clock size={14} />
+                              <span style={{fontWeight: 'bold'}}>
+                                {course.credits || 3} Credits
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                        
+                        <button 
+                          className="sc-continue-button"
+                          onClick={(e) => handleContinueClick(e, course.id)}
+                        >
+                          Continue Learning
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            
+            {/* Archived Courses Tab */}
+            {activeTab === 'archived' && (
+              <>
+                {filteredArchivedCourses.length === 0 ? (
+                  <div className="sc-empty">
+                    <div className="sc-empty-icon">
+                      <BookOpen size={32} />
+                    </div>
+                    <h3 className="sc-empty-title">No completed courses found</h3>
+                    <p className="sc-empty-message">Try adjusting your search or filters</p>
+                  </div>
+                ) : (
+                  <div className="sc-course-grid">
+                    {filteredArchivedCourses.map(course => (
+                      <div key={course.id} className="sc-course-card sc-archived">
+                        <Link to={`/courses/${course.id}`} className="sc-course-link">
+                          <div className="sc-course-image sc-grayscale">
+                            <img 
+                              src={course.imageUrl} 
+                              alt={course.title} 
+                            />
+                            <div className="sc-course-code">{course.code}</div>
+                            <div className="sc-completed-badge">
+                              <BadgeCheck size={16} />
+                              <span>Completed</span>
+                            </div>
+                          </div>
+                          <h3 className="sc-course-title">{course.title}</h3>
+                          <div className="sc-course-department">{course.department}</div>
+                          <div className="sc-course-instructor">{course.instructor}</div>
+                          
+                          {course.grade && (
+                            <div className="sc-grade">
+                              Final Grade: <span>{course.grade}</span>
+                            </div>
+                          )}
+                          
+                          <div className="sc-course-meta">
+                            <div className="sc-meta-item">
+                              <Calendar size={14} />
+                              <span>{course.semester}</span>
+                            </div>
+                            <div className="sc-meta-item">
+                              <Clock size={14} />
+                              <span>{course.credits} Credits</span>
+                            </div>
+                          </div>
+                        </Link>
+                        
+                        <button 
+                          className="sc-continue-button sc-secondary"
+                          onClick={(e) => handleContinueClick(e, course.id)}
+                        >
+                          View Course
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

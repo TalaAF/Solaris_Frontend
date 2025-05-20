@@ -91,7 +91,15 @@ class CourseService {
   // Get courses with user progress
   async getCoursesWithProgress(userId) {
     try {
-      return await api.get(`/api/courses/user/${userId}`);
+      // Check if userId exists
+      if (!userId) {
+        console.warn("No user ID provided for fetching courses");
+        userId = 1; // Default fallback
+      }
+      
+      // Try the correct endpoint format - this may vary based on your API structure
+      const response = await api.get(`/api/enrollments/student/${userId}`);
+      return response;
     } catch (error) {
       console.error(`Error fetching courses with progress for user ${userId}:`, error);
       throw error;
