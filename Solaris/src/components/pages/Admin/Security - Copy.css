@@ -1,0 +1,428 @@
+/* Add these new styles at the top of the file */
+.admin-security-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.admin-security-header::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background-color: #E5BF03;
+  border-radius: 2px;
+}
+
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  color: #E5BF03;
+}
+
+/* Main container styles */
+.security-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    margin-top: 70px; /* Match the spacing in the design */
+  }
+  
+  .security-header {
+    margin-bottom: 24px;
+    position: relative;
+    padding-bottom: 12px;
+  }
+  
+  .security-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    width: 100%;
+    background-color: #e2e8f0;
+  }
+  
+  .admin-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+  }
+  
+  .admin-subtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+  
+  /* Custom styles for tabs */
+  .solaris-tabs-list {
+  display: flex;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0; /* Remove margin to eliminate space */
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .solaris-tabs-list {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.solaris-tabs-trigger {
+  padding: 16px 24px;
+  font-weight: 500;
+  font-size: 1rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.2s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #64748b;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  min-width: 160px;
+}
+
+.solaris-tabs-trigger.active {
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  color: #111827;
+  font-weight: 600;
+  border-bottom: 2px solid #E5BF03;
+}
+
+.solaris-tabs-trigger.active::after {
+  display: none;
+}
+
+.solaris-tabs-content {
+  padding-top: 0;
+}
+
+/* Security warning styles - updated to match image */
+.security-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background-color: transparent; /* Remove background */
+  border: 1px solid #ef4444; /* Keep only the red border */
+  margin-top: 24px; /* Add top margin for spacing from tabs */
+  margin-bottom: 24px;
+}
+
+.security-warning-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.security-warning-content h3 {
+  color: #ef4444;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  font-size: 16px;
+}
+
+.security-warning-content p {
+  color: #64748b;
+  margin: 0;
+  font-size: 14px;
+}
+  
+  /* Policy items */
+  .policy-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  
+  .policy-icon {
+    width: 20px;
+    height: 20px;
+    color: #E5BF03;
+    margin-right: 8px;
+  }
+  
+  .policy-info {
+    flex: 1;
+  }
+  
+  .policy-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  
+  .policy-name {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin: 0;
+    color: #334155;
+  }
+  
+  .policy-description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  
+  .policy-timestamp {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+  
+  /* Form styles */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+  }
+  
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+  }
+  
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: #E5BF03;
+    box-shadow: 0 0 0 1px rgba(229, 191, 3, 0.2);
+  }
+  
+  .form-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .policy-switch-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .policy-switch-label {
+    margin-left: 8px;
+    font-size: 0.875rem;
+  }
+  
+  .add-policy-btn {
+    background-color: #E5BF03;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .add-policy-btn:hover {
+    background-color: #c9a703;
+  }
+  
+  /* Audit log styles */
+  .audit-log-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .audit-log-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  @media (max-width: 768px) {
+    .audit-log-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+  
+  .audit-log-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+  
+  .audit-log-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  @media (max-width: 640px) {
+    .audit-log-actions {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+    }
+  }
+  
+  .search-container {
+    position: relative;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: #64748b;
+  }
+  
+  .search-input {
+    padding-left: 2.25rem;
+    width: 240px;
+  }
+  
+  @media (max-width: 640px) {
+    .search-input {
+      width: 100%;
+    }
+  }
+  
+  .filter-select {
+    width: 160px;
+  }
+  
+  .export-button {
+    background-color: white;
+    color: #333;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .export-button:hover {
+    background-color: #f8fafc;
+  }
+  
+  .audit-log-table-container {
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+  }
+  
+  /* Table styles */
+  .solaris-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  .solaris-table-header th {
+    height: 40px;
+    padding: 8px 16px;
+    text-align: left;
+    font-weight: 500;
+    color: #64748b;
+    border-bottom: 2px solid #E5BF03;
+  }
+  
+  .solaris-table-row {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .solaris-table-row:hover {
+    background-color: rgba(229, 191, 3, 0.05);
+  }
+  
+  .solaris-table-cell {
+    padding: 12px 16px;
+    vertical-align: top;
+  }
+  
+  .user-cell {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .user-name {
+    font-weight: 500;
+  }
+  
+  .user-email {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #64748b;
+  }
+  
+  /* Switch styling to match Solaris theme */
+  :global(.switch[data-state="checked"]) {
+    background-color: #E5BF03 !important;
+  }
+  
+  /* Make table header match Solaris theme */
+  :global(th) {
+    border-bottom: 2px solid #E5BF03 !important;
+  }
+  
+  /* Custom styling for component library elements */
+  :global(.card) {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  :global(.card-header) {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  :global(.card-title) {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+  
+  :global(.card-content) {
+    padding: 1.5rem;
+  }

@@ -1,0 +1,39 @@
+.solaris-card {
+    border-radius: 0.5rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .solaris-card-header {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .solaris-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+  
+  .solaris-card-description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
+  
+  .solaris-card-content {
+    padding: 1.5rem;
+  }
+  
+  .solaris-card-footer {
+    display: flex;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }

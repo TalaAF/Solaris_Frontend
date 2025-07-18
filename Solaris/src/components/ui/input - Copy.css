@@ -1,0 +1,65 @@
+.solaris-input {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #0f172a;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .solaris-input:focus {
+    outline: none;
+    border-color: #E5BF03;
+    box-shadow: 0 0 0 2px rgba(229, 191, 3, 0.2);
+  }
+  
+  .solaris-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: #f8fafc;
+  }
+  
+  .solaris-input[type="search"] {
+    padding-left: 2.25rem; /* Space for search icon */
+  }
+  
+  .solaris-textarea {
+    display: flex;
+    min-height: 80px;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    padding: 0.5rem 0.75rem;
+    resize: vertical;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #0f172a;
+    font-family: inherit;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .solaris-textarea:focus {
+    outline: none;
+    border-color: #E5BF03;
+    box-shadow: 0 0 0 2px rgba(229, 191, 3, 0.2);
+  }
+  
+  .solaris-textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: #f8fafc;
+  }
+  
+  .solaris-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.5rem;
+  }

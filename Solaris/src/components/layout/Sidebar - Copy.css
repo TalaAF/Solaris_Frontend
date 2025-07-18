@@ -1,0 +1,241 @@
+/* .sidebar {
+  position: fixed;
+  top: 100px;
+  left:0;
+  height: calc(100vh - 85px);
+  background-color: white;
+  transition: all 0.3s ease-in-out;
+  width: 280px;
+  padding: 0; Remove padding 
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 900;
+
+} */
+
+/* Fix the sidebar closed state */
+.sidebar.closed {
+  width: 60px; /* Narrower width when closed */
+  transform: translateX(0); /* Don't move it off-screen, just make it narrower */
+}
+
+
+
+
+
+:root {
+  /* Add these variables */
+  --sidebar-width: 220px; /* Default sidebar width */
+  --sidebar-collapsed-width: 60px; /* Default collapsed width */
+}
+
+/* Page-specific sidebar widths */
+.page-dashboard {
+  --sidebar-width: 230px;
+  --sidebar-collapsed-width: 70px; /* Wider collapsed state for dashboard */
+}
+
+.page-courses {
+  --sidebar-width: 230px; 
+  --sidebar-collapsed-width:60px;
+}
+
+.page-assessments {
+  --sidebar-width: 230px;
+  --sidebar-collapsed-width: 65px;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #fff;
+  height: calc(100vh - 90px); /* Adjust 90px to match your header height */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+ overflow-y:scroll;
+  font-family: 'Inter', sans-serif;
+  position: fixed;
+  top: 90px; /* Should match your header height */
+  left: 0;
+  transition: all 0.3s ease-in-out; /* Change from transform to all to include width */
+}
+
+/* Hide text when sidebar is closed */
+.sidebar.closed .nav-label {
+  display: none;
+}
+
+/* Center icons when sidebar is closed */
+.sidebar.closed .nav-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar.closed .nav-icon {
+  margin-right: 0;
+}
+
+/* Hide help section when sidebar is closed */
+.sidebar.closed .help-section {
+  display: none;
+}
+
+.nav-menu {
+  margin-top: 20px; /* Reduce top margin */
+  padding: 0; /* Remove padding */
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px; /* Add padding here instead */
+  color: #64748b;
+  text-decoration: none;
+  margin: 0px; /* Remove margin */
+  border-radius: 0;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 400;
+}
+
+.nav-item:hover {
+  background-color: #ecf4fa;
+  color: #445a7d;
+  border-radius: 8px;
+  margin: 5px; /* Add margin on hover */
+}
+
+.nav-item.active {
+  background-color: #fcf8d4e3;
+  color: #e5bf03;
+  border-radius: 8px;
+  margin: 5px;
+  font-weight: 500;
+}
+
+.nav-icon {
+  margin-right: 12px;
+  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.7;
+  position: relative;
+  top: 2px;
+}
+
+.active .nav-icon {
+  opacity: 1;
+}
+
+
+
+
+
+.nav-label {
+  font-size: 14px;
+}
+
+.sidebar.closed .nav-label {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.sidebar.open .nav-label {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.help-section {
+  margin: 15px;
+  padding: 15px;
+  background-color: #f8f4f1;
+  border-radius: 8px;
+}
+
+.help-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #4d341e;
+}
+
+.help-section p {
+  font-size: 13px;
+  color: #994d1e;
+  margin-bottom: 12px;
+}
+
+.support-button {
+  background-color: transparent;
+  color: #994d1e;
+  border: none;
+  padding: 8px 0;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
+  font-weight: 500;
+}
+
+
+
+.page-dashboard .sidebar {
+  --sidebar-width: 240px; /* Example of wider sidebar for dashboard */
+}
+
+.page-courses .sidebar {
+  --sidebar-width: 220px; /* Fix the typo from 7000px */
+}
+
+/* Logout button styling */
+.logout-container {
+  margin-top: auto; /* Push to bottom of sidebar */
+  padding: 10px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  color: #64748b;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 400;
+}
+
+.logout-button:hover {
+  background-color: #fff2f2;
+  color: #e05252;
+  border-radius: 8px;
+  width: 200px;
+  margin: 5px;
+}
+
+.icon-logout {
+  margin-right: 12px;
+  margin-bottom: 5px;
+  opacity: 0.7;
+}
+
+/* Handle collapsed sidebar state for logout button */
+.sidebar.closed .logout-button {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar.closed .logout-button .nav-icon {
+  margin-right: 0;
+}

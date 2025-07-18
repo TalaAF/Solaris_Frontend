@@ -1,0 +1,147 @@
+.admin-dashboard {
+  padding: 24px;
+  margin-top: 70px;
+}
+
+.admin-dashboard-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.admin-dashboard-header::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background-color: #E5BF03;
+  border-radius: 2px;
+}
+
+.admin-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.admin-subtitle {
+  font-size: 16px;
+  color: #64748b;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+.highlight-card .stat-icon {
+  background-color: rgba(229, 191, 3, 0.25) !important;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.activity-section {
+  margin-bottom: 24px;
+}
+
+/* Responsive design */
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Update/Add the loading container styles to match UserTable styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  height: 400px;
+  color: #4a5568;
+}
+
+/* Replace spinner-container with spinner class from UserTable */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(229, 191, 3, 0.2);
+  border-radius: 50%;
+  border-top-color: #E5BF03;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* Add spin animation if not already present */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  text-align: center;
+  color: #e53e3e;
+  padding: 0 20px;
+}
+
+.error-container h2 {
+  margin: 16px 0;
+  color: #2d3748;
+}
+
+.error-container p {
+  margin-bottom: 24px;
+  color: #4a5568;
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #E5BF03;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.refresh-button:hover {
+  background-color: #ccaa01;
+}
+
+.refresh-button.refreshing {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.refresh-button svg {
+  transition: transform 0.3s ease;
+}
+
+.refresh-button.refreshing svg {
+  animation: spin 2s linear infinite;
+}
+

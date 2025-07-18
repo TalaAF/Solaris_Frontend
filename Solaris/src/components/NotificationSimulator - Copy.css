@@ -1,0 +1,82 @@
+.notification-simulator {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+}
+
+.notification-simulator h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.notification-simulator p {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.simulator-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.simulator-button {
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.simulator-button::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+/* Updated colors to variations of Solaris yellow */
+.simulator-button.academic-button::before {
+  background-color: #e5bf03; /* Main Solaris yellow */
+}
+
+.simulator-button.reminder-button::before {
+  background-color: #d4b003; /* Slightly darker yellow */
+}
+
+.simulator-button.announcement-button::before {
+  background-color: #f6d44d; /* Slightly lighter yellow */
+}
+
+.simulator-button:hover {
+  background-color: rgba(229, 191, 3, 0.05); /* Very light yellow background */
+  border-color: rgba(229, 191, 3, 0.3); /* Yellowish border */
+}
+
+@media (min-width: 640px) {
+  .simulator-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .simulator-button {
+    flex: 1;
+    min-width: 200px;
+  }
+}

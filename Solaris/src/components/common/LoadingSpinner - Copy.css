@@ -1,0 +1,48 @@
+/* Update/Add the loading container styles to match UserTable styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  height: 400px;
+  color: #4a5568;
+}
+
+/* Replace spinner-container with spinner class from UserTable */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(229, 191, 3, 0.2);
+  border-radius: 50%;
+  border-top-color: #E5BF03 !important;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* Add spin animation if not already present */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Maintain support for legacy class names */
+
+
+.loading-message {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Size variants */
+.loading-spinner-container.small .loading-spinner {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+}
+
+.loading-spinner-container.large .loading-spinner {
+  width: 70px;
+  height: 70px;
+  border-width: 6px;
+}

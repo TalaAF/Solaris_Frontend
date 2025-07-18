@@ -1,0 +1,382 @@
+/* Compact Course Layout with Smaller Images */
+
+/* Container and Grid Layout */
+.courses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Course grid - ensures cards are next to each other */
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Ensure each grid item takes proper space */
+.course-grid > * {
+  width: 100%;
+  height: 100%;
+}
+
+/* Course card link wrapper */
+.course-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.course-card-link:hover {
+  transform: translateY(-5px);
+}
+
+/* Course card */
+.course-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(230, 180, 0, 0.12);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(230, 180, 0, 0.1);
+  position: relative;
+}
+
+.course-card:hover {
+  box-shadow: 0 8px 20px rgba(230, 180, 0, 0.25);
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #e6b400, #ffd700);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.course-card:hover::before {
+  opacity: 1;
+}
+
+/* Course image - reduced to 1/4 of card height */
+.course-image {
+  height: 150px !important; /* Reduced height to approximately 1/4 of typical card height */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.course-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(230, 180, 0, 0.1), transparent);
+  pointer-events: none;
+}
+
+/* For course cards that should use an img tag instead of background */
+.course-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.course-card:hover .course-image img {
+  transform: scale(1.05);
+}
+
+.grayscale {
+  filter: grayscale(80%);
+  transition: filter 0.4s ease;
+}
+
+.course-card:hover .grayscale {
+  filter: grayscale(0%);
+}
+
+.course-image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem; /* Reduced padding for smaller image */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
+  color: white;
+  z-index: 1;
+}
+
+.course-code {
+  display: inline-block;
+  font-size: 0.7rem; /* Slightly smaller for compact layout */
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 70px;
+  background-color: #e6b400; /* solaris-yellow */
+  color: white !important;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 2px 4px rgba(230, 180, 0, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.course-title {
+  color: #e6b400 !important; /* solaris-yellow */
+  margin: 0;
+  font-size: 1.1rem; /* Smaller for compact layout */
+  font-weight: 600;
+  line-height: 1.2;
+  transition: color 0.2s ease;
+}
+
+.course-card:hover .course-title {
+  color: #d4a500; /* slightly darker on hover */
+}
+
+.completed-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #22c55e !important; /* green-500 */
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(34, 197, 94, 0.3);
+  transition: transform 0.2s ease;
+  z-index: 2;
+}
+
+.course-card:hover .completed-badge {
+  transform: scale(1.05);
+}
+
+.completed-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.course-content {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.course-info {
+  display: flex;
+  justify-content: space-between;
+  background-color: transparent;
+  margin-bottom: 0.75rem;
+}
+
+.course-instructor {
+  font-size: 0.875rem;
+  color: #4b5563; /* gray-600 */
+  font-weight: 500;
+}
+
+.course-department {
+  font-size: 0.8rem;
+  color: #6b7280; /* gray-500 */
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+/* Status indicators - the in-progress button has been removed */
+/* Only keeping completed and upcoming status styles */
+.course-status {
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-align: center;
+  height: 32px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-completed {
+  background-color: #dcfce7; /* green-100 */
+  color: #166534; /* green-800 */
+  border: 1px solid rgba(22, 101, 52, 0.1);
+}
+
+.status-upcoming {
+  background-color: #f3e8ff; /* purple-100 */
+  color: #7e22ce; /* purple-700 */
+  border: 1px solid rgba(126, 34, 206, 0.1);
+}
+
+.course-grade {
+  font-size: 0.8rem;
+  border-radius: 9999px;
+  background-color: #dcfce7; /* green-100 */
+  color: #166534; /* green-800 */
+  font-weight: 600;
+  padding: 6px 10px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(22, 101, 52, 0.1);
+}
+
+
+
+.progress-bar-container {
+  height: 0.35rem; /* Slightly smaller */
+  background-color: #f3f4f6; /* lighter gray */
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #e6b400, #ffc800) !important;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem; /* Smaller */
+  color: #6b7280 !important; /* gray-500 */
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+
+.course-description {
+  font-size: 0.875rem; /* Smaller */
+  color: #4b5563;
+  margin-bottom: 12px;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+}
+
+.course-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem; /* Smaller */
+  color: #6b7280; /* gray-500 */
+  border-top: 1px solid #f3f4f6; /* lighter border */
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.meta-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: #9ca3af; /* gray-400 */
+}
+
+.course-action {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: #e6b400; /* solaris-yellow */
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(230, 180, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.course-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.course-action:hover {
+  background-color: #d4a500; /* darker yellow */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(230, 180, 0, 0.3);
+}
+
+.course-action:hover::before {
+  left: 100%;
+}
+
+.course-action.secondary {
+  background-color: white;
+  color: #4b5563; /* gray-600 - darker than original */
+  border: 1px solid #e5e7eb; /* gray-200 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.course-action.secondary:hover {
+  background-color: #f9fafb; /* gray-50 */
+  color: #1f2937; /* gray-800 - darker on hover */
+  border-color: #d1d5db; /* gray-300 */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .course-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .course-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .course-image {
+    height: 80px; /* Even smaller on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}
